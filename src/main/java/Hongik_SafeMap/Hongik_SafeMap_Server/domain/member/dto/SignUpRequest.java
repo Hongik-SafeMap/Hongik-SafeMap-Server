@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import static Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.constant.RequestFormatConstant.PASSWORD_REGEX;
-import static Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception.ErrorMessage.PASSWORD_INVALID_FORMAT;
+import static Hongik_SafeMap.Hongik_SafeMap_Server.global.constant.RequestFormatConstant.PASSWORD_REGEX;
+import static Hongik_SafeMap.Hongik_SafeMap_Server.global.exception.ErrorMessage.PASSWORD_INVALID_FORMAT;
 
 public record SignUpRequest(@NotBlank(message = "이름은 필수 입력값입니다.")
                             @Pattern(regexp = "[가-힣]{1,6}$", message = "이름은 한글 6자 이하로 입력해주세요.")

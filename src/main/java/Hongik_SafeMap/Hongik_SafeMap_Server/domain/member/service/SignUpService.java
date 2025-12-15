@@ -1,6 +1,6 @@
 package Hongik_SafeMap.Hongik_SafeMap_Server.domain.member.service;
 
-import Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception.MemberException;
+import Hongik_SafeMap.Hongik_SafeMap_Server.global.exception.MemberException;
 import Hongik_SafeMap.Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap.Hongik_SafeMap_Server.domain.member.domain.vo.MemberStatus;
 import Hongik_SafeMap.Hongik_SafeMap_Server.domain.member.dto.SignUpRequest;
@@ -11,8 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception.ErrorMessage.DUPLICATED_EMAIL;
-import static Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception.ErrorMessage.PASSWORD_IS_DIFFERENT_FROM_CHECK;
+import static Hongik_SafeMap.Hongik_SafeMap_Server.global.exception.ErrorMessage.DUPLICATED_EMAIL;
+import static Hongik_SafeMap.Hongik_SafeMap_Server.global.exception.ErrorMessage.PASSWORD_IS_DIFFERENT_FROM_CHECK;
 
 @Service
 @Transactional(readOnly = true)

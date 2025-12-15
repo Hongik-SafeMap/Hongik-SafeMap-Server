@@ -1,6 +1,6 @@
 package Hongik_SafeMap.Hongik_SafeMap_Server.domain.member.domain;
 
-import Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception.MemberException;
+import Hongik_SafeMap.Hongik_SafeMap_Server.global.exception.MemberException;
 import Hongik_SafeMap.Hongik_SafeMap_Server.domain.member.domain.vo.MemberStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception.ErrorMessage.EMAIL_DOES_NOT_EXIST;
+import static Hongik_SafeMap.Hongik_SafeMap_Server.global.exception.ErrorMessage.EMAIL_DOES_NOT_EXIST;
 
 @Entity
 @Getter
