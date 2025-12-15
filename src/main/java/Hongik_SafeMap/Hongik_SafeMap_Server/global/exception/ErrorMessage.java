@@ -1,4 +1,4 @@
-package Hongik_SafeMap.Hongik_SafeMap_Server.domain.global.exception;
+package Hongik_SafeMap.Hongik_SafeMap_Server.global.exception;
 
 public class ErrorMessage {
     // Member
