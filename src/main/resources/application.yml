@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: Hongik-SafeMap-Server
+  profiles:
+    group:
+      local: "local, datasource"
+    include:
+      - redis
