@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.member.domain;
 
-import Hongik_SafeMap_Server.domain.member.domain.vo.MemberStatus;
+import Hongik_SafeMap_Server.vo.LoginType;
+import Hongik_SafeMap_Server.vo.MemberStatus;
 import Hongik_SafeMap_Server.execption.MemberException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -35,13 +36,22 @@ public class Member {
     @Column(length = 50)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private LoginType loginType;
+
+    @Column(length = 100)
+    private String socialId;
+
     @Builder
-    public Member(String email, String password, MemberStatus status, String name, String phone) {
+    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId) {
         this.email = email;
         this.password = password;
         this.status = status;
         this.name = name;
         this.phone = phone;
+        this.loginType = loginType;
+        this.socialId = socialId;
     }
 
     public void validateEmail(String email) {
