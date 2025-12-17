@@ -1,7 +1,8 @@
 package Hongik_SafeMap_Server.domain.member.service;
 
 import Hongik_SafeMap_Server.domain.member.domain.Member;
-import Hongik_SafeMap_Server.domain.member.domain.vo.MemberStatus;
+import Hongik_SafeMap_Server.vo.LoginType;
+import Hongik_SafeMap_Server.vo.MemberStatus;
 import Hongik_SafeMap_Server.domain.member.dto.SignUpRequest;
 import Hongik_SafeMap_Server.domain.member.dto.SignUpResponse;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
@@ -38,7 +39,14 @@ public class SignUpService {
         String encodePassword = passwordEncoder.encode(signUpRequest.password());
 
         //암호화된 비밀번호로 새로운 member 생성
-        Member member = new Member(signUpRequest.email(), encodePassword, MemberStatus.일반, signUpRequest.name(), signUpRequest.phone());
+        Member member = Member.builder()
+                .email(signUpRequest.email())
+                .password(encodePassword)
+                .name(signUpRequest.name())
+                .phone(signUpRequest.phone())
+                .loginType(LoginType.일반)
+                .socialId(null)
+                .build();
 
         //Member 저장
         Member savedMember = memberRepository.save(member);

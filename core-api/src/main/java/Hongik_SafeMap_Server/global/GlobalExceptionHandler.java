@@ -1,3 +1,5 @@
+package Hongik_SafeMap_Server.global;
+
 import Hongik_SafeMap_Server.execption.MemberException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
