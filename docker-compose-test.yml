@@ -1,3 +1,5 @@
+name: hongik-safemap-server
+
 services:
   mysql:
     image: 'mysql:latest'
