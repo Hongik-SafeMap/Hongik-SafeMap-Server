@@ -1,1 +1,3 @@
 rootProject.name = 'Hongik-SafeMap-Server'
+include 'common'
+include 'core-api'

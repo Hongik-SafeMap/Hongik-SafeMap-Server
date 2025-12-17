@@ -1,0 +1,10 @@
+bootJar { enabled = false }
+jar { enabled = true }
+
+dependencies {
+    // Validation 어노테이션을 위한 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Json 관련 처리를 위한 의존성
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
