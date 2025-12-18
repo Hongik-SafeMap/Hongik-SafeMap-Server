@@ -1,0 +1,95 @@
+package Hongik_SafeMap_Server.domain.disaster_report.service;
+
+import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
+import Hongik_SafeMap_Server.domain.member.domain.Member;
+import Hongik_SafeMap_Server.exception.DisasterReportException;
+import Hongik_SafeMap_Server.util.MemberUtil;
+import Hongik_SafeMap_Server.vo.DisasterReportStatus;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class DisasterReportService {
+    private final DisasterReportRepository disasterReportRepository;
+    private final MemberUtil memberUtil;
+
+    // 긴급 제보 등록
+    @Transactional
+    public Long create(DisasterReportCreateRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+
+        DisasterReport disasterReport = DisasterReport.builder()
+                .disasterType(request.disasterType())
+                .riskLevel(request.riskLevel())
+                .disasterDescription(request.disasterDescription())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .address(request.address())
+                .mediaUrls(request.mediaUrls())
+                .status(DisasterReportStatus.PENDING)
+                .member(member)
+                .build();
+
+        return disasterReportRepository.save(disasterReport).getId();
+    }
+
+    // 제보 조회 (일반/관리자 공용)
+    public DisasterReportResponse getById(Long reportId) {
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        return DisasterReportResponse.of(disasterReport);
+    }
+
+    // 전체 제보 목록 (관리자 전체 제보/지도)
+    public Page<DisasterReportListResponse> getAll(Pageable pageable) {
+        return disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(DisasterReportListResponse::of);
+    }
+
+    // 내 제보 목록(마이 페이지)
+    public Page<DisasterReportListResponse> getMyReports(Pageable pageable) {
+        Member member = memberUtil.getLoggedInMember();
+
+        return disasterReportRepository.findByMemberOrderByCreatedAtDesc(member, pageable)
+                .map(DisasterReportListResponse::of);
+    }
+
+    // 관리자 제보 승인 처리
+    @Transactional
+    public void approve(Long reportId) {
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        disasterReport.approve();
+    }
+
+    // 관리자 제보 블라인드 처리
+    @Transactional
+    public void blind(Long reportId) {
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        disasterReport.blind();
+    }
+
+    // 관리자 제보 허위 처리
+    @Transactional
+    public void markFalse(Long reportId) {
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        disasterReport.markFalse();
+    }
+}
