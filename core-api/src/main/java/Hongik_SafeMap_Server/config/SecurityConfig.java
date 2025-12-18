@@ -36,6 +36,11 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
+
+                        // 관리 기능은 관리자 권한 필요
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
