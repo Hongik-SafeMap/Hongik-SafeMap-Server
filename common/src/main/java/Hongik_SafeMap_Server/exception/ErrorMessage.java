@@ -16,4 +16,8 @@ public class ErrorMessage {
     // Auth
     public static final String INVALID_REFRESH_TOKEN = "유효하지 않은 Refresh Token입니다.";
     public static final String REFRESH_TOKEN_DOES_NOT_MATCH = "Rfresh token이 일치하지 않습니다.";
+    public static final String NOT_USER = "재난 제보는 회원가입을 진행해야 합니다.";
+
+    // DisasterReport
+    public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
 }
