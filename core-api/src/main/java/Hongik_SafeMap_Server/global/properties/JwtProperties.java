@@ -1,4 +1,4 @@
-package Hongik_SafeMap_Server.global;
+package Hongik_SafeMap_Server.global.properties;
 
 import lombok.Getter;
 import lombok.Setter;

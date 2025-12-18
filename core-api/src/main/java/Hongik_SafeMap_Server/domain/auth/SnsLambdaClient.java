@@ -1,6 +1,6 @@
 package Hongik_SafeMap_Server.domain.auth;
 
-import Hongik_SafeMap_Server.domain.auth.dto.SnsLoginRequest;
+import Hongik_SafeMap_Server.domain.auth.dto.request.SnsLoginRequest;
 import Hongik_SafeMap_Server.dto.SnsAuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,8 +16,8 @@ public class SnsLambdaClient {
         // 실제 AWS 배포시에는 AWS Lambda URL로 교체해야 함 (application.yml로 관리 추천)
         String lambdaUrl = "http://localhost:8081/snsAuth";
 
-        // 1. 람다로 POST 요청 전송 (토큰과 타입을 줌)
-        // 2. 람다에서 검증 후 이메일/ID 반환 (SnsAuthResponse)
+        // 람다로 POST 요청 전송 (토큰과 타입을 줌)
+        // 람다에서 검증 후 이메일/ID 반환 (SnsAuthResponse)
         return restTemplate.postForObject(lambdaUrl, request, SnsAuthResponse.class);
     }
 }
