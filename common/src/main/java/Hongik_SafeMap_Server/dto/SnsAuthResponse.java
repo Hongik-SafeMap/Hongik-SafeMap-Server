@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class SnsAuthResponse {
     private String email;
     private String socialId;
+    private String name;
+    private String phone;
 }

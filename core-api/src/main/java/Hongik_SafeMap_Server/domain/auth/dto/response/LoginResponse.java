@@ -1,4 +1,4 @@
-package Hongik_SafeMap_Server.domain.auth.dto;
+package Hongik_SafeMap_Server.domain.auth.dto.response;
 
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.LoginType;
@@ -7,8 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public record LoginResponse(
         String accessToken,
-        @JsonIgnore
-                String refreshToken,
+        String refreshToken,
         String name,
         String email,
         MemberStatus status,

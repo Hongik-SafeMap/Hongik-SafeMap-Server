@@ -2,18 +2,18 @@ package Hongik_SafeMap_Server.domain.member.service;
 
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.LoginType;
-import Hongik_SafeMap_Server.vo.MemberStatus;
-import Hongik_SafeMap_Server.domain.member.dto.SignUpRequest;
-import Hongik_SafeMap_Server.domain.member.dto.SignUpResponse;
+import Hongik_SafeMap_Server.domain.member.dto.request.SignUpRequest;
+import Hongik_SafeMap_Server.domain.member.dto.response.SignUpResponse;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
-import Hongik_SafeMap_Server.execption.MemberException;
+import Hongik_SafeMap_Server.exception.MemberException;
+import Hongik_SafeMap_Server.vo.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static Hongik_SafeMap_Server.execption.ErrorMessage.DUPLICATED_EMAIL;
-import static Hongik_SafeMap_Server.execption.ErrorMessage.PASSWORD_IS_DIFFERENT_FROM_CHECK;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.DUPLICATED_EMAIL;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.PASSWORD_IS_DIFFERENT_FROM_CHECK;
 
 @Service
 @Transactional(readOnly = true)
@@ -44,7 +44,8 @@ public class SignUpService {
                 .password(encodePassword)
                 .name(signUpRequest.name())
                 .phone(signUpRequest.phone())
-                .loginType(LoginType.일반)
+                .status(MemberStatus.USER)
+                .loginType(LoginType.GENERAL)
                 .socialId(null)
                 .build();
 

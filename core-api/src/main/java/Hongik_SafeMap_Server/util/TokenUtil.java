@@ -1,6 +1,6 @@
 package Hongik_SafeMap_Server.util;
 
-import Hongik_SafeMap_Server.global.JwtProperties;
+import Hongik_SafeMap_Server.global.properties.JwtProperties;
 import Hongik_SafeMap_Server.vo.MemberStatus;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -13,6 +13,7 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class TokenUtil {
+
     private final JwtProperties jwtProperties;
 
     // Access Token 생성
@@ -29,7 +30,7 @@ public class TokenUtil {
     private String createToken(String email, String name, MemberStatus status, long validity) {
         Claims claims = Jwts.claims().setSubject(email); // Subject = Email
         claims.put("name", name);
-        claims.put("status", status);
+        claims.put("status", status.name()); // ✅ enum -> String
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + validity);
@@ -68,11 +69,13 @@ public class TokenUtil {
     // 상태 추출
     public String getStatusFromToken(String token) {
         token = removePrefix(token);
-        return (String) Jwts.parser()
+        Object status = Jwts.parser()
                 .setSigningKey(jwtProperties.getSecret())
                 .parseClaimsJws(token)
                 .getBody()
                 .get("status");
+
+        return status == null ? null : status.toString(); // ✅ 안전
     }
 
     private String removePrefix(String token) {

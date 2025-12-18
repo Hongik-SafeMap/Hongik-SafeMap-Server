@@ -1,7 +1,7 @@
 package Hongik_SafeMap_Server.domain.member.controller;
 
-import Hongik_SafeMap_Server.domain.member.dto.SignUpRequest;
-import Hongik_SafeMap_Server.domain.member.dto.SignUpResponse;
+import Hongik_SafeMap_Server.domain.member.dto.request.SignUpRequest;
+import Hongik_SafeMap_Server.domain.member.dto.response.SignUpResponse;
 import Hongik_SafeMap_Server.domain.member.service.SignUpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

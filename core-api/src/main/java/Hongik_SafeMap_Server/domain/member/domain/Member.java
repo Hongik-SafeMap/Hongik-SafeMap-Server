@@ -2,14 +2,14 @@ package Hongik_SafeMap_Server.domain.member.domain;
 
 import Hongik_SafeMap_Server.vo.LoginType;
 import Hongik_SafeMap_Server.vo.MemberStatus;
-import Hongik_SafeMap_Server.execption.MemberException;
+import Hongik_SafeMap_Server.exception.MemberException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static Hongik_SafeMap_Server.execption.ErrorMessage.EMAIL_DOES_NOT_EXIST;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.EMAIL_DOES_NOT_EXIST;
 
 @Entity
 @Getter
@@ -59,4 +59,6 @@ public class Member {
             throw new MemberException(EMAIL_DOES_NOT_EXIST);
         }
     }
+
+    public void updatePassword(String encodedPassword) { this.password = encodedPassword; }
 }

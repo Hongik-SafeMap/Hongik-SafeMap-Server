@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import Hongik_SafeMap_Server.util.EnvironmentUtil;
 
+import java.util.List;
+
 import static Hongik_SafeMap_Server.constant.EnvironmentConstant.LOCAL_SERVER_URL;
 
 @Configuration
@@ -29,6 +31,7 @@ public class SwaggerConfig {
         }
 
         return new OpenAPI()
+                .servers(List.of(server))
                 .components(new Components())
                 .info(apiInfo());
     }
