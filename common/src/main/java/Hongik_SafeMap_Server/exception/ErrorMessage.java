@@ -12,11 +12,11 @@ public class ErrorMessage {
     public static final String INVALID_CURRENT_PASSWORD = "현재 비밀번호가 올바르지 않습니다.";
     public static final String PASSWORD_SAME_AS_OLD = "새 비밀번호가 기존 비밀번호와 동일합니다";
     public static final String INVALID_LOGIN_TYPE = "유효하지 않은 로그인 타입입니다.";
+    public static final String EMERGENCY_CONTACT_NOT_FOUND = "비상연락망이 존재하지 않습니다.";
 
     // Auth
     public static final String INVALID_REFRESH_TOKEN = "유효하지 않은 Refresh Token입니다.";
     public static final String REFRESH_TOKEN_DOES_NOT_MATCH = "Rfresh token이 일치하지 않습니다.";
-    public static final String NOT_USER = "재난 제보는 회원가입을 진행해야 합니다.";
 
     // DisasterReport
     public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
