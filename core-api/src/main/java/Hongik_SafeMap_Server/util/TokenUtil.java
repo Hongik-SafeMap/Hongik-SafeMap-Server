@@ -75,7 +75,7 @@ public class TokenUtil {
                 .getBody()
                 .get("status");
 
-        return status == null ? null : status.toString(); // ✅ 안전
+        return status == null ? null : status.toString();
     }
 
     private String removePrefix(String token) {

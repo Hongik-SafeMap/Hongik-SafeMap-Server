@@ -43,8 +43,11 @@ public class Member {
     @Column(length = 100)
     private String socialId;
 
+    @Column(nullable = false)
+    private boolean isCredible = false;
+
     @Builder
-    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId) {
+    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId, boolean isCredible) {
         this.email = email;
         this.password = password;
         this.status = status;
@@ -52,6 +55,7 @@ public class Member {
         this.phone = phone;
         this.loginType = loginType;
         this.socialId = socialId;
+        this.isCredible = isCredible;
     }
 
     public void validateEmail(String email) {
@@ -61,4 +65,8 @@ public class Member {
     }
 
     public void updatePassword(String encodedPassword) { this.password = encodedPassword; }
+
+    public void toggleCredible() {
+        this.isCredible = !this.isCredible;
+    }
 }
