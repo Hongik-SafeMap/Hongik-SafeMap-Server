@@ -14,18 +14,18 @@ import java.util.List;
 import static Hongik_SafeMap_Server.exception.ErrorMessage.MEMBER_NOT_EXISTS;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AdminMemberService {
     private final MemberRepository memberRepository;
     private final DisasterReportRepository disasterReportRepository;
 
-    // 회원 리스트
+    @Transactional(readOnly = true)
     public List<AdminMemberResponse> findAllMembers() {
         return disasterReportRepository.findAdminMemberList();
     }
 
     // 공신력 부여/해제
+    @Transactional
     public void toggleCredible(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MEMBER_NOT_EXISTS));
