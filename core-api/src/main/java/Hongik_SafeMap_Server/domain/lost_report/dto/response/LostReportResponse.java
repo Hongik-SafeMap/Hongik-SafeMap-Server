@@ -44,7 +44,10 @@ public record LostReportResponse(
         List<String> fileUrls,
 
         @Schema(description = "신고자 ID", example = "1")
-        Long memberId
+        Long memberId,
+
+        @Schema(description = "신고자 이름", example = "홍길동")
+        String memberName
 ) {
     public static LostReportResponse of(LostReport lostReport) {
         return new LostReportResponse(
@@ -59,7 +62,8 @@ public record LostReportResponse(
                 lostReport.getCreatedAt(),
                 lostReport.getStatus(),
                 lostReport.getFileUrls(),
-                lostReport.getMember().getId()
+                lostReport.getMember().getId(),
+                lostReport.getMember().getName()
         );
     }
 }
