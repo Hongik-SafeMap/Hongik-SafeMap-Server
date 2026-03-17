@@ -37,7 +37,7 @@ public class LostReport {
     @Column(name = "age", length = 20)
     private String age;
 
-    @Column(name = "charitistic", length = 255, nullable = false)
+    @Column(name = "characteristic", length = 255, nullable = false)
     private String characteristic;
 
     @Column(name = "last_seen", length = 255, nullable = false)
@@ -46,8 +46,8 @@ public class LostReport {
     @Column(name = "current_location", length = 255, nullable = false)
     private String currentLocation;
 
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "createdAt", nullable = false)
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "lost_report_status", nullable = false)
@@ -73,7 +73,7 @@ public class LostReport {
         this.characteristic = characteristic;
         this.lastSeen = lastSeen;
         this.currentLocation = currentLocation;
-        this.timestamp = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
         this.status = LostReportStatus.IN_PROGRESS;
         this.member = member;
         this.fileUrls = fileUrls != null ? new ArrayList<>(fileUrls) : new ArrayList<>();

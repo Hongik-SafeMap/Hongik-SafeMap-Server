@@ -34,8 +34,8 @@ public record LostReportResponse(
         @Schema(description = "현재 위치", example = "서울시 강남구 역삼동")
         String currentLocation,
 
-        @Schema(description = "신고 시각")
-        LocalDateTime timestamp,
+        @Schema(description = "작성 시각")
+        LocalDateTime createdAt,
 
         @Schema(description = "상태", example = "진행중")
         LostReportStatus status,
@@ -56,7 +56,7 @@ public record LostReportResponse(
                 lostReport.getCharacteristic(),
                 lostReport.getLastSeen(),
                 lostReport.getCurrentLocation(),
-                lostReport.getTimestamp(),
+                lostReport.getCreatedAt(),
                 lostReport.getStatus(),
                 lostReport.getFileUrls(),
                 lostReport.getMember().getId()
