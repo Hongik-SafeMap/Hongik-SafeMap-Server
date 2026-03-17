@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.global;
 
 import Hongik_SafeMap_Server.exception.AuthException;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
+import Hongik_SafeMap_Server.exception.LostReportException;
 import Hongik_SafeMap_Server.exception.MemberException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -61,6 +62,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DisasterReportException.class)
     public ErrorResponse handleDisasterReportException(DisasterReportException ex) {
         log.info("exception.DisasterReportException: {}", ex.getMessage());
+
+        return ErrorResponse.create(
+                ex,
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
+    }
+
+    // LostReport 도메인 예외처리(404)
+    @ExceptionHandler(LostReportException.class)
+    public ErrorResponse handleLostReportException(LostReportException ex) {
+        log.info("exception.LostReportException: {}", ex.getMessage());
 
         return ErrorResponse.create(
                 ex,
