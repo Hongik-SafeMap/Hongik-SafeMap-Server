@@ -1,8 +1,11 @@
 package Hongik_SafeMap_Server.domain.lost_report.service;
 
 import Hongik_SafeMap_Server.domain.lost_report.domain.LostReport;
+import Hongik_SafeMap_Server.domain.lost_report.domain.LostReportComment;
+import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
+import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportCommentRepository;
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportRepository;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.LostReportException;
@@ -19,6 +22,7 @@ import static Hongik_SafeMap_Server.exception.ErrorMessage.LOST_REPORT_NOT_FOUND
 public class LostReportService {
 
     private final LostReportRepository lostReportRepository;
+    private final LostReportCommentRepository lostReportCommentRepository;
     private final MemberUtil memberUtil;
 
     @Transactional
@@ -45,5 +49,22 @@ public class LostReportService {
         LostReport lostReport = lostReportRepository.findById(id)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
         return LostReportResponse.of(lostReport);
+    }
+
+    @Transactional
+    public Long createComment(Long lostReportId, LostReportCommentCreateRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+        
+        LostReport lostReport = lostReportRepository.findById(lostReportId)
+                .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
+
+        LostReportComment comment = LostReportComment.builder()
+                .content(request.content())
+                .member(member)
+                .lostReport(lostReport)
+                .build();
+
+        LostReportComment savedComment = lostReportCommentRepository.save(comment);
+        return savedComment.getId();
     }
 }

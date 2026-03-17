@@ -1,5 +1,6 @@
 package Hongik_SafeMap_Server.domain.lost_report.controller;
 
+import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
 import Hongik_SafeMap_Server.domain.lost_report.service.LostReportService;
@@ -31,5 +32,13 @@ public class LostReportController {
     public ResponseEntity<LostReportResponse> getById(@PathVariable Long id) {
         LostReportResponse response = lostReportService.getById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "실종 신고 댓글 작성", description = "실종신고에 댓글을 작성합니다.")
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<Long> createComment(@PathVariable Long id, 
+                                            @Valid @RequestBody LostReportCommentCreateRequest request) {
+        Long commentId = lostReportService.createComment(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentId);
     }
 }
