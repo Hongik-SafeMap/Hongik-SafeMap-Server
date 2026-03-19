@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.lost_report.controller;
 
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
+import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
 import Hongik_SafeMap_Server.domain.lost_report.service.LostReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,9 +37,16 @@ public class LostReportController {
 
     @Operation(summary = "실종 신고 댓글 작성", description = "실종신고에 댓글을 작성합니다.")
     @PostMapping("/{id}/comments")
-    public ResponseEntity<Long> createComment(@PathVariable Long id, 
-                                            @Valid @RequestBody LostReportCommentCreateRequest request) {
+    public ResponseEntity<Long> createComment(@PathVariable Long id,
+                                              @Valid @RequestBody LostReportCommentCreateRequest request) {
         Long commentId = lostReportService.createComment(id, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentId);
+    }
+
+    @Operation(summary = "실종 신고 댓글 목록 조회", description = "실종신고 게시물의 댓글 목록을 조회합니다.")
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<LostReportCommentsResponse> getCommentsById(@PathVariable Long id) {
+        LostReportCommentsResponse response = lostReportService.getComments(id);
+        return ResponseEntity.ok(response);
     }
 }
