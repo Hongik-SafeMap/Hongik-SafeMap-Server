@@ -4,6 +4,8 @@ import Hongik_SafeMap_Server.domain.lost_report.domain.LostReport;
 import Hongik_SafeMap_Server.domain.lost_report.domain.LostReportComment;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
+import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentResponse;
+import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportCommentRepository;
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportRepository;
@@ -13,6 +15,8 @@ import Hongik_SafeMap_Server.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static Hongik_SafeMap_Server.exception.ErrorMessage.LOST_REPORT_NOT_FOUND;
 
@@ -54,7 +58,7 @@ public class LostReportService {
     @Transactional
     public Long createComment(Long lostReportId, LostReportCommentCreateRequest request) {
         Member member = memberUtil.getLoggedInMember();
-        
+
         LostReport lostReport = lostReportRepository.findById(lostReportId)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
 
@@ -66,5 +70,22 @@ public class LostReportService {
 
         LostReportComment savedComment = lostReportCommentRepository.save(comment);
         return savedComment.getId();
+    }
+
+    @Transactional
+    public LostReportCommentsResponse getComments(Long lostReportId) {
+        lostReportRepository.findById(lostReportId)
+                .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
+
+        List<LostReportComment> comments = lostReportCommentRepository.findByLostReportIdOrderByCreatedAtAsc(lostReportId);
+
+        List<LostReportCommentResponse> commentResponses = comments.stream()
+                .map(LostReportCommentResponse::of)
+                .toList();
+
+        return new LostReportCommentsResponse(
+                comments.size(),
+                commentResponses
+        );
     }
 }
