@@ -23,4 +23,7 @@ public class ErrorMessage {
 
     // LostReport
     public static final String LOST_REPORT_NOT_FOUND = "해당 id를 가진 실종신고를 찾을 수 없습니다.";
+
+    // ResourceReport
+    public static final String RESOURCE_REPORT_NOT_FOUND = "자원 게시글을 찾을 수 없습니다.";
 }

@@ -3,7 +3,10 @@ package Hongik_SafeMap_Server.domain.resource_report.service;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReport;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
 import Hongik_SafeMap_Server.domain.resource_report.repository.ResourceReportRepository;
+import Hongik_SafeMap_Server.exception.ErrorMessage;
+import Hongik_SafeMap_Server.exception.ResourceReportException;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,5 +36,12 @@ public class ResourceReportService {
 
         ResourceReport savedReport = resourceReportRepository.save(resourceReport);
         return savedReport.getId();
+    }
+
+    public ResourceReportResponse findById(Long id) {
+        ResourceReport resourceReport = resourceReportRepository.findById(id)
+                .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
+
+        return ResourceReportResponse.from(resourceReport);
     }
 }
