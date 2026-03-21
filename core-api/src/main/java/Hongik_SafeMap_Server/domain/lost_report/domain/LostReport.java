@@ -85,4 +85,17 @@ public class LostReport {
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void update(LostReportCategory category, LostReportStatus status, String title, String description, String age,
+                       String characteristic, String lastSeen, String currentLocation, List<String> fileUrls) {
+        this.category = category;
+        this.status = status;
+        this.title = title;
+        this.description = description;
+        this.age = age;
+        this.characteristic = characteristic;
+        this.lastSeen = lastSeen;
+        this.currentLocation = currentLocation;
+        this.fileUrls = fileUrls != null ? new ArrayList<>(fileUrls) : new ArrayList<>();
+    }
 }

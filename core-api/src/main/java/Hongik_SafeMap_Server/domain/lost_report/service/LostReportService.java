@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.domain.lost_report.domain.LostReport;
 import Hongik_SafeMap_Server.domain.lost_report.domain.LostReportComment;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
+import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
@@ -144,5 +145,35 @@ public class LostReportService {
         
         lostReport.softDelete();
         lostReportRepository.save(lostReport);
+    }
+
+    @Transactional
+    public LostReportResponse update(Long id, LostReportUpdateRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+        
+        LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
+        
+        // 작성자 본인인지 확인
+        if (!lostReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("본인이 작성한 게시물만 수정할 수 있습니다");
+        }
+        
+        lostReport.update(
+                request.category(),
+                request.status(),
+                request.title(),
+                request.description(),
+                request.age(),
+                request.characteristic(),
+                request.lastSeen(),
+                request.currentLocation(),
+                request.fileUrls()
+        );
+        
+        LostReport updatedReport = lostReportRepository.save(lostReport);
+        long commentCount = lostReportCommentRepository.countByLostReportId(id);
+        
+        return LostReportResponse.of(updatedReport, commentCount);
     }
 }
