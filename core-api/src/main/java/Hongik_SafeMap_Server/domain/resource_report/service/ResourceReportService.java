@@ -5,6 +5,8 @@ import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReport;
 import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReportComment;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentResponse;
+import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
 import Hongik_SafeMap_Server.domain.resource_report.repository.ResourceReportCommentRepository;
 import Hongik_SafeMap_Server.domain.resource_report.repository.ResourceReportRepository;
@@ -14,6 +16,8 @@ import Hongik_SafeMap_Server.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -64,5 +68,21 @@ public class ResourceReportService {
 
         ResourceReportComment savedComment = resourceReportCommentRepository.save(comment);
         return savedComment.getId();
+    }
+
+    public ResourceReportCommentsResponse getComments(Long resourceReportId) {
+        resourceReportRepository.findByIdAndNotDeleted(resourceReportId)
+                .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
+
+        List<ResourceReportComment> comments = resourceReportCommentRepository.findByResourceReportIdOrderByCreatedAtAsc(resourceReportId);
+
+        List<ResourceReportCommentResponse> commentResponses = comments.stream()
+                .map(ResourceReportCommentResponse::of)
+                .toList();
+
+        return new ResourceReportCommentsResponse(
+                comments.size(),
+                commentResponses
+        );
     }
 }
