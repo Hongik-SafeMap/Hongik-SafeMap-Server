@@ -49,6 +49,9 @@ public class LostReport {
     @Column(name = "createdAt", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "deletedAt")
+    private LocalDateTime deletedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "lost_report_status", nullable = false)
     private LostReportStatus status;
@@ -63,9 +66,9 @@ public class LostReport {
     private List<String> fileUrls = new ArrayList<>();
 
     @Builder
-    public LostReport(LostReportCategory category, String title, String description, String age, 
-                     String characteristic, String lastSeen, String currentLocation, 
-                     Member member, List<String> fileUrls) {
+    public LostReport(LostReportCategory category, String title, String description, String age,
+                      String characteristic, String lastSeen, String currentLocation,
+                      Member member, List<String> fileUrls) {
         this.category = category;
         this.title = title;
         this.description = description;
@@ -77,5 +80,9 @@ public class LostReport {
         this.status = LostReportStatus.IN_PROGRESS;
         this.member = member;
         this.fileUrls = fileUrls != null ? new ArrayList<>(fileUrls) : new ArrayList<>();
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

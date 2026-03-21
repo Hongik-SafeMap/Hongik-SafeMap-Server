@@ -56,7 +56,7 @@ public class LostReportService {
     }
 
     public LostReportResponse getById(Long id) {
-        LostReport lostReport = lostReportRepository.findById(id)
+        LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
 
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
@@ -100,7 +100,7 @@ public class LostReportService {
     public Long createComment(Long lostReportId, LostReportCommentCreateRequest request) {
         Member member = memberUtil.getLoggedInMember();
 
-        LostReport lostReport = lostReportRepository.findById(lostReportId)
+        LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(lostReportId)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
 
         LostReportComment comment = LostReportComment.builder()
@@ -115,7 +115,7 @@ public class LostReportService {
 
     @Transactional
     public LostReportCommentsResponse getComments(Long lostReportId) {
-        lostReportRepository.findById(lostReportId)
+        lostReportRepository.findByIdAndNotDeleted(lostReportId)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
 
         List<LostReportComment> comments = lostReportCommentRepository.findByLostReportIdOrderByCreatedAtAsc(lostReportId);
@@ -128,5 +128,21 @@ public class LostReportService {
                 comments.size(),
                 commentResponses
         );
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Member member = memberUtil.getLoggedInMember();
+        
+        LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
+        
+        // 작성자 본인인지 확인
+        if (!lostReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("본인이 작성한 게시물만 삭제할 수 있습니다");
+        }
+        
+        lostReport.softDelete();
+        lostReportRepository.save(lostReport);
     }
 }

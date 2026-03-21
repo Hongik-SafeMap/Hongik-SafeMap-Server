@@ -11,39 +11,44 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LostReportRepository extends JpaRepository<LostReport, Long> {
-    
 
-    // 댓글 개수와 함께 전체 목록 조회 (최신순, 페이징)
+
+    // 댓글 개수와 함께 전체 목록 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.LostReportWithCommentCount(lr, COUNT(lrc)) " +
-           "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
-           "GROUP BY lr")
+            "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
+            "WHERE lr.deletedAt IS NULL " +
+            "GROUP BY lr")
     Page<LostReportWithCommentCount> findAllWithCommentCount(Pageable pageable);
 
-    // 댓글 개수와 함께 카테고리별 조회 (최신순, 페이징)
+    // 댓글 개수와 함께 카테고리별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.LostReportWithCommentCount(lr, COUNT(lrc)) " +
-           "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
-           "WHERE lr.category = :category " +
-           "GROUP BY lr")
+            "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
+            "WHERE lr.deletedAt IS NULL AND lr.category = :category " +
+            "GROUP BY lr")
     Page<LostReportWithCommentCount> findByCategoryWithCommentCount(@Param("category") LostReportCategory category, Pageable pageable);
 
-    // 댓글 개수와 함께 상태별 조회 (최신순, 페이징)
+    // 댓글 개수와 함께 상태별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.LostReportWithCommentCount(lr, COUNT(lrc)) " +
-           "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
-           "WHERE lr.status = :status " +
-           "GROUP BY lr")
+            "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
+            "WHERE lr.deletedAt IS NULL AND lr.status = :status " +
+            "GROUP BY lr")
     Page<LostReportWithCommentCount> findByStatusWithCommentCount(@Param("status") LostReportStatus status, Pageable pageable);
 
-    // 댓글 개수와 함께 카테고리 + 상태별 조회 (최신순, 페이징)
+    // 댓글 개수와 함께 카테고리 + 상태별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.LostReportWithCommentCount(lr, COUNT(lrc)) " +
-           "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
-           "WHERE lr.category = :category AND lr.status = :status " +
-           "GROUP BY lr")
+            "FROM LostReport lr LEFT JOIN LostReportComment lrc ON lr.id = lrc.lostReport.id " +
+            "WHERE lr.deletedAt IS NULL AND lr.category = :category AND lr.status = :status " +
+            "GROUP BY lr")
     Page<LostReportWithCommentCount> findByCategoryAndStatusWithCommentCount(
-            @Param("category") LostReportCategory category, 
-            @Param("status") LostReportStatus status, 
+            @Param("category") LostReportCategory category,
+            @Param("status") LostReportStatus status,
             Pageable pageable);
+
+    // 삭제되지 않은 게시물만 조회
+    @Query("SELECT lr FROM LostReport lr WHERE lr.id = :id AND lr.deletedAt IS NULL")
+    Optional<LostReport> findByIdAndNotDeleted(@Param("id") Long id);
 }

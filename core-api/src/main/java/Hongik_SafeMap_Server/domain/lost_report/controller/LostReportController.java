@@ -79,4 +79,11 @@ public class LostReportController {
         LostReportCommentsResponse response = lostReportService.getComments(id);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "실종 신고 삭제", description = "실종신고 게시물을 삭제합니다. 작성자만 삭제 가능합니다.")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        lostReportService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
