@@ -47,9 +47,12 @@ public record LostReportResponse(
         Long memberId,
 
         @Schema(description = "신고자 이름", example = "홍길동")
-        String memberName
+        String memberName,
+
+        @Schema(description = "댓글 개수", example = "5")
+        long commentCount
 ) {
-    public static LostReportResponse of(LostReport lostReport) {
+    public static LostReportResponse of(LostReport lostReport, long commentCount) {
         return new LostReportResponse(
                 lostReport.getId(),
                 lostReport.getCategory(),
@@ -63,7 +66,8 @@ public record LostReportResponse(
                 lostReport.getStatus(),
                 lostReport.getFileUrls(),
                 lostReport.getMember().getId(),
-                lostReport.getMember().getName()
+                lostReport.getMember().getName(),
+                commentCount
         );
     }
 }

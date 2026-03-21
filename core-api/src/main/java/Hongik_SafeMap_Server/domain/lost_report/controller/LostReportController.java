@@ -4,11 +4,17 @@ import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCre
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
+import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportsPageResponse;
 import Hongik_SafeMap_Server.domain.lost_report.service.LostReportService;
+import Hongik_SafeMap_Server.vo.LostReportCategory;
+import Hongik_SafeMap_Server.vo.LostReportStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +26,30 @@ import org.springframework.web.bind.annotation.*;
 public class LostReportController {
 
     private final LostReportService lostReportService;
+
+    @Operation(summary = "실종 신고 목록 조회", description = "실종신고 게시물 목록을 페이징으로 조회합니다. 카테고리나 상태로 필터링 가능합니다.")
+    @GetMapping
+    public ResponseEntity<LostReportsPageResponse> getAllLostReports(
+            @RequestParam(required = false) LostReportCategory category,
+            @RequestParam(required = false) LostReportStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        LostReportsPageResponse response;
+        
+        if (category != null && status != null) {
+            response = lostReportService.getLostReportsByCategoryAndStatus(category, status, pageable);
+        } else if (category != null) {
+            response = lostReportService.getLostReportsByCategory(category, pageable);
+        } else if (status != null) {
+            response = lostReportService.getLostReportsByStatus(status, pageable);
+        } else {
+            response = lostReportService.getLostReports(pageable);
+        }
+        
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "실종 신고 등록", description = "실종자 정보를 등록합니다.")
     @PostMapping

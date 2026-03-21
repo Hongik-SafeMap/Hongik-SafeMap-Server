@@ -7,12 +7,18 @@ import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequ
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
+import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportsPageResponse;
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportCommentRepository;
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportRepository;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.LostReportException;
+import Hongik_SafeMap_Server.global.dto.response.LostReportWithCommentCount;
 import Hongik_SafeMap_Server.util.MemberUtil;
+import Hongik_SafeMap_Server.vo.LostReportCategory;
+import Hongik_SafeMap_Server.vo.LostReportStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +58,42 @@ public class LostReportService {
     public LostReportResponse getById(Long id) {
         LostReport lostReport = lostReportRepository.findById(id)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
-        return LostReportResponse.of(lostReport);
+
+        long commentCount = lostReportCommentRepository.countByLostReportId(id);
+
+        return LostReportResponse.of(lostReport, commentCount);
+    }
+
+    public LostReportsPageResponse getLostReports(Pageable pageable) {
+        return createLostReportsPageResponse(lostReportRepository.findAllWithCommentCount(pageable));
+    }
+
+    public LostReportsPageResponse getLostReportsByCategory(LostReportCategory category, Pageable pageable) {
+        return createLostReportsPageResponse(lostReportRepository.findByCategoryWithCommentCount(category, pageable));
+    }
+
+    public LostReportsPageResponse getLostReportsByStatus(LostReportStatus status, Pageable pageable) {
+        return createLostReportsPageResponse(lostReportRepository.findByStatusWithCommentCount(status, pageable));
+    }
+
+    public LostReportsPageResponse getLostReportsByCategoryAndStatus(LostReportCategory category, LostReportStatus status, Pageable pageable) {
+        return createLostReportsPageResponse(lostReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
+    }
+
+    private LostReportsPageResponse createLostReportsPageResponse(Page<LostReportWithCommentCount> page) {
+        List<LostReportResponse> reportResponses = page.getContent().stream()
+                .map(dto -> LostReportResponse.of(dto.lostReport(), dto.commentCount()))
+                .toList();
+
+        return new LostReportsPageResponse(
+                reportResponses,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast()
+        );
     }
 
     @Transactional

@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface LostReportCommentRepository extends JpaRepository<LostReportComment, Long> {
     List<LostReportComment> findByLostReportIdOrderByCreatedAtAsc(Long lostReportId);
+    
+    // 게시글별 댓글 개수 조회
+    long countByLostReportId(Long lostReportId);
 }
