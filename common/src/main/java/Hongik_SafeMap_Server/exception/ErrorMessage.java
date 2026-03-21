@@ -20,4 +20,7 @@ public class ErrorMessage {
 
     // DisasterReport
     public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
+
+    // LostReport
+    public static final String LOST_REPORT_NOT_FOUND = "해당 id를 가진 실종신고를 찾을 수 없습니다.";
 }

@@ -1,45 +1,36 @@
 package Hongik_SafeMap_Server.config;
 
 import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.OpenAPI;
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import Hongik_SafeMap_Server.util.EnvironmentUtil;
-
-import java.util.List;
-
-import static Hongik_SafeMap_Server.constant.EnvironmentConstant.LOCAL_SERVER_URL;
 
 @Configuration
-@RequiredArgsConstructor
-@Profile({"local", "dev"})
+@Profile({"!prod"})
 public class SwaggerConfig {
-
-    private final EnvironmentUtil environmentUtil;
 
     @Bean
     public OpenAPI openAPI() {
-        String activeProfile = environmentUtil.getCurrentProfile();
+        SecurityScheme securityScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .in(SecurityScheme.In.HEADER)
+                .name("Authorization");
 
-        Server server = new Server();
-        if (activeProfile.equalsIgnoreCase("local")) {
-            server.setUrl(LOCAL_SERVER_URL);
-        }
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList("bearerAuth");
 
         return new OpenAPI()
-                .servers(List.of(server))
-                .components(new Components())
-                .info(apiInfo());
+                .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
+                .security(java.util.List.of(securityRequirement))
+                .info(new Info()
+                        .title("SafeMap Server API")
+                        .description("SafeMap 서버 API")
+                        .version("1.0.0"));
     }
-
-    private Info apiInfo() {
-        return new Info()
-                .title("Hongik SafeMap Server")
-                .version("1.0.0");
-    }
-
 }
