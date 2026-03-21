@@ -20,6 +20,9 @@ public class EnumUtil {
         return switch (simpleName) {
             case "LostReportCategory" -> "카테고리";
             case "LostReportStatus" -> "상태";
+            case "ResourceReportType" -> "유형";
+            case "ResourceReportCategory" -> "카테고리";
+            case "ResourceReportStatus" -> "상태";
             default -> simpleName;
         };
     }

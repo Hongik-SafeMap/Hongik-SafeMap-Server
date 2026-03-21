@@ -5,11 +5,18 @@ import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCr
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
+import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportsPageResponse;
 import Hongik_SafeMap_Server.domain.resource_report.service.ResourceReportService;
+import Hongik_SafeMap_Server.vo.ResourceReportCategory;
+import Hongik_SafeMap_Server.vo.ResourceReportStatus;
+import Hongik_SafeMap_Server.vo.ResourceReportType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +28,39 @@ import org.springframework.web.bind.annotation.*;
 public class ResourceReportController {
 
     private final ResourceReportService resourceReportService;
+
+    @Operation(summary = "자원 게시글 목록 조회", description = "자원 게시글 목록을 페이징으로 조회합니다. 유형, 카테고리, 상태로 필터링 가능합니다.")
+    @GetMapping
+    public ResponseEntity<ResourceReportsPageResponse> getResourceReports(
+            @RequestParam(required = false) ResourceReportType type,
+            @RequestParam(required = false) ResourceReportCategory category,
+            @RequestParam(required = false) ResourceReportStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        ResourceReportsPageResponse response;
+        
+        if (type != null && category != null && status != null) {
+            response = resourceReportService.getResourceReportsByTypeAndCategoryAndStatus(type, category, status, pageable);
+        } else if (type != null && category != null) {
+            response = resourceReportService.getResourceReportsByTypeAndCategory(type, category, pageable);
+        } else if (type != null && status != null) {
+            response = resourceReportService.getResourceReportsByTypeAndStatus(type, status, pageable);
+        } else if (category != null && status != null) {
+            response = resourceReportService.getResourceReportsByCategoryAndStatus(category, status, pageable);
+        } else if (type != null) {
+            response = resourceReportService.getResourceReportsByType(type, pageable);
+        } else if (category != null) {
+            response = resourceReportService.getResourceReportsByCategory(category, pageable);
+        } else if (status != null) {
+            response = resourceReportService.getResourceReportsByStatus(status, pageable);
+        } else {
+            response = resourceReportService.getResourceReports(pageable);
+        }
+        
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "자원 요청/공급 등록", description = "자원 요청 또는 공급 정보를 등록합니다.")
     @PostMapping

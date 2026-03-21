@@ -9,12 +9,19 @@ import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUp
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
+import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportsPageResponse;
 import Hongik_SafeMap_Server.domain.resource_report.repository.ResourceReportCommentRepository;
 import Hongik_SafeMap_Server.domain.resource_report.repository.ResourceReportRepository;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.exception.ResourceReportException;
+import Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount;
 import Hongik_SafeMap_Server.util.MemberUtil;
+import Hongik_SafeMap_Server.vo.ResourceReportCategory;
+import Hongik_SafeMap_Server.vo.ResourceReportStatus;
+import Hongik_SafeMap_Server.vo.ResourceReportType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,5 +134,53 @@ public class ResourceReportService {
 
         resourceReport.softDelete();
         resourceReportRepository.save(resourceReport);
+    }
+
+    public ResourceReportsPageResponse getResourceReports(Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findAllWithCommentCount(pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByType(ResourceReportType type, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByTypeWithCommentCount(type, pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByCategory(ResourceReportCategory category, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByCategoryWithCommentCount(category, pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByStatus(ResourceReportStatus status, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByStatusWithCommentCount(status, pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByTypeAndCategory(ResourceReportType type, ResourceReportCategory category, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryWithCommentCount(type, category, pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByTypeAndStatus(ResourceReportType type, ResourceReportStatus status, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndStatusWithCommentCount(type, status, pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByCategoryAndStatus(ResourceReportCategory category, ResourceReportStatus status, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
+    }
+
+    public ResourceReportsPageResponse getResourceReportsByTypeAndCategoryAndStatus(ResourceReportType type, ResourceReportCategory category, ResourceReportStatus status, Pageable pageable) {
+        return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryAndStatusWithCommentCount(type, category, status, pageable));
+    }
+
+    private ResourceReportsPageResponse createResourceReportsPageResponse(Page<ResourceReportWithCommentCount> page) {
+        List<ResourceReportResponse> reportResponses = page.getContent().stream()
+                .map(dto -> ResourceReportResponse.from(dto.resourceReport()))
+                .toList();
+
+        return new ResourceReportsPageResponse(
+                reportResponses,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast()
+        );
     }
 }
