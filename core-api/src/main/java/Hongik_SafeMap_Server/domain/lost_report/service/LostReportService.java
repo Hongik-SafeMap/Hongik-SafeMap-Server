@@ -12,6 +12,7 @@ import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportsPageResp
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportCommentRepository;
 import Hongik_SafeMap_Server.domain.lost_report.repository.LostReportRepository;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
+import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.exception.LostReportException;
 import Hongik_SafeMap_Server.global.dto.response.LostReportWithCommentCount;
 import Hongik_SafeMap_Server.util.MemberUtil;
@@ -134,15 +135,15 @@ public class LostReportService {
     @Transactional
     public void delete(Long id) {
         Member member = memberUtil.getLoggedInMember();
-        
+
         LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
-        
+
         // 작성자 본인인지 확인
         if (!lostReport.getMember().getId().equals(member.getId())) {
-            throw new IllegalArgumentException("본인이 작성한 게시물만 삭제할 수 있습니다");
+            throw new IllegalArgumentException(ErrorMessage.REPORT_DELETE_UNAUTHORIZED);
         }
-        
+
         lostReport.softDelete();
         lostReportRepository.save(lostReport);
     }
@@ -150,15 +151,15 @@ public class LostReportService {
     @Transactional
     public LostReportResponse update(Long id, LostReportUpdateRequest request) {
         Member member = memberUtil.getLoggedInMember();
-        
+
         LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
-        
+
         // 작성자 본인인지 확인
         if (!lostReport.getMember().getId().equals(member.getId())) {
-            throw new IllegalArgumentException("본인이 작성한 게시물만 수정할 수 있습니다");
+            throw new IllegalArgumentException(ErrorMessage.REPORT_UPDATE_UNAUTHORIZED);
         }
-        
+
         lostReport.update(
                 request.category(),
                 request.status(),
@@ -170,10 +171,10 @@ public class LostReportService {
                 request.currentLocation(),
                 request.fileUrls()
         );
-        
+
         LostReport updatedReport = lostReportRepository.save(lostReport);
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
-        
+
         return LostReportResponse.of(updatedReport, commentCount);
     }
 }

@@ -26,4 +26,8 @@ public class ErrorMessage {
 
     // ResourceReport
     public static final String RESOURCE_REPORT_NOT_FOUND = "자원 게시글을 찾을 수 없습니다.";
+
+    // 게시물 공통
+    public static final String REPORT_DELETE_UNAUTHORIZED = "본인이 작성한 게시물만 삭제할 수 있습니다";
+    public static final String REPORT_UPDATE_UNAUTHORIZED = "본인이 작성한 게시물만 수정할 수 있습니다";
 }

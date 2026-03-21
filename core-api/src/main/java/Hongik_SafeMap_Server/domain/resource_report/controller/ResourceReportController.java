@@ -52,6 +52,13 @@ public class ResourceReportController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "자원 게시글 삭제", description = "자원 게시글을 삭제합니다. 작성자만 삭제 가능합니다.")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        resourceReportService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "자원 게시글 댓글 목록 조회", description = "자원 게시글의 댓글 목록을 조회합니다.")
     @GetMapping("/{id}/comments")
     public ResponseEntity<ResourceReportCommentsResponse> getCommentsById(@PathVariable Long id) {

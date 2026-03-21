@@ -96,7 +96,7 @@ public class ResourceReportService {
 
         // 작성자 본인인지 확인
         if (!resourceReport.getMember().getId().equals(member.getId())) {
-            throw new IllegalArgumentException("본인이 작성한 게시물만 수정할 수 있습니다");
+            throw new IllegalArgumentException(ErrorMessage.REPORT_UPDATE_UNAUTHORIZED);
         }
 
         resourceReport.update(
@@ -111,5 +111,21 @@ public class ResourceReportService {
 
         ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
         return ResourceReportResponse.from(updatedReport);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Member member = memberUtil.getLoggedInMember();
+
+        ResourceReport resourceReport = resourceReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
+
+        // 작성자 본인인지 확인
+        if (!resourceReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException(ErrorMessage.REPORT_DELETE_UNAUTHORIZED);
+        }
+
+        resourceReport.softDelete();
+        resourceReportRepository.save(resourceReport);
     }
 }
