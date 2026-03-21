@@ -5,6 +5,7 @@ import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReport;
 import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReportComment;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
@@ -84,5 +85,31 @@ public class ResourceReportService {
                 comments.size(),
                 commentResponses
         );
+    }
+
+    @Transactional
+    public ResourceReportResponse update(Long id, ResourceReportUpdateRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+
+        ResourceReport resourceReport = resourceReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
+
+        // 작성자 본인인지 확인
+        if (!resourceReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("본인이 작성한 게시물만 수정할 수 있습니다");
+        }
+
+        resourceReport.update(
+                request.type(),
+                request.category(),
+                request.status(),
+                request.title(),
+                request.description(),
+                request.location(),
+                request.fileUrls()
+        );
+
+        ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
+        return ResourceReportResponse.from(updatedReport);
     }
 }

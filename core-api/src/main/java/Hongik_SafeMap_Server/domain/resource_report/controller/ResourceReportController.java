@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.resource_report.controller;
 
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
 import Hongik_SafeMap_Server.domain.resource_report.service.ResourceReportService;
@@ -41,6 +42,14 @@ public class ResourceReportController {
                                               @Valid @RequestBody ResourceReportCommentCreateRequest request) {
         Long commentId = resourceReportService.createComment(id, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentId);
+    }
+
+    @Operation(summary = "자원 게시글 수정", description = "자원 게시글을 수정합니다.")
+    @PutMapping("/{id}")
+    public ResponseEntity<ResourceReportResponse> update(@PathVariable Long id,
+                                                         @Valid @RequestBody ResourceReportUpdateRequest request) {
+        ResourceReportResponse response = resourceReportService.update(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "자원 게시글 댓글 목록 조회", description = "자원 게시글의 댓글 목록을 조회합니다.")

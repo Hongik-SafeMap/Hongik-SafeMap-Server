@@ -82,4 +82,15 @@ public class ResourceReport {
     public void updateStatus(ResourceReportStatus status) {
         this.status = status;
     }
+
+    public void update(ResourceReportType type, ResourceReportCategory category, ResourceReportStatus status,
+                       String title, String description, String location, List<String> fileUrls) {
+        this.type = type;
+        this.category = category;
+        this.status = status;
+        this.title = title;
+        this.description = description;
+        this.location = location;
+        this.fileUrls = fileUrls != null ? new ArrayList<>(fileUrls) : new ArrayList<>();
+    }
 }
