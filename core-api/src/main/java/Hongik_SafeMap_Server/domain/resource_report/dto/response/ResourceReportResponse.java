@@ -39,9 +39,12 @@ public record ResourceReportResponse(
         List<String> fileUrls,
 
         @Schema(description = "회원 이름")
-        String memberName
+        String memberName,
+
+        @Schema(description = "작성자 여부", example = "true")
+        boolean isAuthor
 ) {
-    public static ResourceReportResponse from(ResourceReport resourceReport) {
+    public static ResourceReportResponse from(ResourceReport resourceReport, boolean isAuthor) {
         return new ResourceReportResponse(
                 resourceReport.getId(),
                 resourceReport.getType(),
@@ -52,7 +55,8 @@ public record ResourceReportResponse(
                 resourceReport.getStatus(),
                 resourceReport.getCreatedAt(),
                 resourceReport.getFileUrls(),
-                resourceReport.getMember().getName()
+                resourceReport.getMember().getName(),
+                isAuthor
         );
     }
 }

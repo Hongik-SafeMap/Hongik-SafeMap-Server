@@ -58,7 +58,10 @@ public class ResourceReportService {
         ResourceReport resourceReport = resourceReportRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
 
-        return ResourceReportResponse.from(resourceReport);
+        Member currentMember = memberUtil.getLoggedInMember();
+        boolean isAuthor = resourceReport.getMember().getId().equals(currentMember.getId());
+
+        return ResourceReportResponse.from(resourceReport, isAuthor);
     }
 
     @Transactional
@@ -117,7 +120,8 @@ public class ResourceReportService {
         );
 
         ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
-        return ResourceReportResponse.from(updatedReport);
+        boolean isAuthor = true; // 수정은 작성자만 가능하므로 항상 true
+        return ResourceReportResponse.from(updatedReport, isAuthor);
     }
 
     @Transactional
@@ -169,8 +173,13 @@ public class ResourceReportService {
     }
 
     private ResourceReportsPageResponse createResourceReportsPageResponse(Page<ResourceReportWithCommentCount> page) {
+        Member currentMember = memberUtil.getLoggedInMember();
+        
         List<ResourceReportResponse> reportResponses = page.getContent().stream()
-                .map(dto -> ResourceReportResponse.from(dto.resourceReport()))
+                .map(dto -> {
+                    boolean isAuthor = dto.resourceReport().getMember().getId().equals(currentMember.getId());
+                    return ResourceReportResponse.from(dto.resourceReport(), isAuthor);
+                })
                 .toList();
 
         return new ResourceReportsPageResponse(

@@ -63,7 +63,10 @@ public class LostReportService {
 
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
 
-        return LostReportResponse.of(lostReport, commentCount);
+        Member currentMember = memberUtil.getLoggedInMember();
+        boolean isAuthor = lostReport.getMember().getId().equals(currentMember.getId());
+
+        return LostReportResponse.of(lostReport, commentCount, isAuthor);
     }
 
     public LostReportsPageResponse getLostReports(Pageable pageable) {
@@ -83,8 +86,13 @@ public class LostReportService {
     }
 
     private LostReportsPageResponse createLostReportsPageResponse(Page<LostReportWithCommentCount> page) {
+        Member currentMember = memberUtil.getLoggedInMember();
+        
         List<LostReportResponse> reportResponses = page.getContent().stream()
-                .map(dto -> LostReportResponse.of(dto.lostReport(), dto.commentCount()))
+                .map(dto -> {
+                    boolean isAuthor = dto.lostReport().getMember().getId().equals(currentMember.getId());
+                    return LostReportResponse.of(dto.lostReport(), dto.commentCount(), isAuthor);
+                })
                 .toList();
 
         return new LostReportsPageResponse(
@@ -175,6 +183,7 @@ public class LostReportService {
         LostReport updatedReport = lostReportRepository.save(lostReport);
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
 
-        return LostReportResponse.of(updatedReport, commentCount);
+        boolean isAuthor = true; // 수정은 작성자만 가능하므로 항상 true
+        return LostReportResponse.of(updatedReport, commentCount, isAuthor);
     }
 }
