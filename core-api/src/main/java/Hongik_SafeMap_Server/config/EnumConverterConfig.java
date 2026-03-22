@@ -1,7 +1,6 @@
 package Hongik_SafeMap_Server.config;
 
-import Hongik_SafeMap_Server.vo.LostReportCategory;
-import Hongik_SafeMap_Server.vo.LostReportStatus;
+import Hongik_SafeMap_Server.vo.*;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
@@ -12,21 +11,43 @@ public class EnumConverterConfig implements WebMvcConfigurer {
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
+        // 실종신고 컨버터
         registry.addConverter(new LostReportCategoryConverter());
         registry.addConverter(new LostReportStatusConverter());
+
+        // 자원요청 컨버터
+        registry.addConverter(new ResourceReportTypeConverter());
+        registry.addConverter(new ResourceReportCategoryConverter());
+        registry.addConverter(new ResourceReportStatusConverter());
     }
 
     private static class LostReportCategoryConverter implements Converter<String, LostReportCategory> {
-        @Override
         public LostReportCategory convert(String source) {
             return LostReportCategory.fromDescription(source);
         }
     }
 
     private static class LostReportStatusConverter implements Converter<String, LostReportStatus> {
-        @Override
         public LostReportStatus convert(String source) {
             return LostReportStatus.fromDescription(source);
+        }
+    }
+
+    private static class ResourceReportTypeConverter implements Converter<String, ResourceReportType> {
+        public ResourceReportType convert(String source) {
+            return ResourceReportType.fromDescription(source);
+        }
+    }
+
+    private static class ResourceReportCategoryConverter implements Converter<String, ResourceReportCategory> {
+        public ResourceReportCategory convert(String source) {
+            return ResourceReportCategory.fromDescription(source);
+        }
+    }
+
+    private static class ResourceReportStatusConverter implements Converter<String, ResourceReportStatus> {
+        public ResourceReportStatus convert(String source) {
+            return ResourceReportStatus.fromDescription(source);
         }
     }
 }
