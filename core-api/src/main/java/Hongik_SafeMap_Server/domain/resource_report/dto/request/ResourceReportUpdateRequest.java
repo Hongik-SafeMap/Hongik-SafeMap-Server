@@ -19,7 +19,7 @@ public record ResourceReportUpdateRequest(
         @NotNull(message = "자원 요청 카테고리는 필수입니다")
         ResourceReportCategory category,
 
-        @Schema(description = "자원 요청 상태", example = "진행중")
+        @Schema(description = "자원 요청 상태", example = "진행 중")
         @NotNull(message = "자원 요청 상태는 필수입니다")
         ResourceReportStatus status,
 

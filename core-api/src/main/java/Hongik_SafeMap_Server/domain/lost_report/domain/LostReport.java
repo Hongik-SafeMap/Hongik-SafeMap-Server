@@ -77,7 +77,7 @@ public class LostReport {
         this.lastSeen = lastSeen;
         this.currentLocation = currentLocation;
         this.createdAt = LocalDateTime.now();
-        this.status = LostReportStatus.IN_PROGRESS;
+        this.status = LostReportStatus.SEARCHING;
         this.member = member;
         this.fileUrls = fileUrls != null ? new ArrayList<>(fileUrls) : new ArrayList<>();
     }

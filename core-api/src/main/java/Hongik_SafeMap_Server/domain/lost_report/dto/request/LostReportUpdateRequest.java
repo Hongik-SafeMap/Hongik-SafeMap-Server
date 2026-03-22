@@ -14,7 +14,7 @@ public record LostReportUpdateRequest(
         @NotNull(message = "카테고리는 필수입니다")
         LostReportCategory category,
 
-        @Schema(description = "상태", example = "진행중")
+        @Schema(description = "상태", example = "찾는 중")
         @NotNull(message = "상태는 필수입니다")
         LostReportStatus status,
 

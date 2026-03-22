@@ -37,7 +37,7 @@ public record LostReportResponse(
         @Schema(description = "작성 시각")
         LocalDateTime createdAt,
 
-        @Schema(description = "상태", example = "진행중")
+        @Schema(description = "상태", example = "찾는 중")
         LostReportStatus status,
 
         @Schema(description = "파일 URL 목록")
