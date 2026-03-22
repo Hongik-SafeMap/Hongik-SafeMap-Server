@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.domain.lost_report.domain.LostReport;
 import Hongik_SafeMap_Server.domain.lost_report.domain.LostReportComment;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
+import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
@@ -87,7 +88,7 @@ public class LostReportService {
 
     private LostReportsPageResponse createLostReportsPageResponse(Page<LostReportWithCommentCount> page) {
         Member currentMember = memberUtil.getLoggedInMember();
-        
+
         List<LostReportResponse> reportResponses = page.getContent().stream()
                 .map(dto -> {
                     boolean isAuthor = dto.lostReport().getMember().getId().equals(currentMember.getId());
@@ -183,7 +184,28 @@ public class LostReportService {
         LostReport updatedReport = lostReportRepository.save(lostReport);
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
 
-        boolean isAuthor = true; // 수정은 작성자만 가능하므로 항상 true
+        boolean isAuthor = true;
+        return LostReportResponse.of(updatedReport, commentCount, isAuthor);
+    }
+
+    @Transactional
+    public LostReportResponse updateStatus(Long id, LostReportStatusPatchRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+
+        LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
+
+        // 작성자 본인인지 확인
+        if (!lostReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException(ErrorMessage.REPORT_UPDATE_UNAUTHORIZED);
+        }
+
+        lostReport.updateStatus(request.status());
+
+        LostReport updatedReport = lostReportRepository.save(lostReport);
+        long commentCount = lostReportCommentRepository.countByLostReportId(id);
+
+        boolean isAuthor = true;
         return LostReportResponse.of(updatedReport, commentCount, isAuthor);
     }
 }

@@ -5,6 +5,7 @@ import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReport;
 import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReportComment;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
@@ -120,7 +121,7 @@ public class ResourceReportService {
         );
 
         ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
-        boolean isAuthor = true; // 수정은 작성자만 가능하므로 항상 true
+        boolean isAuthor = true;
         return ResourceReportResponse.from(updatedReport, isAuthor);
     }
 
@@ -174,7 +175,7 @@ public class ResourceReportService {
 
     private ResourceReportsPageResponse createResourceReportsPageResponse(Page<ResourceReportWithCommentCount> page) {
         Member currentMember = memberUtil.getLoggedInMember();
-        
+
         List<ResourceReportResponse> reportResponses = page.getContent().stream()
                 .map(dto -> {
                     boolean isAuthor = dto.resourceReport().getMember().getId().equals(currentMember.getId());
@@ -191,5 +192,24 @@ public class ResourceReportService {
                 page.isFirst(),
                 page.isLast()
         );
+    }
+
+    @Transactional
+    public ResourceReportResponse updateStatus(Long id, ResourceReportStatusPatchRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+
+        ResourceReport resourceReport = resourceReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
+
+        // 작성자 본인인지 확인
+        if (!resourceReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException(ErrorMessage.REPORT_UPDATE_UNAUTHORIZED);
+        }
+
+        resourceReport.updateStatus(request.status());
+
+        ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
+        boolean isAuthor = true;
+        return ResourceReportResponse.from(updatedReport, isAuthor);
     }
 }

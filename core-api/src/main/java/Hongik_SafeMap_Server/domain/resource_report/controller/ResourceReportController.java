@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.resource_report.controller;
 
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
@@ -89,6 +90,14 @@ public class ResourceReportController {
     public ResponseEntity<ResourceReportResponse> update(@PathVariable Long id,
                                                          @Valid @RequestBody ResourceReportUpdateRequest request) {
         ResourceReportResponse response = resourceReportService.update(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "자원 게시글 상태 변경", description = "자원 게시글 상태를 변경합니다. 작성자만 변경 가능합니다.")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ResourceReportResponse> updateStatus(@PathVariable Long id,
+                                                              @Valid @RequestBody ResourceReportStatusPatchRequest request) {
+        ResourceReportResponse response = resourceReportService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }
 

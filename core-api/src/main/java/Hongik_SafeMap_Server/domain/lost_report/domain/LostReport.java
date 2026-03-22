@@ -86,6 +86,10 @@ public class LostReport {
         this.deletedAt = LocalDateTime.now();
     }
 
+    public void updateStatus(LostReportStatus status) {
+        this.status = status;
+    }
+
     public void update(LostReportCategory category, LostReportStatus status, String title, String description, String age,
                        String characteristic, String lastSeen, String currentLocation, List<String> fileUrls) {
         this.category = category;
