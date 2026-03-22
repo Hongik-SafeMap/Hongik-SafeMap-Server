@@ -10,6 +10,8 @@ import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
+import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,10 +60,27 @@ public class DisasterReportService {
     }
 
     // 전체 제보 목록 (관리자 전체 제보/지도)
-    public DisasterReportPageResponse getAll(int page, int size) {
+    public DisasterReportPageResponse getAll(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<DisasterReportListResponse> pageResult = disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
-                .map(DisasterReportListResponse::of);
+        
+        Page<DisasterReportListResponse> pageResult;
+        if ((disasterTypes == null || disasterTypes.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
+            // 필터 없음 - 전체 조회
+            pageResult = disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (disasterTypes != null && !disasterTypes.isEmpty() && riskLevels != null && !riskLevels.isEmpty()) {
+            // 재난 유형과 긴급도 둘 다 필터링
+            pageResult = disasterReportRepository.findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(disasterTypes, riskLevels, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (disasterTypes != null && !disasterTypes.isEmpty()) {
+            // 재난 유형만 필터링
+            pageResult = disasterReportRepository.findByDisasterTypeInOrderByCreatedAtDesc(disasterTypes, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else {
+            // 긴급도만 필터링
+            pageResult = disasterReportRepository.findByRiskLevelInOrderByCreatedAtDesc(riskLevels, pageable)
+                    .map(DisasterReportListResponse::of);
+        }
         
         List<DisasterReportListResponse> reports = pageResult.getContent();
         

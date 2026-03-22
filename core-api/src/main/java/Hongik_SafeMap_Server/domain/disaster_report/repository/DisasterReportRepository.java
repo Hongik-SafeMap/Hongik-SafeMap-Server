@@ -4,6 +4,8 @@ import Hongik_SafeMap_Server.domain.admin.member.dto.AdminMemberResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
+import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.vo.RiskLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +29,15 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
 
     // 관리자 제보 검토 - 상태별 조회(승인/블라인드/허위)
     Page<DisasterReport> findByStatusOrderByCreatedAtDesc(DisasterReportStatus status, Pageable pageable);
+
+    // 재난 유형별 필터링 조회
+    Page<DisasterReport> findByDisasterTypeInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, Pageable pageable);
+
+    // 긴급도별 필터링 조회
+    Page<DisasterReport> findByRiskLevelInOrderByCreatedAtDesc(List<RiskLevel> riskLevels, Pageable pageable);
+
+    // 재난 유형과 긴급도 모두 필터링 조회
+    Page<DisasterReport> findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, Pageable pageable);
 
     @Query("""
     select new Hongik_SafeMap_Server.domain.admin.member.dto.AdminMemberResponse(

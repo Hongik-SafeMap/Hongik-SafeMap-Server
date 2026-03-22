@@ -4,11 +4,15 @@ import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCr
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
+import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,8 +36,10 @@ public class DisasterReportController {
     // 전체 제보 목록 조회 (지도/관리자 제보검토용)
     @GetMapping
     public ResponseEntity<DisasterReportPageResponse> getAll(
+            @RequestParam(required = false) List<DisasterType> disasterTypes,
+            @RequestParam(required = false) List<RiskLevel> riskLevels,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(disasterReportService.getAll(page, size));
+        return ResponseEntity.ok(disasterReportService.getAll(disasterTypes, riskLevels, page, size));
     }
 }
