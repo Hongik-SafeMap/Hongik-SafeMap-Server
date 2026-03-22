@@ -45,14 +45,14 @@ public class DisasterReport extends BaseTimeEntity {
     @Column(length = 255)
     private String address;
 
-    // 미디어 URL 목록
+    // 파일 URL 목록
     @ElementCollection
     @CollectionTable(
-            name = "disaster_report_media",
+            name = "disaster_report_file",
             joinColumns = @JoinColumn(name = "disaster_report_id")
     )
-    @Column(name = "media_url", length = 2048)
-    private List<String> mediaUrls = new ArrayList<>();
+    @Column(name = "file_url", length = 2048)
+    private List<String> fileUrls = new ArrayList<>();
 
     // 제보 처리 상태(관리자 검토/조치)
     @Enumerated(EnumType.STRING)
@@ -71,7 +71,7 @@ public class DisasterReport extends BaseTimeEntity {
             Double latitude,
             Double longitude,
             String address,
-            List<String> mediaUrls,
+            List<String> fileUrls,
             DisasterReportStatus status,
             Member member
     ) {
@@ -81,7 +81,7 @@ public class DisasterReport extends BaseTimeEntity {
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
-        this.mediaUrls = (mediaUrls == null) ? new ArrayList<>() : mediaUrls;
+        this.fileUrls = (fileUrls == null) ? new ArrayList<>() : fileUrls;
         this.status = (status == null) ? DisasterReportStatus.PENDING : status;
         this.member = member;
     }

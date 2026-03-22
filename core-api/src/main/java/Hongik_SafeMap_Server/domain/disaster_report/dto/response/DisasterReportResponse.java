@@ -16,7 +16,7 @@ public record DisasterReportResponse(
         Double latitude,
         Double longitude,
         String address,
-        List<String> mediaUrls,
+        List<String> fileUrls,
         DisasterReportStatus status,
         LocalDateTime createdAt,
         Long memberId
@@ -30,7 +30,7 @@ public record DisasterReportResponse(
                 dr.getLatitude(),
                 dr.getLongitude(),
                 dr.getAddress(),
-                dr.getMediaUrls(),
+                dr.getFileUrls(),
                 dr.getStatus(),
                 dr.getCreatedAt(),
                 dr.getMember().getId()

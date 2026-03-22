@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,18 +35,16 @@ public class LostReportController {
             @RequestParam(required = false) LostReportStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         LostReportsPageResponse response;
         
         if (category != null && status != null) {
-            response = lostReportService.getLostReportsByCategoryAndStatus(category, status, pageable);
+            response = lostReportService.getLostReportsByCategoryAndStatus(category, status, page, size);
         } else if (category != null) {
-            response = lostReportService.getLostReportsByCategory(category, pageable);
+            response = lostReportService.getLostReportsByCategory(category, page, size);
         } else if (status != null) {
-            response = lostReportService.getLostReportsByStatus(status, pageable);
+            response = lostReportService.getLostReportsByStatus(status, page, size);
         } else {
-            response = lostReportService.getLostReports(pageable);
+            response = lostReportService.getLostReports(page, size);
         }
         
         return ResponseEntity.ok(response);

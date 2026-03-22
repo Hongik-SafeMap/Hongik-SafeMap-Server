@@ -1,14 +1,11 @@
 package Hongik_SafeMap_Server.domain.disaster_report.controller;
 
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +31,9 @@ public class DisasterReportController {
 
     // 전체 제보 목록 조회 (지도/관리자 제보검토용)
     @GetMapping
-    public ResponseEntity<Page<DisasterReportListResponse>> getAll(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(disasterReportService.getAll(pageable));
+    public ResponseEntity<DisasterReportPageResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(disasterReportService.getAll(page, size));
     }
 }

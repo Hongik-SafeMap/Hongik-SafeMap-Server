@@ -7,8 +7,6 @@ import Hongik_SafeMap_Server.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +26,10 @@ public class MemberController {
 
     // 내 제보 조회
     @GetMapping("/me/reports")
-    public ResponseEntity<Page<DisasterReportListResponse>> getMyReports(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(memberService.getMyReports(pageable));
+    public ResponseEntity<Page<DisasterReportListResponse>> getMyReports(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(memberService.getMyReports(page, size));
     }
 
     // 비밀번호 변경

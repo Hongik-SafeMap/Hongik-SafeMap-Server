@@ -26,5 +26,5 @@ public record DisasterReportCreateRequest(
         @Size(max = 255)
         String address,
 
-        List<String> mediaUrls
+        List<String> fileUrls
         ) {}
