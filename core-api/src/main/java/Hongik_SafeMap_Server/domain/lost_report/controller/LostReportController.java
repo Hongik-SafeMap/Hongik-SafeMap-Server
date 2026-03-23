@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.lost_report.controller;
 
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
+import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportResponse;
@@ -14,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,18 +35,16 @@ public class LostReportController {
             @RequestParam(required = false) LostReportStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         LostReportsPageResponse response;
         
         if (category != null && status != null) {
-            response = lostReportService.getLostReportsByCategoryAndStatus(category, status, pageable);
+            response = lostReportService.getLostReportsByCategoryAndStatus(category, status, page, size);
         } else if (category != null) {
-            response = lostReportService.getLostReportsByCategory(category, pageable);
+            response = lostReportService.getLostReportsByCategory(category, page, size);
         } else if (status != null) {
-            response = lostReportService.getLostReportsByStatus(status, pageable);
+            response = lostReportService.getLostReportsByStatus(status, page, size);
         } else {
-            response = lostReportService.getLostReports(pageable);
+            response = lostReportService.getLostReports(page, size);
         }
         
         return ResponseEntity.ok(response);
@@ -86,6 +84,14 @@ public class LostReportController {
     public ResponseEntity<LostReportResponse> update(@PathVariable Long id,
                                                    @Valid @RequestBody LostReportUpdateRequest request) {
         LostReportResponse response = lostReportService.update(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "실종 신고 상태 변경", description = "실종신고 상태를 변경합니다. 작성자만 변경 가능합니다.")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<LostReportResponse> updateStatus(@PathVariable Long id,
+                                                          @Valid @RequestBody LostReportStatusPatchRequest request) {
+        LostReportResponse response = lostReportService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }
 

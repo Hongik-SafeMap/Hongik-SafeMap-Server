@@ -15,7 +15,7 @@ public class PresignedUrlRequest {
     private String fileName;
 
     @NotBlank(message = "파일 타입은 필수입니다.")
-    @Pattern(regexp = "^image/(jpeg|jpg|png|gif|webp)$", 
-             message = "이미지 파일만 업로드 가능합니다. (jpeg, jpg, png, gif, webp)")
+    @Pattern(regexp = "^(image/(jpeg|jpg|png|gif|webp)|video/(mp4|avi|mov|wmv|flv|webm))$", 
+             message = "이미지 및 영상 파일만 업로드 가능합니다. (이미지: jpeg, jpg, png, gif, webp / 영상: mp4, avi, mov, wmv, flv, webm)")
     private String contentType;
 }

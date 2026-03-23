@@ -8,9 +8,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum LostReportStatus implements EnumUtil.DescriptionProvider {
-    IN_PROGRESS("진행중"),
-    WAITING("대기중"),
-    RESOLVED("해결됨");
+    SEARCHING("찾는 중"),
+    FOUND("발견됨");
 
     @JsonValue
     private final String description;

@@ -10,7 +10,6 @@ import Hongik_SafeMap_Server.exception.MemberException;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +31,9 @@ public class MemberService {
         return MyPageResponse.of(member);
     }
 
-    public Page<DisasterReportListResponse> getMyReports(Pageable pageable) {
+    public Page<DisasterReportListResponse> getMyReports(int page, int size) {
         Member member = memberUtil.getLoggedInMember();
-        return disasterReportService.getMyReports(pageable);
+        return disasterReportService.getMyReports(page, size);
     }
 
     @Transactional
@@ -42,12 +41,12 @@ public class MemberService {
         Member member = memberUtil.getLoggedInMember();
 
         // 현재 비밀번호 일치 검증
-        if(!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
             throw new MemberException(INVALID_CURRENT_PASSWORD);
         }
 
         // 새 비밀번호가 현재 비밀번호와 다른지 검증
-        if(request.currentPassword().equals(request.newPassword())){
+        if (request.currentPassword().equals(request.newPassword())) {
             throw new MemberException(PASSWORD_SAME_AS_OLD);
         }
 

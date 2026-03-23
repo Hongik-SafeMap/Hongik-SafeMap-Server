@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.domain.lost_report.domain.LostReport;
 import Hongik_SafeMap_Server.domain.lost_report.domain.LostReportComment;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportCreateRequest;
+import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.request.LostReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentResponse;
 import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportCommentsResponse;
@@ -20,7 +21,9 @@ import Hongik_SafeMap_Server.vo.LostReportCategory;
 import Hongik_SafeMap_Server.vo.LostReportStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,28 +66,40 @@ public class LostReportService {
 
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
 
-        return LostReportResponse.of(lostReport, commentCount);
+        Member currentMember = memberUtil.getLoggedInMember();
+        boolean isAuthor = lostReport.getMember().getId().equals(currentMember.getId());
+
+        return LostReportResponse.of(lostReport, commentCount, isAuthor);
     }
 
-    public LostReportsPageResponse getLostReports(Pageable pageable) {
+    public LostReportsPageResponse getLostReports(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createLostReportsPageResponse(lostReportRepository.findAllWithCommentCount(pageable));
     }
 
-    public LostReportsPageResponse getLostReportsByCategory(LostReportCategory category, Pageable pageable) {
+    public LostReportsPageResponse getLostReportsByCategory(LostReportCategory category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createLostReportsPageResponse(lostReportRepository.findByCategoryWithCommentCount(category, pageable));
     }
 
-    public LostReportsPageResponse getLostReportsByStatus(LostReportStatus status, Pageable pageable) {
+    public LostReportsPageResponse getLostReportsByStatus(LostReportStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createLostReportsPageResponse(lostReportRepository.findByStatusWithCommentCount(status, pageable));
     }
 
-    public LostReportsPageResponse getLostReportsByCategoryAndStatus(LostReportCategory category, LostReportStatus status, Pageable pageable) {
+    public LostReportsPageResponse getLostReportsByCategoryAndStatus(LostReportCategory category, LostReportStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createLostReportsPageResponse(lostReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
     }
 
     private LostReportsPageResponse createLostReportsPageResponse(Page<LostReportWithCommentCount> page) {
+        Member currentMember = memberUtil.getLoggedInMember();
+
         List<LostReportResponse> reportResponses = page.getContent().stream()
-                .map(dto -> LostReportResponse.of(dto.lostReport(), dto.commentCount()))
+                .map(dto -> {
+                    boolean isAuthor = dto.lostReport().getMember().getId().equals(currentMember.getId());
+                    return LostReportResponse.of(dto.lostReport(), dto.commentCount(), isAuthor);
+                })
                 .toList();
 
         return new LostReportsPageResponse(
@@ -175,6 +190,28 @@ public class LostReportService {
         LostReport updatedReport = lostReportRepository.save(lostReport);
         long commentCount = lostReportCommentRepository.countByLostReportId(id);
 
-        return LostReportResponse.of(updatedReport, commentCount);
+        boolean isAuthor = true;
+        return LostReportResponse.of(updatedReport, commentCount, isAuthor);
+    }
+
+    @Transactional
+    public LostReportResponse updateStatus(Long id, LostReportStatusPatchRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+
+        LostReport lostReport = lostReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new LostReportException(LOST_REPORT_NOT_FOUND));
+
+        // 작성자 본인인지 확인
+        if (!lostReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException(ErrorMessage.REPORT_UPDATE_UNAUTHORIZED);
+        }
+
+        lostReport.updateStatus(request.status());
+
+        LostReport updatedReport = lostReportRepository.save(lostReport);
+        long commentCount = lostReportCommentRepository.countByLostReportId(id);
+
+        boolean isAuthor = true;
+        return LostReportResponse.of(updatedReport, commentCount, isAuthor);
     }
 }

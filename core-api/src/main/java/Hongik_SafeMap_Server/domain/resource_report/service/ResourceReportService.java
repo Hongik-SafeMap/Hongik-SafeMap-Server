@@ -5,6 +5,7 @@ import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReport;
 import Hongik_SafeMap_Server.domain.resource_report.domain.ResourceReportComment;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
@@ -21,7 +22,9 @@ import Hongik_SafeMap_Server.vo.ResourceReportStatus;
 import Hongik_SafeMap_Server.vo.ResourceReportType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +61,12 @@ public class ResourceReportService {
         ResourceReport resourceReport = resourceReportRepository.findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
 
-        return ResourceReportResponse.from(resourceReport);
+        Member currentMember = memberUtil.getLoggedInMember();
+        boolean isAuthor = resourceReport.getMember().getId().equals(currentMember.getId());
+        
+        long commentCount = resourceReportCommentRepository.countByResourceReportId(id);
+
+        return ResourceReportResponse.from(resourceReport, commentCount, isAuthor);
     }
 
     @Transactional
@@ -117,7 +125,9 @@ public class ResourceReportService {
         );
 
         ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
-        return ResourceReportResponse.from(updatedReport);
+        boolean isAuthor = true;
+        long commentCount = resourceReportCommentRepository.countByResourceReportId(id);
+        return ResourceReportResponse.from(updatedReport, commentCount, isAuthor);
     }
 
     @Transactional
@@ -136,41 +146,54 @@ public class ResourceReportService {
         resourceReportRepository.save(resourceReport);
     }
 
-    public ResourceReportsPageResponse getResourceReports(Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReports(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findAllWithCommentCount(pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByType(ResourceReportType type, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByType(ResourceReportType type, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByTypeWithCommentCount(type, pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByCategory(ResourceReportCategory category, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByCategory(ResourceReportCategory category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByCategoryWithCommentCount(category, pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByStatus(ResourceReportStatus status, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByStatus(ResourceReportStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByStatusWithCommentCount(status, pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByTypeAndCategory(ResourceReportType type, ResourceReportCategory category, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByTypeAndCategory(ResourceReportType type, ResourceReportCategory category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryWithCommentCount(type, category, pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByTypeAndStatus(ResourceReportType type, ResourceReportStatus status, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByTypeAndStatus(ResourceReportType type, ResourceReportStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndStatusWithCommentCount(type, status, pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByCategoryAndStatus(ResourceReportCategory category, ResourceReportStatus status, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByCategoryAndStatus(ResourceReportCategory category, ResourceReportStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
     }
 
-    public ResourceReportsPageResponse getResourceReportsByTypeAndCategoryAndStatus(ResourceReportType type, ResourceReportCategory category, ResourceReportStatus status, Pageable pageable) {
+    public ResourceReportsPageResponse getResourceReportsByTypeAndCategoryAndStatus(ResourceReportType type, ResourceReportCategory category, ResourceReportStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryAndStatusWithCommentCount(type, category, status, pageable));
     }
 
     private ResourceReportsPageResponse createResourceReportsPageResponse(Page<ResourceReportWithCommentCount> page) {
+        Member currentMember = memberUtil.getLoggedInMember();
+
         List<ResourceReportResponse> reportResponses = page.getContent().stream()
-                .map(dto -> ResourceReportResponse.from(dto.resourceReport()))
+                .map(dto -> {
+                    boolean isAuthor = dto.resourceReport().getMember().getId().equals(currentMember.getId());
+                    return ResourceReportResponse.from(dto.resourceReport(), dto.commentCount(), isAuthor);
+                })
                 .toList();
 
         return new ResourceReportsPageResponse(
@@ -182,5 +205,25 @@ public class ResourceReportService {
                 page.isFirst(),
                 page.isLast()
         );
+    }
+
+    @Transactional
+    public ResourceReportResponse updateStatus(Long id, ResourceReportStatusPatchRequest request) {
+        Member member = memberUtil.getLoggedInMember();
+
+        ResourceReport resourceReport = resourceReportRepository.findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new ResourceReportException(ErrorMessage.RESOURCE_REPORT_NOT_FOUND));
+
+        // 작성자 본인인지 확인
+        if (!resourceReport.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException(ErrorMessage.REPORT_UPDATE_UNAUTHORIZED);
+        }
+
+        resourceReport.updateStatus(request.status());
+
+        ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
+        boolean isAuthor = true;
+        long commentCount = resourceReportCommentRepository.countByResourceReportId(id);
+        return ResourceReportResponse.from(updatedReport, commentCount, isAuthor);
     }
 }

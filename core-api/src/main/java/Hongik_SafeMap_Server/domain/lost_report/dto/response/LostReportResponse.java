@@ -37,7 +37,7 @@ public record LostReportResponse(
         @Schema(description = "작성 시각")
         LocalDateTime createdAt,
 
-        @Schema(description = "상태", example = "진행중")
+        @Schema(description = "상태", example = "찾는 중")
         LostReportStatus status,
 
         @Schema(description = "파일 URL 목록")
@@ -50,9 +50,12 @@ public record LostReportResponse(
         String memberName,
 
         @Schema(description = "댓글 개수", example = "5")
-        long commentCount
+        long commentCount,
+
+        @Schema(description = "작성자 여부", example = "true")
+        boolean isAuthor
 ) {
-    public static LostReportResponse of(LostReport lostReport, long commentCount) {
+    public static LostReportResponse of(LostReport lostReport, long commentCount, boolean isAuthor) {
         return new LostReportResponse(
                 lostReport.getId(),
                 lostReport.getCategory(),
@@ -67,7 +70,8 @@ public record LostReportResponse(
                 lostReport.getFileUrls(),
                 lostReport.getMember().getId(),
                 lostReport.getMember().getName(),
-                commentCount
+                commentCount,
+                isAuthor
         );
     }
 }

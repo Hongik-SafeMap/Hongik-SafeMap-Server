@@ -77,13 +77,17 @@ public class LostReport {
         this.lastSeen = lastSeen;
         this.currentLocation = currentLocation;
         this.createdAt = LocalDateTime.now();
-        this.status = LostReportStatus.IN_PROGRESS;
+        this.status = LostReportStatus.SEARCHING;
         this.member = member;
         this.fileUrls = fileUrls != null ? new ArrayList<>(fileUrls) : new ArrayList<>();
     }
 
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(LostReportStatus status) {
+        this.status = status;
     }
 
     public void update(LostReportCategory category, LostReportStatus status, String title, String description, String age,

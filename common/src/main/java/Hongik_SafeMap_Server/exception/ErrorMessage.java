@@ -16,7 +16,7 @@ public class ErrorMessage {
 
     // Auth
     public static final String INVALID_REFRESH_TOKEN = "유효하지 않은 Refresh Token입니다.";
-    public static final String REFRESH_TOKEN_DOES_NOT_MATCH = "Rfresh token이 일치하지 않습니다.";
+    public static final String REFRESH_TOKEN_DOES_NOT_MATCH = "Refresh token이 일치하지 않습니다.";
 
     // DisasterReport
     public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
@@ -25,7 +25,7 @@ public class ErrorMessage {
     public static final String LOST_REPORT_NOT_FOUND = "해당 id를 가진 실종신고를 찾을 수 없습니다.";
 
     // ResourceReport
-    public static final String RESOURCE_REPORT_NOT_FOUND = "자원 게시글을 찾을 수 없습니다.";
+    public static final String RESOURCE_REPORT_NOT_FOUND = "해당 id를 가진 자원 게시글을 찾을 수 없습니다.";
 
     // 게시물 공통
     public static final String REPORT_DELETE_UNAUTHORIZED = "본인이 작성한 게시물만 삭제할 수 있습니다";

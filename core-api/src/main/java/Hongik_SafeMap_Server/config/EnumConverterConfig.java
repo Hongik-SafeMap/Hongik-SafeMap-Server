@@ -19,6 +19,10 @@ public class EnumConverterConfig implements WebMvcConfigurer {
         registry.addConverter(new ResourceReportTypeConverter());
         registry.addConverter(new ResourceReportCategoryConverter());
         registry.addConverter(new ResourceReportStatusConverter());
+
+        // 재난제보 컨버터
+        registry.addConverter(new DisasterTypeConverter());
+        registry.addConverter(new RiskLevelConverter());
     }
 
     private static class LostReportCategoryConverter implements Converter<String, LostReportCategory> {
@@ -48,6 +52,18 @@ public class EnumConverterConfig implements WebMvcConfigurer {
     private static class ResourceReportStatusConverter implements Converter<String, ResourceReportStatus> {
         public ResourceReportStatus convert(String source) {
             return ResourceReportStatus.fromDescription(source);
+        }
+    }
+
+    private static class DisasterTypeConverter implements Converter<String, DisasterType> {
+        public DisasterType convert(String source) {
+            return DisasterType.fromDescription(source);
+        }
+    }
+
+    private static class RiskLevelConverter implements Converter<String, RiskLevel> {
+        public RiskLevel convert(String source) {
+            return RiskLevel.fromDescription(source);
         }
     }
 }

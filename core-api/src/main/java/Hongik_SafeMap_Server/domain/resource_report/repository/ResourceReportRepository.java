@@ -19,35 +19,35 @@ public interface ResourceReportRepository extends JpaRepository<ResourceReport, 
 
     // 댓글 개수와 함께 전체 목록 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findAllWithCommentCount(Pageable pageable);
 
     // 댓글 개수와 함께 유형별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.type = :type " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByTypeWithCommentCount(@Param("type") ResourceReportType type, Pageable pageable);
 
     // 댓글 개수와 함께 카테고리별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.category = :category " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByCategoryWithCommentCount(@Param("category") ResourceReportCategory category, Pageable pageable);
 
     // 댓글 개수와 함께 상태별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.status = :status " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByStatusWithCommentCount(@Param("status") ResourceReportStatus status, Pageable pageable);
 
     // 댓글 개수와 함께 유형 + 카테고리별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.type = :type AND rr.category = :category " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByTypeAndCategoryWithCommentCount(
@@ -57,7 +57,7 @@ public interface ResourceReportRepository extends JpaRepository<ResourceReport, 
 
     // 댓글 개수와 함께 유형 + 상태별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.type = :type AND rr.status = :status " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByTypeAndStatusWithCommentCount(
@@ -67,7 +67,7 @@ public interface ResourceReportRepository extends JpaRepository<ResourceReport, 
 
     // 댓글 개수와 함께 카테고리 + 상태별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.category = :category AND rr.status = :status " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByCategoryAndStatusWithCommentCount(
@@ -77,7 +77,7 @@ public interface ResourceReportRepository extends JpaRepository<ResourceReport, 
 
     // 댓글 개수와 함께 유형 + 카테고리 + 상태별 조회 (삭제되지 않은 것만, 최신순, 페이징)
     @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
-            "FROM ResourceReport rr LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
             "WHERE rr.deletedAt IS NULL AND rr.type = :type AND rr.category = :category AND rr.status = :status " +
             "GROUP BY rr")
     Page<ResourceReportWithCommentCount> findByTypeAndCategoryAndStatusWithCommentCount(
@@ -87,6 +87,6 @@ public interface ResourceReportRepository extends JpaRepository<ResourceReport, 
             Pageable pageable);
 
     // 삭제되지 않은 게시물만 조회
-    @Query("SELECT rr FROM ResourceReport rr WHERE rr.id = :id AND rr.deletedAt IS NULL")
+    @Query("SELECT rr FROM ResourceReport rr LEFT JOIN FETCH rr.member WHERE rr.id = :id AND rr.deletedAt IS NULL")
     Optional<ResourceReport> findByIdAndNotDeleted(@Param("id") Long id);
 }

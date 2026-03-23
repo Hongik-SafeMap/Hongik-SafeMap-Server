@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.resource_report.controller;
 
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCommentCreateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportCreateRequest;
+import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportStatusPatchRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.request.ResourceReportUpdateRequest;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportCommentsResponse;
 import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportResponse;
@@ -15,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,26 +37,24 @@ public class ResourceReportController {
             @RequestParam(required = false) ResourceReportStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         ResourceReportsPageResponse response;
         
         if (type != null && category != null && status != null) {
-            response = resourceReportService.getResourceReportsByTypeAndCategoryAndStatus(type, category, status, pageable);
+            response = resourceReportService.getResourceReportsByTypeAndCategoryAndStatus(type, category, status, page, size);
         } else if (type != null && category != null) {
-            response = resourceReportService.getResourceReportsByTypeAndCategory(type, category, pageable);
+            response = resourceReportService.getResourceReportsByTypeAndCategory(type, category, page, size);
         } else if (type != null && status != null) {
-            response = resourceReportService.getResourceReportsByTypeAndStatus(type, status, pageable);
+            response = resourceReportService.getResourceReportsByTypeAndStatus(type, status, page, size);
         } else if (category != null && status != null) {
-            response = resourceReportService.getResourceReportsByCategoryAndStatus(category, status, pageable);
+            response = resourceReportService.getResourceReportsByCategoryAndStatus(category, status, page, size);
         } else if (type != null) {
-            response = resourceReportService.getResourceReportsByType(type, pageable);
+            response = resourceReportService.getResourceReportsByType(type, page, size);
         } else if (category != null) {
-            response = resourceReportService.getResourceReportsByCategory(category, pageable);
+            response = resourceReportService.getResourceReportsByCategory(category, page, size);
         } else if (status != null) {
-            response = resourceReportService.getResourceReportsByStatus(status, pageable);
+            response = resourceReportService.getResourceReportsByStatus(status, page, size);
         } else {
-            response = resourceReportService.getResourceReports(pageable);
+            response = resourceReportService.getResourceReports(page, size);
         }
         
         return ResponseEntity.ok(response);
@@ -89,6 +87,14 @@ public class ResourceReportController {
     public ResponseEntity<ResourceReportResponse> update(@PathVariable Long id,
                                                          @Valid @RequestBody ResourceReportUpdateRequest request) {
         ResourceReportResponse response = resourceReportService.update(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "자원 게시글 상태 변경", description = "자원 게시글 상태를 변경합니다. 작성자만 변경 가능합니다.")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ResourceReportResponse> updateStatus(@PathVariable Long id,
+                                                              @Valid @RequestBody ResourceReportStatusPatchRequest request) {
+        ResourceReportResponse response = resourceReportService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }
 
