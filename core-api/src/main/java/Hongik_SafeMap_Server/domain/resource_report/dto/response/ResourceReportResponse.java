@@ -38,13 +38,19 @@ public record ResourceReportResponse(
         @Schema(description = "파일 URL 목록")
         List<String> fileUrls,
 
+        @Schema(description = "회원 ID", example = "1")
+        Long memberId,
+
         @Schema(description = "회원 이름")
         String memberName,
+
+        @Schema(description = "댓글 개수", example = "5")
+        long commentCount,
 
         @Schema(description = "작성자 여부", example = "true")
         boolean isAuthor
 ) {
-    public static ResourceReportResponse from(ResourceReport resourceReport, boolean isAuthor) {
+    public static ResourceReportResponse from(ResourceReport resourceReport, long commentCount, boolean isAuthor) {
         return new ResourceReportResponse(
                 resourceReport.getId(),
                 resourceReport.getType(),
@@ -55,7 +61,9 @@ public record ResourceReportResponse(
                 resourceReport.getStatus(),
                 resourceReport.getCreatedAt(),
                 resourceReport.getFileUrls(),
+                resourceReport.getMember().getId(),
                 resourceReport.getMember().getName(),
+                commentCount,
                 isAuthor
         );
     }

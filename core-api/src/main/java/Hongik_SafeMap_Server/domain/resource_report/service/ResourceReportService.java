@@ -63,8 +63,10 @@ public class ResourceReportService {
 
         Member currentMember = memberUtil.getLoggedInMember();
         boolean isAuthor = resourceReport.getMember().getId().equals(currentMember.getId());
+        
+        long commentCount = resourceReportCommentRepository.countByResourceReportId(id);
 
-        return ResourceReportResponse.from(resourceReport, isAuthor);
+        return ResourceReportResponse.from(resourceReport, commentCount, isAuthor);
     }
 
     @Transactional
@@ -124,7 +126,8 @@ public class ResourceReportService {
 
         ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
         boolean isAuthor = true;
-        return ResourceReportResponse.from(updatedReport, isAuthor);
+        long commentCount = resourceReportCommentRepository.countByResourceReportId(id);
+        return ResourceReportResponse.from(updatedReport, commentCount, isAuthor);
     }
 
     @Transactional
@@ -189,7 +192,7 @@ public class ResourceReportService {
         List<ResourceReportResponse> reportResponses = page.getContent().stream()
                 .map(dto -> {
                     boolean isAuthor = dto.resourceReport().getMember().getId().equals(currentMember.getId());
-                    return ResourceReportResponse.from(dto.resourceReport(), isAuthor);
+                    return ResourceReportResponse.from(dto.resourceReport(), dto.commentCount(), isAuthor);
                 })
                 .toList();
 
@@ -220,6 +223,7 @@ public class ResourceReportService {
 
         ResourceReport updatedReport = resourceReportRepository.save(resourceReport);
         boolean isAuthor = true;
-        return ResourceReportResponse.from(updatedReport, isAuthor);
+        long commentCount = resourceReportCommentRepository.countByResourceReportId(id);
+        return ResourceReportResponse.from(updatedReport, commentCount, isAuthor);
     }
 }
