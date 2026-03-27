@@ -1,11 +1,11 @@
 package Hongik_SafeMap_Server.domain.disaster_report.controller;
 
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportEvaluationRequest;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
-import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.validation.Valid;
@@ -46,20 +46,20 @@ public class DisasterReportController {
     }
 
     // 제보 평가하기
-    @PostMapping("/{reportId}/evaluations/{evaluationType}")
+    @PostMapping("/{reportId}/evaluations")
     public ResponseEntity<Void> createReportEvaluation(
             @PathVariable("reportId") Long reportId,
-            @PathVariable("evaluationType") DisasterReportEvaluationType evaluationType) {
-        disasterReportService.evaluateReport(reportId, evaluationType);
+            @Valid @RequestBody DisasterReportEvaluationRequest request) {
+        disasterReportService.evaluateReport(reportId, request.evaluationType());
         return ResponseEntity.noContent().build();
     }
 
     // 제보 평가 취소하기
-    @DeleteMapping("/{reportId}/evaluations/{evaluationType}")
+    @DeleteMapping("/{reportId}/evaluations")
     public ResponseEntity<Void> deleteReportEvaluation(
             @PathVariable("reportId") Long reportId,
-            @PathVariable("evaluationType") DisasterReportEvaluationType evaluationType) {
-        disasterReportService.deleteEvaluation(reportId, evaluationType);
+            @Valid @RequestBody DisasterReportEvaluationRequest request) {
+        disasterReportService.deleteEvaluation(reportId, request.evaluationType());
         return ResponseEntity.noContent().build();
     }
 
