@@ -1,9 +1,11 @@
 package Hongik_SafeMap_Server.domain.disaster_report.controller;
 
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
+import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.validation.Valid;
@@ -33,7 +35,7 @@ public class DisasterReportController {
         return ResponseEntity.ok(disasterReportService.getById(reportId));
     }
 
-    // 전체 제보 목록 조회 (지도/관리자 제보검토용)
+    // 전체 제보 목록 조회 (관리자 제보검토용)
     @GetMapping
     public ResponseEntity<DisasterReportPageResponse> getAll(
             @RequestParam(required = false) List<DisasterType> disasterTypes,
@@ -41,5 +43,29 @@ public class DisasterReportController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(disasterReportService.getAll(disasterTypes, riskLevels, page, size));
+    }
+
+    // 제보 평가하기
+    @PostMapping("/{reportId}/evaluations/{evaluationType}")
+    public ResponseEntity<Void> createReportEvaluation(
+            @PathVariable Long reportId,
+            @PathVariable DisasterReportEvaluationType evaluationType) {
+        disasterReportService.evaluateReport(reportId, evaluationType);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 제보 평가 취소하기
+    @DeleteMapping("/{reportId}/evaluations/{evaluationType}")
+    public ResponseEntity<Void> deleteReportEvaluation(
+            @PathVariable Long reportId,
+            @PathVariable DisasterReportEvaluationType evaluationType) {
+        disasterReportService.deleteEvaluation(reportId, evaluationType);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 제보 평가 조회
+    @GetMapping("/{reportId}/evaluations")
+    public ResponseEntity<DisasterReportEvaluationResponse> getReportEvaluation(@PathVariable Long reportId) {
+        return ResponseEntity.ok(disasterReportService.getReportEvaluation(reportId));
     }
 }
