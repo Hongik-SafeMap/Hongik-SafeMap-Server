@@ -31,25 +31,25 @@ public class DisasterReportController {
 
     // 제보 조회(일반, 관리자 공용)
     @GetMapping("/{reportId}")
-    public ResponseEntity<DisasterReportResponse> getById(@PathVariable Long reportId) {
+    public ResponseEntity<DisasterReportResponse> getById(@PathVariable("reportId") Long reportId) {
         return ResponseEntity.ok(disasterReportService.getById(reportId));
     }
 
     // 전체 제보 목록 조회 (관리자 제보검토용)
     @GetMapping
     public ResponseEntity<DisasterReportPageResponse> getAll(
-            @RequestParam(required = false) List<DisasterType> disasterTypes,
-            @RequestParam(required = false) List<RiskLevel> riskLevels,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(value = "disasterTypes", required = false) List<DisasterType> disasterTypes,
+            @RequestParam(value = "riskLevels", required = false) List<RiskLevel> riskLevels,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         return ResponseEntity.ok(disasterReportService.getAll(disasterTypes, riskLevels, page, size));
     }
 
     // 제보 평가하기
     @PostMapping("/{reportId}/evaluations/{evaluationType}")
     public ResponseEntity<Void> createReportEvaluation(
-            @PathVariable Long reportId,
-            @PathVariable DisasterReportEvaluationType evaluationType) {
+            @PathVariable("reportId") Long reportId,
+            @PathVariable("evaluationType") DisasterReportEvaluationType evaluationType) {
         disasterReportService.evaluateReport(reportId, evaluationType);
         return ResponseEntity.noContent().build();
     }
@@ -57,15 +57,15 @@ public class DisasterReportController {
     // 제보 평가 취소하기
     @DeleteMapping("/{reportId}/evaluations/{evaluationType}")
     public ResponseEntity<Void> deleteReportEvaluation(
-            @PathVariable Long reportId,
-            @PathVariable DisasterReportEvaluationType evaluationType) {
+            @PathVariable("reportId") Long reportId,
+            @PathVariable("evaluationType") DisasterReportEvaluationType evaluationType) {
         disasterReportService.deleteEvaluation(reportId, evaluationType);
         return ResponseEntity.noContent().build();
     }
 
     // 제보 평가 조회
     @GetMapping("/{reportId}/evaluations")
-    public ResponseEntity<DisasterReportEvaluationResponse> getReportEvaluation(@PathVariable Long reportId) {
+    public ResponseEntity<DisasterReportEvaluationResponse> getReportEvaluation(@PathVariable("reportId") Long reportId) {
         return ResponseEntity.ok(disasterReportService.getReportEvaluation(reportId));
     }
 }
