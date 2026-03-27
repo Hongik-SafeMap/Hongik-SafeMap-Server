@@ -243,10 +243,15 @@ public class DisasterReportService {
     @Transactional(readOnly = true)
     public DisasterReportEvaluationResponse getReportEvaluation(Long reportId) {
         Member member = memberUtil.getLoggedInMember();
-        disasterReportRepository.findById(reportId)
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
         DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
+        
+        // evaluation이 null인 경우 기본값으로 새로운 객체 생성
+        if (evaluation == null) {
+            evaluation = new DisasterReportEvaluation(disasterReport);
+        }
 
         // 사용자의 평가 정보 조회
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
