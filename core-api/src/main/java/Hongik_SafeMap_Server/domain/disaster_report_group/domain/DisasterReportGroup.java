@@ -1,12 +1,11 @@
 package Hongik_SafeMap_Server.domain.disaster_report_group.domain;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.util.DistanceUtil;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -50,13 +49,21 @@ public class DisasterReportGroup {
     @Column(nullable = false)
     private Boolean isActive;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    /**
+     * 첫 번째 제보로부터 새 그룹 생성
+     */
+    public static DisasterReportGroup createFromFirstReport(DisasterReport report) {
+        return DisasterReportGroup.builder()
+                .disasterType(report.getDisasterType())
+                .centerLatitude(report.getLatitude())
+                .centerLongitude(report.getLongitude())
+                .earliestReportTime(report.getCreatedAt())
+                .latestReportTime(report.getCreatedAt())
+                .reportCount(1)
+                .latestRiskLevel(report.getRiskLevel())
+                .isActive(true)
+                .build();
+    }
 
     // 새로운 제보 추가
     public void addReport(DisasterReport report) {
@@ -97,7 +104,7 @@ public class DisasterReportGroup {
         }
 
         // 거리 확인 (위도/경도 기반)
-        double distance = calculateDistance(this.centerLatitude, this.centerLongitude,
+        double distance = DistanceUtil.calculateDistance(this.centerLatitude, this.centerLongitude,
                 report.getLatitude(), report.getLongitude());
         if (distance > maxDistanceM) {
             return false;
@@ -110,15 +117,4 @@ public class DisasterReportGroup {
         return hoursDiff < maxTimeSpanHours; // 정확히 maxTimeSpanHours 차이나면 기존 재난 제보에 추가 안함
     }
 
-    // 두 좌표 간 거리 계산
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        final double EARTH_RADIUS = 6371; // 지구 반지름 (km)
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lngDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return EARTH_RADIUS * c * 1000; // 미터(m)
-    }
 }
