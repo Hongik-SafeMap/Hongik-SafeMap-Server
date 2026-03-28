@@ -9,6 +9,7 @@ import Hongik_SafeMap_Server.util.DistanceUtil;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,15 +96,10 @@ public class DisasterReportGroupService {
     }
 
     /**
-     * 오래된 그룹들 비활성화 (스케줄링용)
-     *
-     * @Scheduled 어노테이션과 함께 사용하여 주기적으로 오래된 그룹들을 비활성화
-     * 예시: @Scheduled(fixedRate = 3600000) // 1시간마다 실행
-     * 목적:
-     * - 24시간 이상 업데이트되지 않은 그룹을 비활성화
-     * - 지도에서 오래된 재난 정보가 계속 표시되는 것을 방지
-     * - 데이터베이스 성능 최적화 (활성 그룹만 조회)
+     * 오래된 그룹들 비활성화 (스케줄링)
+     * 1시간마다 실행하여 24시간 이상 업데이트되지 않은 그룹을 비활성화
      */
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행 (3600000ms = 1시간)
     @Transactional
     public void deactivateOldGroups() {
         LocalDateTime cutoffTime = LocalDateTime.now().minusHours(GROUP_DEACTIVATE_HOURS);
