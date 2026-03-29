@@ -18,7 +18,7 @@ public class AdminDashboardService {
 
     public AdminDashboardResponse getDashboard() {
         long totalReports = disasterReportRepository.count();
-        long pendingReports = 0L;  // @TODO: 검토 대기
+        long pendingReports = disasterReportRepository.countByStatus(DisasterReportStatus.PENDING);
         long totalUsers = memberRepository.count();
         long blindedReports = disasterReportRepository.countByStatus(DisasterReportStatus.BLINDED);
         long suspiciousUsers = 0L; // @TODO: 신뢰도 의심
