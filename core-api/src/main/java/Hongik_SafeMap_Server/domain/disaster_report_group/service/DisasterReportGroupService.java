@@ -1,10 +1,13 @@
 package Hongik_SafeMap_Server.domain.disaster_report_group.service;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
+import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupDetailResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.repository.DisasterReportGroupRepository;
+import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.util.DistanceUtil;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
@@ -205,5 +208,28 @@ public class DisasterReportGroupService {
                         group.getLatestRiskLevel()
                 ))
                 .toList();
+    }
+
+    public GroupDetailResponse getGroupDetail(Long groupId) {
+        DisasterReportGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorMessage.DISASTER_REPORT_GROUP_NOT_FOUND));
+
+        List<DisasterReport> reports = reportRepository.findByGroupId(groupId);
+        List<DisasterReportListResponse> reportResponses = reports.stream()
+                .map(DisasterReportListResponse::of)
+                .toList();
+
+        return new GroupDetailResponse(
+                group.getId(),
+                group.getDisasterType(),
+                group.getCenterLatitude(),
+                group.getCenterLongitude(),
+                group.getEarliestReportTime(),
+                group.getLatestReportTime(),
+                group.getReportCount(),
+                group.getLatestRiskLevel(),
+                group.getIsActive(),
+                reportResponses
+        );
     }
 }

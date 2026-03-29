@@ -1,15 +1,13 @@
 package Hongik_SafeMap_Server.domain.disaster_report_group.controller;
 
+import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupDetailResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,5 +32,11 @@ public class DisasterReportGroupController {
             @RequestParam(name = "radiusMeters", defaultValue = "10000") int radiusMeters,
             @RequestParam(name = "isActive", defaultValue = "true", required = false) Boolean isActive) {
         return ResponseEntity.ok(disasterReportGroupService.getGroupedReports(latitude, longitude, radiusMeters, isActive));
+    }
+
+    @Operation(summary = "재난 제보 그룹 상세 조회", description = "특정 그룹의 통계 정보와 속한 재난 제보 목록을 함께 조회합니다.")
+    @GetMapping("/grouped/{groupId}")
+    public ResponseEntity<GroupDetailResponse> getGroupDetail(@PathVariable Long groupId) {
+        return ResponseEntity.ok(disasterReportGroupService.getGroupDetail(groupId));
     }
 }
