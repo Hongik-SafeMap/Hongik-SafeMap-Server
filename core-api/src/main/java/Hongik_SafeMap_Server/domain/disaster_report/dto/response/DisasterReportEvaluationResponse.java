@@ -5,28 +5,18 @@ import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluat
 public record DisasterReportEvaluationResponse(
         int helpfulCount,
         int notHelpfulCount,
-        int accurateCount,
-        int falseReportCount,
         boolean userEvaluatedHelpful,
-        boolean userEvaluatedNotHelpful,
-        boolean userEvaluatedAccurate,
-        boolean userEvaluatedFalseReport
+        boolean userEvaluatedNotHelpful
 ) {
 
     public static DisasterReportEvaluationResponse of(DisasterReportEvaluation dre,
                                                       boolean userEvaluatedHelpful,
-                                                      boolean userEvaluatedNotHelpful,
-                                                      boolean userEvaluatedAccurate,
-                                                      boolean userEvaluatedFalseReport) {
+                                                      boolean userEvaluatedNotHelpful) {
         return new DisasterReportEvaluationResponse(
                 dre.getHelpfulCount(),
                 dre.getNotHelpfulCount(),
-                dre.getAccurateCount(),
-                dre.getFalseReportCount(),
                 userEvaluatedHelpful,
-                userEvaluatedNotHelpful,
-                userEvaluatedAccurate,
-                userEvaluatedFalseReport
+                userEvaluatedNotHelpful
         );
     }
 }

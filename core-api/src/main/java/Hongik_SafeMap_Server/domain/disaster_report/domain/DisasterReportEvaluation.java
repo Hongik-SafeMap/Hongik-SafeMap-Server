@@ -17,8 +17,6 @@ public class DisasterReportEvaluation {
 
     private int helpfulCount;
     private int notHelpfulCount;
-    private int accurateCount;
-    private int falseReportCount;
 
 
     @OneToOne
@@ -34,8 +32,6 @@ public class DisasterReportEvaluation {
         switch (evaluationType) {
             case HELPFUL -> helpfulCount++;
             case NOT_HELPFUL -> notHelpfulCount++;
-            case ACCURATE -> accurateCount++;
-            case FALSE_REPORT -> falseReportCount++;
         }
     }
 
@@ -43,8 +39,6 @@ public class DisasterReportEvaluation {
         switch (evaluationType) {
             case HELPFUL -> helpfulCount--;
             case NOT_HELPFUL -> notHelpfulCount--;
-            case ACCURATE -> accurateCount--;
-            case FALSE_REPORT -> falseReportCount--;
         }
     }
 }
