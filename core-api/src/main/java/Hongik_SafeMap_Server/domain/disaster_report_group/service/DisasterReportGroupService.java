@@ -228,7 +228,7 @@ public class DisasterReportGroupService {
                 group.getLatestReportTime(),
                 group.getReportCount(),
                 group.getLatestRiskLevel(),
-                group.getIsActive(),
+                group.isActive(),
                 reportResponses
         );
     }

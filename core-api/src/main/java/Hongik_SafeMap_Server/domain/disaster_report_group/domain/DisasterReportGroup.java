@@ -47,7 +47,7 @@ public class DisasterReportGroup {
     private RiskLevel latestRiskLevel;
 
     @Column(nullable = false)
-    private Boolean isActive;
+    private boolean isActive;
 
     /**
      * 첫 번째 제보로부터 새 그룹 생성
