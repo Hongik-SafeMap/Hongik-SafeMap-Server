@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.disaster_report.domain;
 
 import Hongik_SafeMap_Server.domain.common.BaseTimeEntity;
+import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.DisasterType;
@@ -63,6 +64,10 @@ public class DisasterReport extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disaster_report_group_id")
+    private DisasterReportGroup group;
+
     @Builder
     private DisasterReport(
             DisasterType disasterType,
@@ -97,5 +102,9 @@ public class DisasterReport extends BaseTimeEntity {
 
     public void markFalse() {
         this.status = DisasterReportStatus.FALSE;
+    }
+
+    public void updateGroup(DisasterReportGroup group) {
+        this.group = group;
     }
 }
