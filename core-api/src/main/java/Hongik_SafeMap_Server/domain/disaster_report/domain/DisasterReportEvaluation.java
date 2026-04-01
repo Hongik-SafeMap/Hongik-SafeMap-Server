@@ -15,9 +15,11 @@ public class DisasterReportEvaluation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private int helpfulCount;
+    
+    @Column(nullable = false)
     private int notHelpfulCount;
-
 
     @OneToOne
     @MapsId // 식별 관계
@@ -26,6 +28,8 @@ public class DisasterReportEvaluation {
 
     public DisasterReportEvaluation(DisasterReport disasterReport) {
         this.disasterReport = disasterReport;
+        this.helpfulCount = 0;
+        this.notHelpfulCount = 0;
     }
 
     public void increase(DisasterReportEvaluationType evaluationType) {

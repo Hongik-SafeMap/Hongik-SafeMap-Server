@@ -9,9 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum DisasterReportEvaluationType implements EnumUtil.DescriptionProvider {
     HELPFUL("도움됨"),
-    NOT_HELPFUL("도움 안됨"),
-    ACCURATE("정확함"),
-    FALSE_REPORT("허위제보");
+    NOT_HELPFUL("도움 안됨");
 
     @JsonValue
     private final String description;

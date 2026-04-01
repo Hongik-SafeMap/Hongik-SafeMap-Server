@@ -187,55 +187,57 @@ public class DisasterReportService {
         DisasterReport disasterReport = disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
-        // 기존 사용자 평가 조회 또는 새로 생성
-        UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
-                        member.getId(), reportId)
-                .orElse(new UserEvaluation(member, disasterReport));
+        UserEvaluation existingUserEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
+                member.getId(), reportId).orElse(null);
 
-        // 집계 카운트 조회
+        // 이미 해당 타입으로 평가함
+        if (existingUserEvaluation != null && existingUserEvaluation.hasEvaluationType(evaluationType)) {
+            return;
+        }
+
         DisasterReportEvaluation evaluation = evaluationRepository.findById(reportId)
                 .orElseGet(() -> new DisasterReportEvaluation(disasterReport));
 
-        // 이미 평가했는지 확인
-        boolean alreadyEvaluated = getPreviousEvaluationValue(userEvaluation, evaluationType);
-
-        if (!alreadyEvaluated) {
-            // 평가 추가
-            updateUserEvaluation(userEvaluation, evaluationType, true);
-            userEvaluationRepository.save(userEvaluation);
-
-            // 집계 카운트 증가
-            evaluation.increase(evaluationType);
-            evaluationRepository.save(evaluation);
+        // 이전에 다른 평가를 했다면 해당 평가 카운트 감소
+        if (existingUserEvaluation != null && existingUserEvaluation.hasEvaluation()) {
+            DisasterReportEvaluationType previousType = existingUserEvaluation.getEvaluationType();
+            evaluation.decrease(previousType);
         }
+
+        // 사용자 평가 생성/업데이트
+        UserEvaluation userEvaluation;
+        if (existingUserEvaluation == null) {
+            userEvaluation = new UserEvaluation(member, disasterReport, evaluationType);
+        } else {
+            existingUserEvaluation.updateEvaluation(evaluationType);
+            userEvaluation = existingUserEvaluation;
+        }
+
+        // 새 평가 카운트 증가
+        evaluation.increase(evaluationType);
+
+        // 저장
+        userEvaluationRepository.save(userEvaluation);
+        evaluationRepository.save(evaluation);
     }
 
     // 제보 평가 취소하기
     @Transactional
-    public void deleteEvaluation(Long reportId, DisasterReportEvaluationType evaluationType) {
+    public void deleteEvaluation(Long reportId) {
         Member member = memberUtil.getLoggedInMember();
         DisasterReport disasterReport = disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
-        // 기존 사용자 평가 조회
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
                         member.getId(), reportId)
                 .orElse(null);
 
         if (userEvaluation != null) {
-            boolean previousValue = getPreviousEvaluationValue(userEvaluation, evaluationType);
-
-            if (previousValue) {
-                // 평가를 false로 변경
-                updateUserEvaluation(userEvaluation, evaluationType, false);
-                userEvaluationRepository.save(userEvaluation);
-
-                // 집계 카운트 감소
-                DisasterReportEvaluation evaluation = evaluationRepository.findById(reportId)
-                        .orElseGet(() -> new DisasterReportEvaluation(disasterReport));
-                evaluation.decrease(evaluationType);
-                evaluationRepository.save(evaluation);
-            }
+            DisasterReportEvaluation evaluation = evaluationRepository.findById(reportId)
+                    .orElseGet(() -> new DisasterReportEvaluation(disasterReport));
+            evaluation.decrease(userEvaluation.getEvaluationType());
+            evaluationRepository.save(evaluation);
+            userEvaluationRepository.delete(userEvaluation);
         }
     }
 
@@ -247,8 +249,6 @@ public class DisasterReportService {
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
         DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
-        
-        // evaluation이 null인 경우 기본값으로 새로운 객체 생성
         if (evaluation == null) {
             evaluation = new DisasterReportEvaluation(disasterReport);
         }
@@ -257,33 +257,10 @@ public class DisasterReportService {
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
                 member.getId(), reportId).orElse(null);
 
-        boolean userEvaluatedHelpful = userEvaluation != null && userEvaluation.getIsHelpful();
-        boolean userEvaluatedNotHelpful = userEvaluation != null && userEvaluation.getIsNotHelpful();
-        boolean userEvaluatedAccurate = userEvaluation != null && userEvaluation.getIsAccurate();
-        boolean userEvaluatedFalseReport = userEvaluation != null && userEvaluation.getIsFalseReport();
+        boolean userEvaluatedHelpful = userEvaluation != null && userEvaluation.hasEvaluationType(DisasterReportEvaluationType.HELPFUL);
+        boolean userEvaluatedNotHelpful = userEvaluation != null && userEvaluation.hasEvaluationType(DisasterReportEvaluationType.NOT_HELPFUL);
 
         return DisasterReportEvaluationResponse.of(evaluation,
-                userEvaluatedHelpful, userEvaluatedNotHelpful,
-                userEvaluatedAccurate, userEvaluatedFalseReport);
+                userEvaluatedHelpful, userEvaluatedNotHelpful);
     }
-
-    private boolean getPreviousEvaluationValue(UserEvaluation userEvaluation, DisasterReportEvaluationType evaluationType) {
-        return switch (evaluationType) {
-            case HELPFUL -> userEvaluation.getIsHelpful();
-            case NOT_HELPFUL -> userEvaluation.getIsNotHelpful();
-            case ACCURATE -> userEvaluation.getIsAccurate();
-            case FALSE_REPORT -> userEvaluation.getIsFalseReport();
-        };
-    }
-
-    private void updateUserEvaluation(UserEvaluation userEvaluation, DisasterReportEvaluationType evaluationType, boolean value) {
-        switch (evaluationType) {
-            case HELPFUL -> userEvaluation.updateEvaluations(value, null, null, null);
-            case NOT_HELPFUL -> userEvaluation.updateEvaluations(null, value, null, null);
-            case ACCURATE -> userEvaluation.updateEvaluations(null, null, value, null);
-            case FALSE_REPORT -> userEvaluation.updateEvaluations(null, null, null, value);
-        }
-    }
-
-
 }

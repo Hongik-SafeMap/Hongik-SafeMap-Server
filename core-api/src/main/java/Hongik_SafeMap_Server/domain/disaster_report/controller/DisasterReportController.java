@@ -59,10 +59,8 @@ public class DisasterReportController {
 
     @Operation(summary = "재난 제보 평가 취소", description = "ID로 제보 평가를 취소합니다.")
     @DeleteMapping("/{reportId}/evaluations")
-    public ResponseEntity<Void> deleteReportEvaluation(
-            @PathVariable("reportId") Long reportId,
-            @Valid @RequestBody DisasterReportEvaluationRequest request) {
-        disasterReportService.deleteEvaluation(reportId, request.evaluationType());
+    public ResponseEntity<Void> deleteReportEvaluation(@PathVariable("reportId") Long reportId) {
+        disasterReportService.deleteEvaluation(reportId);
         return ResponseEntity.noContent().build();
     }
 

@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.disaster_report.domain;
 
 import Hongik_SafeMap_Server.domain.member.domain.Member;
+import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,22 +27,25 @@ public class UserEvaluation {
     @JoinColumn(name = "disaster_report_id", nullable = false)
     private DisasterReport disasterReport;
 
-    @Column(name = "is_helpful", nullable = false)
-    private Boolean isHelpful = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "evaluation_type")
+    private DisasterReportEvaluationType evaluationType;
 
-    @Column(name = "is_not_helpful", nullable = false)
-    private Boolean isNotHelpful = false;
-
-    public UserEvaluation(Member member, DisasterReport disasterReport) {
+    public UserEvaluation(Member member, DisasterReport disasterReport, DisasterReportEvaluationType evaluationType) {
         this.member = member;
         this.disasterReport = disasterReport;
-        this.isHelpful = false;
-        this.isNotHelpful = false;
+        this.evaluationType = evaluationType;
     }
 
-    // 값이 들어온 필드만 업데이트
-    public void updateEvaluations(Boolean isHelpful, Boolean isNotHelpful) {
-        if (isHelpful != null) this.isHelpful = isHelpful;
-        if (isNotHelpful != null) this.isNotHelpful = isNotHelpful;
+    public void updateEvaluation(DisasterReportEvaluationType evaluationType) {
+        this.evaluationType = evaluationType;
+    }
+
+    public boolean hasEvaluation() {
+        return this.evaluationType != null;
+    }
+
+    public boolean hasEvaluationType(DisasterReportEvaluationType type) {
+        return this.evaluationType == type;
     }
 }
