@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class DisasterReportController {
         return ResponseEntity.ok(disasterReportService.getById(reportId));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "재난 상황 목록 조회", description = "재난 상황 목록을 조회합니다. 관리자 제보 검토용 API입니다.")
     @GetMapping
     public ResponseEntity<DisasterReportPageResponse> getAll(
@@ -68,5 +70,12 @@ public class DisasterReportController {
     @GetMapping("/{reportId}/evaluations")
     public ResponseEntity<DisasterReportEvaluationResponse> getReportEvaluation(@PathVariable("reportId") Long reportId) {
         return ResponseEntity.ok(disasterReportService.getReportEvaluation(reportId));
+    }
+
+    @Operation(summary = "재난 제보 신고", description = "재난 제보를 신고합니다.")
+    @PostMapping("/{reportId}/accusation")
+    public ResponseEntity<Void> accuseReport(@PathVariable("reportId") Long reportId) {
+        disasterReportService.accuseReport(reportId);
+        return ResponseEntity.ok().build();
     }
 }
