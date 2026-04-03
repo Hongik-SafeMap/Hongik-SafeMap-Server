@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.admin.account.controller;
 
 import Hongik_SafeMap_Server.domain.admin.account.dto.AdminMyPageResponse;
+import Hongik_SafeMap_Server.domain.admin.account.dto.request.DemoteFromAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.PromoteToAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.service.AdminAccountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +26,13 @@ public class AdminAccountController {
     @PostMapping("/promote")
     public ResponseEntity<Void> promoteToAdmin(@Valid @RequestBody PromoteToAdminRequest request) {
         adminAccountService.promoteToAdmin(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "관리자 권한 박탈", description = "이메일로 관리자 권한을 박탈하고 일반 사용자로 전환합니다.")
+    @PostMapping("/demote")
+    public ResponseEntity<Void> demoteFromAdmin(@Valid @RequestBody DemoteFromAdminRequest request) {
+        adminAccountService.demoteFromAdmin(request);
         return ResponseEntity.ok().build();
     }
 }

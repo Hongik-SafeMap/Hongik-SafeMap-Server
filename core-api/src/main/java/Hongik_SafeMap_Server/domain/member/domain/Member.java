@@ -82,4 +82,9 @@ public class Member {
     public void updateNickname(String nickname) {
         this.adminNickname = nickname;
     }
+
+    public void demoteFromAdmin() {
+        this.status = MemberStatus.USER;
+        this.adminNickname = null;
+    }
 }

@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.admin.account.service;
 
 import Hongik_SafeMap_Server.domain.admin.account.dto.AdminMyPageResponse;
+import Hongik_SafeMap_Server.domain.admin.account.dto.request.DemoteFromAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.PromoteToAdminRequest;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
@@ -36,5 +37,15 @@ public class AdminAccountService {
 
         // 관리자로 승급
         member.promoteToAdmin();
+    }
+
+    @Transactional
+    public void demoteFromAdmin(DemoteFromAdminRequest request) {
+        // 이메일로 기존 회원 찾기
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new MemberException(MEMBER_NOT_EXISTS_WITH_EMAIL));
+
+        // 관리자 권한 박탈
+        member.demoteFromAdmin();
     }
 }
