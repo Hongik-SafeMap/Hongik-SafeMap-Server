@@ -8,6 +8,7 @@ import Hongik_SafeMap_Server.domain.admin.account.dto.response.AdminAccountRespo
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
 import Hongik_SafeMap_Server.exception.MemberException;
+import Hongik_SafeMap_Server.global.annotation.LogAdminActivity;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.MemberStatus;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class AdminAccountService {
         return AdminMyPageResponse.of(member);
     }
 
+    @LogAdminActivity(description = "사용자를 관리자로 승급했습니다.")
     @Transactional
     public void promoteToAdmin(PromoteToAdminRequest request) {
         // 이메일로 기존 회원 찾기
@@ -45,6 +47,7 @@ public class AdminAccountService {
         member.promoteToAdmin();
     }
 
+    @LogAdminActivity(description = "관리자 권한을 박탈했습니다.")
     @Transactional
     public void demoteFromAdmin(DemoteFromAdminRequest request) {
         // 이메일로 기존 회원 찾기
@@ -60,6 +63,7 @@ public class AdminAccountService {
         member.demoteFromAdmin();
     }
 
+    @LogAdminActivity(description = "관리자 닉네임을 변경했습니다.")
     @Transactional
     public void updateAdminNickname(UpdateAdminNicknameRequest request) {
         // 회원 ID로 기존 회원 찾기
@@ -78,7 +82,7 @@ public class AdminAccountService {
     public List<AdminAccountResponse> getAdminAccounts() {
         // 모든 관리자 계정 조회
         List<Member> adminMembers = memberRepository.findAllByStatus(MemberStatus.ADMIN);
-        
+
         // AdminAccountResponse로 변환
         return adminMembers.stream()
                 .map(AdminAccountResponse::of)
