@@ -1,8 +1,8 @@
 package Hongik_SafeMap_Server.domain.member.domain;
 
+import Hongik_SafeMap_Server.exception.MemberException;
 import Hongik_SafeMap_Server.vo.LoginType;
 import Hongik_SafeMap_Server.vo.MemberStatus;
-import Hongik_SafeMap_Server.exception.MemberException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -46,8 +46,11 @@ public class Member {
     @Column(nullable = false)
     private boolean isCredible = false;
 
+    @Column(length = 10)
+    private String adminNickname;
+
     @Builder
-    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId, boolean isCredible) {
+    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId, boolean isCredible, String adminNickname) {
         this.email = email;
         this.password = password;
         this.status = status;
@@ -59,14 +62,24 @@ public class Member {
     }
 
     public void validateEmail(String email) {
-        if(!this.email.equals(email)) {
+        if (!this.email.equals(email)) {
             throw new MemberException(EMAIL_DOES_NOT_EXIST);
         }
     }
 
-    public void updatePassword(String encodedPassword) { this.password = encodedPassword; }
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 
     public void toggleCredible() {
         this.isCredible = !this.isCredible;
+    }
+
+    public void promoteToAdmin() {
+        this.status = MemberStatus.ADMIN;
+    }
+
+    public void updateNickname(String nickname) {
+        this.adminNickname = nickname;
     }
 }
