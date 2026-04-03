@@ -21,12 +21,12 @@ public class DisasterReportStatisticsResponse {
     private int notHelpfulCount;
     
     @Schema(description = "총 신고 수", example = "2")
-    private long accusationCount;
+    private int accusationCount;
 
     public static DisasterReportStatisticsResponse of(
             Long disasterReportId,
             DisasterReportEvaluation evaluation,
-            long accusationCount
+            int accusationCount
     ) {
         return DisasterReportStatisticsResponse.builder()
                 .disasterReportId(disasterReportId)
