@@ -13,7 +13,7 @@ public interface SafetyTipRepository extends JpaRepository<SafetyTip, Long> {
 
     Optional<SafetyTip> findByDisasterType(DisasterType disasterType);
 
-    List<SafetyTip> findAllByOrderByDisasterTypeAsc();
+    List<SafetyTip> findAllByOrderByIdAsc();
 
     @Query("SELECT st FROM SafetyTip st LEFT JOIN FETCH st.actions LEFT JOIN FETCH st.supplies LEFT JOIN FETCH st.warnings WHERE st.disasterType = :disasterType")
     Optional<SafetyTip> findByDisasterTypeWithActions(@Param("disasterType") DisasterType disasterType);

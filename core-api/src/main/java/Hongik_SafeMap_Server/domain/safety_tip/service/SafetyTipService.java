@@ -6,6 +6,7 @@ import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyTip;
 import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyWarning;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.request.SafetyTipUpdateRequest;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipResponse;
+import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipSummaryResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyActionRepository;
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetySupplyRepository;
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyTipRepository;
@@ -40,6 +41,14 @@ public class SafetyTipService {
 
         return safetyTips.stream()
                 .map(SafetyTipResponse::of)
+                .toList();
+    }
+
+    public List<SafetyTipSummaryResponse> getAllSafetyTipsSummary() {
+        List<SafetyTip> safetyTips = safetyTipRepository.findAllByOrderByIdAsc();
+
+        return safetyTips.stream()
+                .map(SafetyTipSummaryResponse::of)
                 .toList();
     }
 
