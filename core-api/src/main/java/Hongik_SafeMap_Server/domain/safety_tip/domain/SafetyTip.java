@@ -34,27 +34,21 @@ public class SafetyTip extends BaseTimeEntity {
     @OneToMany(mappedBy = "safetyTip", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SafetyAction> actions = new HashSet<>();
 
-    @OneToMany(mappedBy = "safetyTip", cascade = CascadeType.ALL, orphanRemoval = true)  
-    private Set<SafetySupply> supplies = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "safety_tip_supplies", joinColumns = @JoinColumn(name = "safety_tip_id"))
+    @Column(name = "supply")
+    private Set<String> supplies = new HashSet<>();
 
-    @OneToMany(mappedBy = "safetyTip", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SafetyWarning> warnings = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "safety_tip_warnings", joinColumns = @JoinColumn(name = "safety_tip_id"))
+    @Column(name = "warning")
+    private Set<String> warnings = new HashSet<>();
 
     @Builder
     private SafetyTip(DisasterType disasterType, String title, String detail) {
         this.disasterType = disasterType;
         this.title = title;
         this.detail = detail;
-    }
-
-    public void addAction(SafetyAction action) {
-        this.actions.add(action);
-        action.updateSafetyTip(this);
-    }
-
-    public void removeAction(SafetyAction action) {
-        this.actions.remove(action);
-        action.updateSafetyTip(null);
     }
 
     public void updateDetail(String detail) {
@@ -64,29 +58,18 @@ public class SafetyTip extends BaseTimeEntity {
     public void updateTitle(String title) {
         this.title = title;
     }
-    
-    public void addSupply(SafetySupply supply) {
-        this.supplies.add(supply);
-        supply.updateSafetyTip(this);
+
+    public void updateSupplies(List<String> supplies) {
+        this.supplies.clear();
+        if (supplies != null) {
+            this.supplies.addAll(supplies);
+        }
     }
 
-    public void removeSupply(SafetySupply supply) {
-        this.supplies.remove(supply);
-        supply.updateSafetyTip(null);
-    }
-
-    public void addWarning(SafetyWarning warning) {
-        this.warnings.add(warning);
-        warning.updateSafetyTip(this);
-    }
-
-    public void removeWarning(SafetyWarning warning) {
-        this.warnings.remove(warning);
-        warning.updateSafetyTip(null);
-    }
-
-    public void updateActions(List<SafetyAction> newActions) {
-        this.actions.clear();
-        newActions.forEach(this::addAction);
+    public void updateWarnings(List<String> warnings) {
+        this.warnings.clear();
+        if (warnings != null) {
+            this.warnings.addAll(warnings);
+        }
     }
 }

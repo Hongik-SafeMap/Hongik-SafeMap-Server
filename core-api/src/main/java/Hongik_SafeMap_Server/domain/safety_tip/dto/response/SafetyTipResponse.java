@@ -23,12 +23,8 @@ public record SafetyTipResponse(
                 safetyTip.getDisasterType(),
                 safetyTip.getTitle(),
                 safetyTip.getDetail(),
-                safetyTip.getSupplies().stream()
-                        .map(supply -> supply.getContent())
-                        .toList(),
-                safetyTip.getWarnings().stream()
-                        .map(warning -> warning.getContent())
-                        .toList(),
+                safetyTip.getSupplies().stream().toList(),
+                safetyTip.getWarnings().stream().toList(),
                 safetyTip.getActions().stream()
                         .map(SafetyActionResponse::of)
                         .toList(),

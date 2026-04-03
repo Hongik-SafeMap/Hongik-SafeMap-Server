@@ -1,16 +1,12 @@
 package Hongik_SafeMap_Server.domain.safety_tip.service;
 
 import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyAction;
-import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetySupply;
 import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyTip;
-import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyWarning;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.request.SafetyTipUpdateRequest;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipSummaryResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyActionRepository;
-import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetySupplyRepository;
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyTipRepository;
-import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyWarningRepository;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.exception.SafetyTipException;
 import Hongik_SafeMap_Server.vo.DisasterType;
@@ -27,8 +23,6 @@ public class SafetyTipService {
 
     private final SafetyTipRepository safetyTipRepository;
     private final SafetyActionRepository safetyActionRepository;
-    private final SafetySupplyRepository safetySupplyRepository;
-    private final SafetyWarningRepository safetyWarningRepository;
 
     public SafetyTipResponse getSafetyTipByDisasterType(DisasterType disasterType) {
         return safetyTipRepository.findByDisasterTypeWithActions(disasterType)
@@ -59,13 +53,12 @@ public class SafetyTipService {
 
         safetyTip.updateTitle(request.title());
         safetyTip.updateDetail(request.detail());
+        safetyTip.updateSupplies(request.supplies());
+        safetyTip.updateWarnings(request.warnings());
 
-        // 기존 관련 엔티티들 삭제
+        // 기존 Actions 삭제 후 새로 생성
         safetyActionRepository.deleteBySafetyTip(safetyTip);
-        safetySupplyRepository.deleteBySafetyTip(safetyTip);
-        safetyWarningRepository.deleteBySafetyTip(safetyTip);
 
-        // 새로운 Actions 생성
         List<SafetyAction> newActions = request.actions().stream()
                 .map(actionRequest -> SafetyAction.builder()
                         .title(actionRequest.title())
@@ -74,25 +67,6 @@ public class SafetyTipService {
                         .build())
                 .toList();
 
-        // 새로운 Supplies 생성
-        List<SafetySupply> newSupplies = request.supplies().stream()
-                .map(content -> SafetySupply.builder()
-                        .content(content)
-                        .safetyTip(safetyTip)
-                        .build())
-                .toList();
-
-        // 새로운 Warnings 생성
-        List<SafetyWarning> newWarnings = request.warnings().stream()
-                .map(content -> SafetyWarning.builder()
-                        .content(content)
-                        .safetyTip(safetyTip)
-                        .build())
-                .toList();
-
-        // 모든 새로운 엔티티들 저장
         safetyActionRepository.saveAll(newActions);
-        safetySupplyRepository.saveAll(newSupplies);
-        safetyWarningRepository.saveAll(newWarnings);
     }
 }
