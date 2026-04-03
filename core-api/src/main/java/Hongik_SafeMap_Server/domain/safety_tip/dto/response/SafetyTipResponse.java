@@ -11,8 +11,8 @@ public record SafetyTipResponse(
         DisasterType disasterType,
         String title,
         String detail,
-        List<SafetySupplyResponse> supplies,
-        List<SafetyWarningResponse> warnings,
+        List<String> supplies,
+        List<String> warnings,
         List<SafetyActionResponse> actions,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -24,10 +24,10 @@ public record SafetyTipResponse(
                 safetyTip.getTitle(),
                 safetyTip.getDetail(),
                 safetyTip.getSupplies().stream()
-                        .map(SafetySupplyResponse::of)
+                        .map(supply -> supply.getContent())
                         .toList(),
                 safetyTip.getWarnings().stream()
-                        .map(SafetyWarningResponse::of)
+                        .map(warning -> warning.getContent())
                         .toList(),
                 safetyTip.getActions().stream()
                         .map(SafetyActionResponse::of)

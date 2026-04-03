@@ -67,16 +67,16 @@ public class SafetyTipService {
 
         // 새로운 Supplies 생성
         List<SafetySupply> newSupplies = request.supplies().stream()
-                .map(supplyRequest -> SafetySupply.builder()
-                        .content(supplyRequest.content())
+                .map(content -> SafetySupply.builder()
+                        .content(content)
                         .safetyTip(safetyTip)
                         .build())
                 .toList();
 
         // 새로운 Warnings 생성
         List<SafetyWarning> newWarnings = request.warnings().stream()
-                .map(warningRequest -> SafetyWarning.builder()
-                        .content(warningRequest.content())
+                .map(content -> SafetyWarning.builder()
+                        .content(content)
                         .safetyTip(safetyTip)
                         .build())
                 .toList();

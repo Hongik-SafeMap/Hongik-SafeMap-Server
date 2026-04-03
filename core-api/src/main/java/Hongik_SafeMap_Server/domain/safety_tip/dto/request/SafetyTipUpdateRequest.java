@@ -16,11 +16,9 @@ public record SafetyTipUpdateRequest(
         @Size(max = 100)
         String detail,
 
-        @Valid
-        List<SafetySupplyRequest> supplies,
+        List<@NotBlank @Size(max = 100) String> supplies,
 
-        @Valid
-        List<SafetyWarningRequest> warnings,
+        List<@NotBlank @Size(max = 100) String> warnings,
 
         @NotEmpty
         @Valid
