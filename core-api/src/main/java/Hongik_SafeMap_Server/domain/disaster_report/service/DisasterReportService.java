@@ -266,7 +266,7 @@ public class DisasterReportService {
         }
 
         DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(disasterReportId);
-        long accusationCount = accusationRepository.countByDisasterReportId(disasterReportId);
+        int accusationCount = accusationRepository.countByDisasterReportId(disasterReportId);
 
         return DisasterReportStatisticsResponse.of(disasterReportId, evaluation, accusationCount);
     }
