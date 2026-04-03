@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.domain.admin.account.dto.AdminMyPageResponse;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.DemoteFromAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.PromoteToAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.UpdateAdminNicknameRequest;
+import Hongik_SafeMap_Server.domain.admin.account.dto.response.AdminAccountResponse;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
 import Hongik_SafeMap_Server.exception.MemberException;
@@ -12,6 +13,9 @@ import Hongik_SafeMap_Server.vo.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static Hongik_SafeMap_Server.exception.ErrorMessage.*;
 
@@ -69,5 +73,15 @@ public class AdminAccountService {
 
         // 관리자 닉네임 업데이트
         member.updateNickname(request.getNickname());
+    }
+
+    public List<AdminAccountResponse> getAdminAccounts() {
+        // 모든 관리자 계정 조회
+        List<Member> adminMembers = memberRepository.findAllByStatus(MemberStatus.ADMIN);
+        
+        // AdminAccountResponse로 변환
+        return adminMembers.stream()
+                .map(AdminAccountResponse::of)
+                .collect(Collectors.toList());
     }
 }

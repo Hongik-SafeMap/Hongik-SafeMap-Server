@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.domain.admin.account.dto.AdminMyPageResponse;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.DemoteFromAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.PromoteToAdminRequest;
 import Hongik_SafeMap_Server.domain.admin.account.dto.request.UpdateAdminNicknameRequest;
+import Hongik_SafeMap_Server.domain.admin.account.dto.response.AdminAccountResponse;
 import Hongik_SafeMap_Server.domain.admin.account.service.AdminAccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "관리자 계정 관리")
 @RestController
@@ -44,5 +47,12 @@ public class AdminAccountController {
     public ResponseEntity<Void> updateAdminNickname(@Valid @RequestBody UpdateAdminNicknameRequest request) {
         adminAccountService.updateAdminNickname(request);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "관리자 계정 목록 조회", description = "모든 관리자 계정을 조회합니다.")
+    @GetMapping("/accounts")
+    public ResponseEntity<List<AdminAccountResponse>> getAdminAccounts() {
+        List<AdminAccountResponse> adminAccounts = adminAccountService.getAdminAccounts();
+        return ResponseEntity.ok().body(adminAccounts);
     }
 }
