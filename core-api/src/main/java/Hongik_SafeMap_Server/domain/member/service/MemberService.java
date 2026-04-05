@@ -1,6 +1,6 @@
 package Hongik_SafeMap_Server.domain.member.service;
 
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.member.dto.request.MemberPasswordChangeRequest;
@@ -9,7 +9,6 @@ import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
 import Hongik_SafeMap_Server.exception.MemberException;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +30,7 @@ public class MemberService {
         return MyPageResponse.of(member);
     }
 
-    public Page<DisasterReportListResponse> getMyReports(int page, int size) {
-        Member member = memberUtil.getLoggedInMember();
+    public DisasterReportPageResponse getMyReports(int page, int size) {
         return disasterReportService.getMyReports(page, size);
     }
 
