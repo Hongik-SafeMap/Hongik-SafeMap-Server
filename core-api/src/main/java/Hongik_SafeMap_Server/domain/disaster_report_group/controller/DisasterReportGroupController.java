@@ -3,6 +3,8 @@ package Hongik_SafeMap_Server.domain.disaster_report_group.controller;
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupDetailResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
+import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.vo.RiskLevel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,10 @@ public class DisasterReportGroupController {
             @RequestParam(name = "latitude", required = false) Double latitude,
             @RequestParam(name = "longitude", required = false) Double longitude,
             @RequestParam(name = "radiusMeters", defaultValue = "10000") int radiusMeters,
-            @RequestParam(name = "isActive", defaultValue = "true", required = false) Boolean isActive) {
-        return ResponseEntity.ok(disasterReportGroupService.getGroupedReports(latitude, longitude, radiusMeters, isActive));
+            @RequestParam(name = "isActive", defaultValue = "true", required = false) Boolean isActive,
+            @RequestParam(required = false) List<DisasterType> disasterTypes,
+            @RequestParam(required = false) List<RiskLevel> riskLevels) {
+        return ResponseEntity.ok(disasterReportGroupService.getGroupedReports(latitude, longitude, radiusMeters, isActive, disasterTypes, riskLevels));
     }
 
     @Operation(summary = "재난 제보 그룹 상세 조회", description = "특정 그룹의 통계 정보와 속한 재난 제보 목록을 함께 조회합니다.")
