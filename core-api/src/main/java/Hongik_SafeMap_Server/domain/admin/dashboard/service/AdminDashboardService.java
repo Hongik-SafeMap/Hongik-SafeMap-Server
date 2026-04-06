@@ -21,7 +21,7 @@ public class AdminDashboardService {
         long pendingReports = disasterReportRepository.countByStatus(DisasterReportStatus.PENDING);
         long totalUsers = memberRepository.count();
         long blindedReports = disasterReportRepository.countByStatus(DisasterReportStatus.BLINDED);
-        long suspiciousUsers = 0L; // @TODO: 신뢰도 의심
+        long suspiciousReports = 0L; // @TODO: 신뢰도 의심
         long credibleUsers = memberRepository.countByIsCredibleTrueAndStatus(MemberStatus.USER);
 
         List<AdminDashboardResponse.RecentReport> recentReports = disasterReportRepository.findTop4ByOrderByCreatedAtDesc()
@@ -34,7 +34,7 @@ public class AdminDashboardService {
                 pendingReports,
                 totalUsers,
                 blindedReports,
-                suspiciousUsers,
+                suspiciousReports,
                 credibleUsers,
                 recentReports
         );

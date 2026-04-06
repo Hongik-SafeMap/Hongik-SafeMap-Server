@@ -12,7 +12,7 @@ public record AdminDashboardResponse(
         long totalReports,
         long falseReports,
         long totalUsers,
-        long suspiciousUsers,
+        long suspiciousReports,
         long blindedReports,
         long credibleUsers,
         List<RecentReport> recentReports
