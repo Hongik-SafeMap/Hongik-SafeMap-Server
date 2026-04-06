@@ -123,10 +123,6 @@ public class DisasterReportService {
         if (disasterReport.getStatus() == DisasterReportStatus.BLINDED) {
             throw new DisasterReportException(ErrorMessage.CANNOT_APPROVE_BLINDED_REPORT);
         }
-        if (disasterReport.getStatus() == DisasterReportStatus.FALSE) {
-            throw new DisasterReportException(ErrorMessage.CANNOT_APPROVE_FALSE_REPORT);
-        }
-
         disasterReport.approve();
     }
 
@@ -150,26 +146,4 @@ public class DisasterReportService {
             groupService.calculateGroupStatistics(groupId);
         }
     }
-
-    // 관리자 제보 허위 처리
-    @Transactional
-    public void markFalse(Long reportId) {
-        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
-                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
-
-        Long groupId = null;
-        // 그룹에서 제거 (허위 제보는 그룹 통계에서 제외)
-        if (disasterReport.getGroup() != null) {
-            groupId = disasterReport.getGroup().getId();
-            disasterReport.getGroup().removeReport(disasterReport);
-        }
-
-        disasterReport.markFalse();
-
-        // 그룹 통계 재계산
-        if (groupId != null) {
-            groupService.calculateGroupStatistics(groupId);
-        }
-    }
-
 }

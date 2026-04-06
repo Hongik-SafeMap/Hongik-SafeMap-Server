@@ -22,7 +22,6 @@ public class ErrorMessage {
     // DisasterReport
     public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
     public static final String CANNOT_APPROVE_BLINDED_REPORT = "블라인드 처리된 제보는 승인할 수 없습니다.";
-    public static final String CANNOT_APPROVE_FALSE_REPORT = "허위로 처리된 제보는 승인할 수 없습니다.";
 
     // DisasterReportGroup
     public static final String DISASTER_REPORT_GROUP_NOT_FOUND = "해당 id를 가진 그룹을 찾을 수 없습니다.";
