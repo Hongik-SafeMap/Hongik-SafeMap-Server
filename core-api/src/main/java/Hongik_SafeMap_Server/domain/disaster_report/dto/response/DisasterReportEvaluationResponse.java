@@ -19,4 +19,13 @@ public record DisasterReportEvaluationResponse(
                 userEvaluatedNotHelpful
         );
     }
+
+    public static DisasterReportEvaluationResponse ofDefault() {
+        return new DisasterReportEvaluationResponse(
+                0,
+                0,
+                false,
+                false
+        );
+    }
 }

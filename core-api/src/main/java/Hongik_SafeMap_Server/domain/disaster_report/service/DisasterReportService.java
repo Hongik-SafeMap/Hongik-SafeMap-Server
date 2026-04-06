@@ -245,14 +245,13 @@ public class DisasterReportService {
     @Transactional(readOnly = true)
     public DisasterReportEvaluationResponse getReportEvaluation(Long reportId) {
         Member member = memberUtil.getLoggedInMember();
-        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+        disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
-
+        
         DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
         if (evaluation == null) {
-            evaluation = new DisasterReportEvaluation(disasterReport);
+            return DisasterReportEvaluationResponse.ofDefault();
         }
-
         // 사용자의 평가 정보 조회
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
                 member.getId(), reportId).orElse(null);
