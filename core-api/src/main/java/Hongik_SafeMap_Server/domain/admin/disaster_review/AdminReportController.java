@@ -1,23 +1,35 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_review;
 
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
+import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.vo.RiskLevel;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/reports")
+@RequestMapping("/admin/disaster-reports")
 public class AdminReportController {
     private final AdminReportService adminReportService;
+    private final DisasterReportService disasterReportService;
 
-    // 전체 제보 목록 (제보 평가 및 신고수 포함)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "재난 상황 목록 조회", description = "재난 상황 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<AdminReportPageResponse> getReports(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(adminReportService.findAllReports(page, size));
+    public ResponseEntity<DisasterReportPageResponse> getAll(
+            @RequestParam(value = "disasterTypes", required = false) List<DisasterType> disasterTypes,
+            @RequestParam(value = "riskLevels", required = false) List<RiskLevel> riskLevels,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(disasterReportService.getAll(disasterTypes, riskLevels, page, size));
     }
 }

@@ -3,21 +3,15 @@ package Hongik_SafeMap_Server.domain.disaster_report.controller;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportEvaluationRequest;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
-import Hongik_SafeMap_Server.vo.DisasterType;
-import Hongik_SafeMap_Server.vo.RiskLevel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,16 +33,6 @@ public class DisasterReportController {
         return ResponseEntity.ok(disasterReportService.getById(reportId));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "재난 상황 목록 조회", description = "재난 상황 목록을 조회합니다. 관리자 제보 검토용 API입니다.")
-    @GetMapping
-    public ResponseEntity<DisasterReportPageResponse> getAll(
-            @RequestParam(value = "disasterTypes", required = false) List<DisasterType> disasterTypes,
-            @RequestParam(value = "riskLevels", required = false) List<RiskLevel> riskLevels,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(disasterReportService.getAll(disasterTypes, riskLevels, page, size));
-    }
 
     @Operation(summary = "재난 제보 평가", description = "ID로 제보를 평가합니다. 여러 종류의 평가를 남길 수 있습니다.")
     @PostMapping("/{reportId}/evaluations")
