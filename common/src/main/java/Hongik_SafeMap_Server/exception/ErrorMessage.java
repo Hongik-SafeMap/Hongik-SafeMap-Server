@@ -12,6 +12,7 @@ public class ErrorMessage {
     public static final String INVALID_CURRENT_PASSWORD = "현재 비밀번호가 올바르지 않습니다.";
     public static final String PASSWORD_SAME_AS_OLD = "새 비밀번호가 기존 비밀번호와 동일합니다";
     public static final String INVALID_LOGIN_TYPE = "유효하지 않은 로그인 타입입니다.";
+    public static final String MEMBER_IS_NOT_ADMIN = "해당 회원은 관리자가 아닙니다.";
     public static final String EMERGENCY_CONTACT_NOT_FOUND = "비상연락망이 존재하지 않습니다.";
 
     // Auth
