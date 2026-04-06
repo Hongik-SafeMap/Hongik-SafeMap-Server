@@ -29,9 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static Hongik_SafeMap_Server.exception.ErrorMessage.ALREADY_ACCUSED_DISASTER_REPORT;
-import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT;
-import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT_EVALUATION;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -156,6 +154,7 @@ public class DisasterReportService {
             groupService.calculateGroupStatistics(groupId);
         }
     }
+
     // 제보 평가하기
     @Transactional
     public void evaluateReport(Long reportId, DisasterReportEvaluationType evaluationType) {
@@ -224,10 +223,11 @@ public class DisasterReportService {
         disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
-        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
+        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId).orElse(null);
         if (evaluation == null) {
             return DisasterReportEvaluationResponse.ofDefault();
         }
+
         // 사용자의 평가 정보 조회
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
                 member.getId(), reportId).orElse(null);
@@ -265,7 +265,7 @@ public class DisasterReportService {
             throw new DisasterReportException(INVALID_DISASTER_REPORT);
         }
 
-        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(disasterReportId);
+        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(disasterReportId).orElse(null);
         int accusationCount = accusationRepository.countByDisasterReportId(disasterReportId);
 
         return DisasterReportStatisticsResponse.of(disasterReportId, evaluation, accusationCount);
