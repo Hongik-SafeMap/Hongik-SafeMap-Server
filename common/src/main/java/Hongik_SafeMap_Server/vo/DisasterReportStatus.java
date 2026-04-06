@@ -9,8 +9,7 @@ import lombok.Getter;
 public enum DisasterReportStatus {
     PENDING("검토대기"),
     APPROVED("승인"),
-    BLINDED("블라인드"),
-    FALSE("허위정보");
+    BLINDED("블라인드");
 
     @JsonValue
     private final String description;

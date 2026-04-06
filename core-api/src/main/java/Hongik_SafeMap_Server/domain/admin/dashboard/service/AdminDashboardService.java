@@ -3,9 +3,12 @@ package Hongik_SafeMap_Server.domain.admin.dashboard.service;
 import Hongik_SafeMap_Server.domain.admin.dashboard.dto.AdminDashboardResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
+import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,9 +18,25 @@ public class AdminDashboardService {
 
     public AdminDashboardResponse getDashboard() {
         long totalReports = disasterReportRepository.count();
+        long pendingReports = disasterReportRepository.countByStatus(DisasterReportStatus.PENDING);
         long totalUsers = memberRepository.count();
+        long blindedReports = disasterReportRepository.countByStatus(DisasterReportStatus.BLINDED);
+        long suspiciousUsers = 0L; // @TODO: 신뢰도 의심
         long credibleUsers = memberRepository.countByIsCredibleTrueAndStatus(MemberStatus.USER);
 
-        return AdminDashboardResponse.of(totalReports, totalUsers, credibleUsers);
+        List<AdminDashboardResponse.RecentReport> recentReports = disasterReportRepository.findTop4ByOrderByCreatedAtDesc()
+                .stream()
+                .map(AdminDashboardResponse.RecentReport::from)
+                .toList();
+
+        return AdminDashboardResponse.of(
+                totalReports,
+                pendingReports,
+                totalUsers,
+                blindedReports,
+                suspiciousUsers,
+                credibleUsers,
+                recentReports
+        );
     }
 }

@@ -25,8 +25,11 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
     // 전체 제보 수
     long count();
 
-    // 관리자 제보 검토 - 최신 제보 N개 가져오기
-    List<DisasterReport> findTop10ByOrderByCreatedAtDesc();
+    // 관리자 대시보드 - 최신 제보 4개 가져오기
+    List<DisasterReport> findTop4ByOrderByCreatedAtDesc();
+
+    // 관리자 대시보드 - 블라인드된 제보 수 조회
+    long countByStatus(DisasterReportStatus status);
 
     // 관리자 제보 검토 - 상태별 조회(승인/블라인드/허위)
     Page<DisasterReport> findByStatusOrderByCreatedAtDesc(DisasterReportStatus status, Pageable pageable);
