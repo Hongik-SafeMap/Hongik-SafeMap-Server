@@ -33,8 +33,8 @@ public class DisasterReportGroupController {
             @RequestParam(name = "longitude", required = false) Double longitude,
             @RequestParam(name = "radiusMeters", defaultValue = "10000") int radiusMeters,
             @RequestParam(name = "isActive", defaultValue = "true", required = false) Boolean isActive,
-            @RequestParam(required = false) List<DisasterType> disasterTypes,
-            @RequestParam(required = false) List<RiskLevel> riskLevels) {
+            @RequestParam(name = "disasterTypes", required = false) List<DisasterType> disasterTypes,
+            @RequestParam(name = "riskLevels", required = false) List<RiskLevel> riskLevels) {
         return ResponseEntity.ok(disasterReportGroupService.getGroupedReports(latitude, longitude, radiusMeters, isActive, disasterTypes, riskLevels));
     }
 
