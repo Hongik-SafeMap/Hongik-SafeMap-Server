@@ -5,10 +5,11 @@ import jakarta.validation.constraints.Size;
 
 public record SafetyActionRequest(
         @NotBlank
-        @Size(max = 100)
+        @Size(max = 20)
         String title,
 
         @NotBlank
-        @Size(max = 1000)  
+        @Size(max = 1000)
         String guide
-) {}
+) {
+}

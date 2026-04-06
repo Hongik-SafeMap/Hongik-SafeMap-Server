@@ -13,7 +13,7 @@ public record SafetyTipUpdateRequest(
         String title,
 
         @NotBlank
-        @Size(max = 100)
+        @Size(max = 1000)
         String detail,
 
         List<@NotBlank @Size(max = 100) String> supplies,
