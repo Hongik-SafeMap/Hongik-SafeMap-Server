@@ -62,7 +62,7 @@ public class DisasterReportService {
     // 전체 제보 목록 (관리자 전체 제보/지도)
     public DisasterReportPageResponse getAll(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        
+
         Page<DisasterReportListResponse> pageResult;
         if ((disasterTypes == null || disasterTypes.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
             // 필터 없음 - 전체 조회
@@ -81,9 +81,9 @@ public class DisasterReportService {
             pageResult = disasterReportRepository.findByRiskLevelInOrderByCreatedAtDesc(riskLevels, pageable)
                     .map(DisasterReportListResponse::of);
         }
-        
+
         List<DisasterReportListResponse> reports = pageResult.getContent();
-        
+
         return new DisasterReportPageResponse(
                 reports,
                 pageResult.getNumber(),
@@ -120,14 +120,5 @@ public class DisasterReportService {
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
         disasterReport.blind();
-    }
-
-    // 관리자 제보 허위 처리
-    @Transactional
-    public void markFalse(Long reportId) {
-        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
-                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
-
-        disasterReport.markFalse();
     }
 }

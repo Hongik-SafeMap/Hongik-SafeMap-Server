@@ -86,16 +86,14 @@ public class DisasterReport extends BaseTimeEntity {
         this.member = member;
     }
 
-    /** 필요하면 setter 대신 의미있는 메서드로만 상태 변경 */
+    /**
+     * 필요하면 setter 대신 의미있는 메서드로만 상태 변경
+     */
     public void approve() {
         this.status = DisasterReportStatus.APPROVED;
     }
 
     public void blind() {
         this.status = DisasterReportStatus.BLINDED;
-    }
-
-    public void markFalse() {
-        this.status = DisasterReportStatus.FALSE;
     }
 }
