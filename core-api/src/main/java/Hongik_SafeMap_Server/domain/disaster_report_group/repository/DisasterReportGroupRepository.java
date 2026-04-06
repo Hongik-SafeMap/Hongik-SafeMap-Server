@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.disaster_report_group.repository;
 
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.vo.RiskLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,4 +41,25 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
             "WHERE drg.reportCount > 0 " +
             "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
     List<DisasterReportGroup> findAllGroupsSummary();
+
+    // 활성 그룹들의 요약 정보 조회 (필터링 포함)
+    @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "WHERE drg.isActive = true " +
+            "AND drg.reportCount > 0 " +
+            "AND (:disasterTypes IS NULL OR drg.disasterType IN :disasterTypes) " +
+            "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
+            "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
+    List<DisasterReportGroup> findActiveGroupsWithFilters(
+            @Param("disasterTypes") List<DisasterType> disasterTypes,
+            @Param("riskLevels") List<Hongik_SafeMap_Server.vo.RiskLevel> riskLevels);
+
+    // 모든 그룹들의 요약 정보 조회 (필터링 포함)
+    @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "WHERE drg.reportCount > 0 " +
+            "AND (:disasterTypes IS NULL OR drg.disasterType IN :disasterTypes) " +
+            "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
+            "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
+    List<DisasterReportGroup> findAllGroupsWithFilters(
+            @Param("disasterTypes") List<DisasterType> disasterTypes,
+            @Param("riskLevels") List<Hongik_SafeMap_Server.vo.RiskLevel> riskLevels);
 }

@@ -1,12 +1,11 @@
 package Hongik_SafeMap_Server.domain.member.controller;
 
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.member.dto.request.MemberPasswordChangeRequest;
 import Hongik_SafeMap_Server.domain.member.dto.response.MyPageResponse;
 import Hongik_SafeMap_Server.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,7 @@ public class MemberController {
 
     // 내 제보 조회
     @GetMapping("/me/reports")
-    public ResponseEntity<Page<DisasterReportListResponse>> getMyReports(
+    public ResponseEntity<DisasterReportPageResponse> getMyReports(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(memberService.getMyReports(page, size));

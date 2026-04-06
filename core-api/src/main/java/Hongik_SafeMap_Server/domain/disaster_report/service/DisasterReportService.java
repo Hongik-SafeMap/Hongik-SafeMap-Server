@@ -113,12 +113,25 @@ public class DisasterReportService {
     }
 
     // 내 제보 목록(마이 페이지)
-    public Page<DisasterReportListResponse> getMyReports(int page, int size) {
+    public DisasterReportPageResponse getMyReports(int page, int size) {
         Member member = memberUtil.getLoggedInMember();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        return disasterReportRepository.findByMemberOrderByCreatedAtDesc(member, pageable)
-                .map(DisasterReportListResponse::of);
+        Page<DisasterReport> reportPage = disasterReportRepository.findByMemberOrderByCreatedAtDesc(member, pageable);
+        
+        List<DisasterReportListResponse> reports = reportPage.getContent().stream()
+                .map(DisasterReportListResponse::of)
+                .toList();
+
+        return new DisasterReportPageResponse(
+                reports,
+                reportPage.getNumber(),
+                reportPage.getSize(),
+                reportPage.getTotalElements(),
+                reportPage.getTotalPages(),
+                reportPage.isFirst(),
+                reportPage.isLast()
+        );
     }
 
     // 관리자 제보 승인 처리

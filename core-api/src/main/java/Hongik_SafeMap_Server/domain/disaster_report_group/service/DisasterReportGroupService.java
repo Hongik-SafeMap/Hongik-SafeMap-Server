@@ -9,6 +9,7 @@ import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDi
 import Hongik_SafeMap_Server.domain.disaster_report_group.repository.DisasterReportGroupRepository;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.util.DistanceUtil;
+import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -122,10 +123,17 @@ public class DisasterReportGroupService {
     }
 
     /**
-     * 그룹 목록 조회 (활성 여부에 따라)
+     * 그룹 목록 조회 (활성 여부, 재난 유형, 위험 수준에 따라 필터링)
      */
-    public List<DisasterReportGroup> getGroups(boolean activeOnly) {
-        return activeOnly ? groupRepository.findActiveGroupsSummary() : groupRepository.findAllGroupsSummary();
+    public List<DisasterReportGroup> getGroups(Boolean activeOnly, List<DisasterType> disasterTypes, List<RiskLevel> riskLevels) {
+        // 필터가 없는 경우 기존 메소드 사용
+        if ((disasterTypes == null || disasterTypes.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
+            return activeOnly ? groupRepository.findActiveGroupsSummary() : groupRepository.findAllGroupsSummary();
+        }
+
+        return activeOnly ?
+                groupRepository.findActiveGroupsWithFilters(disasterTypes, riskLevels) :
+                groupRepository.findAllGroupsWithFilters(disasterTypes, riskLevels);
     }
 
 
@@ -171,8 +179,8 @@ public class DisasterReportGroupService {
 
     // 지역별/재난유형별 그룹화 조회 (지도 클러스터링용) - 그룹 테이블 기반
     @Transactional(readOnly = true)
-    public List<GroupedDisasterReportResponse> getGroupedReports(Double userLatitude, Double userLongitude, int radiusMeters, Boolean isActive) {
-        List<DisasterReportGroup> groups = getGroups(isActive);
+    public List<GroupedDisasterReportResponse> getGroupedReports(Double userLatitude, Double userLongitude, int radiusMeters, Boolean isActive, List<DisasterType> disasterTypes, List<RiskLevel> riskLevels) {
+        List<DisasterReportGroup> groups = getGroups(isActive, disasterTypes, riskLevels);
 
         // 사용자 위치가 제공된 경우 거리 필터링
         if (userLatitude != null && userLongitude != null) {
