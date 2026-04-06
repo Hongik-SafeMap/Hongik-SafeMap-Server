@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT_EVALUATION;
 
 @Service
 @RequiredArgsConstructor
@@ -225,7 +226,7 @@ public class DisasterReportService {
     @Transactional
     public void deleteEvaluation(Long reportId) {
         Member member = memberUtil.getLoggedInMember();
-        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+        disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
@@ -234,7 +235,7 @@ public class DisasterReportService {
 
         if (userEvaluation != null) {
             DisasterReportEvaluation evaluation = evaluationRepository.findById(reportId)
-                    .orElseGet(() -> new DisasterReportEvaluation(disasterReport));
+                    .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT_EVALUATION));
             evaluation.decrease(userEvaluation.getEvaluationType());
             evaluationRepository.save(evaluation);
             userEvaluationRepository.delete(userEvaluation);
@@ -247,7 +248,7 @@ public class DisasterReportService {
         Member member = memberUtil.getLoggedInMember();
         disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
-        
+
         DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
         if (evaluation == null) {
             return DisasterReportEvaluationResponse.ofDefault();
