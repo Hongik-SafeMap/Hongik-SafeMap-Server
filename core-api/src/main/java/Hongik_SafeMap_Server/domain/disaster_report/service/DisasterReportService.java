@@ -1,16 +1,22 @@
 package Hongik_SafeMap_Server.domain.disaster_report.service;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
+import Hongik_SafeMap_Server.domain.disaster_report.domain.UserEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
+import Hongik_SafeMap_Server.domain.disaster_report.repository.UserEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.util.MemberUtil;
+import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
@@ -25,12 +31,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT_EVALUATION;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DisasterReportService {
     private final DisasterReportRepository disasterReportRepository;
+    private final DisasterReportEvaluationRepository evaluationRepository;
+    private final UserEvaluationRepository userEvaluationRepository;
     private final DisasterReportGroupService groupService;
     private final MemberUtil memberUtil;
 
@@ -145,5 +154,87 @@ public class DisasterReportService {
         if (groupId != null) {
             groupService.calculateGroupStatistics(groupId);
         }
+    }
+    // 제보 평가하기
+    @Transactional
+    public void evaluateReport(Long reportId, DisasterReportEvaluationType evaluationType) {
+        Member member = memberUtil.getLoggedInMember();
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        UserEvaluation existingUserEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
+                member.getId(), reportId).orElse(null);
+
+        // 이미 해당 타입으로 평가함
+        if (existingUserEvaluation != null && existingUserEvaluation.hasEvaluationType(evaluationType)) {
+            return;
+        }
+
+        DisasterReportEvaluation evaluation = evaluationRepository.findById(reportId)
+                .orElseGet(() -> new DisasterReportEvaluation(disasterReport));
+
+        // 이전에 다른 평가를 했다면 해당 평가 카운트 감소
+        if (existingUserEvaluation != null && existingUserEvaluation.hasEvaluation()) {
+            DisasterReportEvaluationType previousType = existingUserEvaluation.getEvaluationType();
+            evaluation.decrease(previousType);
+        }
+
+        // 사용자 평가 생성/업데이트
+        UserEvaluation userEvaluation;
+        if (existingUserEvaluation == null) {
+            userEvaluation = new UserEvaluation(member, disasterReport, evaluationType);
+        } else {
+            existingUserEvaluation.updateEvaluation(evaluationType);
+            userEvaluation = existingUserEvaluation;
+        }
+
+        // 새 평가 카운트 증가
+        evaluation.increase(evaluationType);
+
+        // 저장
+        userEvaluationRepository.save(userEvaluation);
+        evaluationRepository.save(evaluation);
+    }
+
+    // 제보 평가 취소하기
+    @Transactional
+    public void deleteEvaluation(Long reportId) {
+        Member member = memberUtil.getLoggedInMember();
+        disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
+                        member.getId(), reportId)
+                .orElse(null);
+
+        if (userEvaluation != null) {
+            DisasterReportEvaluation evaluation = evaluationRepository.findById(reportId)
+                    .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT_EVALUATION));
+            evaluation.decrease(userEvaluation.getEvaluationType());
+            evaluationRepository.save(evaluation);
+            userEvaluationRepository.delete(userEvaluation);
+        }
+    }
+
+    // 제보 평가 조회
+    @Transactional(readOnly = true)
+    public DisasterReportEvaluationResponse getReportEvaluation(Long reportId) {
+        Member member = memberUtil.getLoggedInMember();
+        disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
+        if (evaluation == null) {
+            return DisasterReportEvaluationResponse.ofDefault();
+        }
+        // 사용자의 평가 정보 조회
+        UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
+                member.getId(), reportId).orElse(null);
+
+        boolean userEvaluatedHelpful = userEvaluation != null && userEvaluation.hasEvaluationType(DisasterReportEvaluationType.HELPFUL);
+        boolean userEvaluatedNotHelpful = userEvaluation != null && userEvaluation.hasEvaluationType(DisasterReportEvaluationType.NOT_HELPFUL);
+
+        return DisasterReportEvaluationResponse.of(evaluation,
+                userEvaluatedHelpful, userEvaluatedNotHelpful);
     }
 }

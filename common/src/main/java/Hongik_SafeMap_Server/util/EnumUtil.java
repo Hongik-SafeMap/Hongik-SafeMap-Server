@@ -25,6 +25,7 @@ public class EnumUtil {
             case "ResourceReportStatus" -> "상태";
             case "DisasterType" -> "재난 유형";
             case "RiskLevel" -> "긴급도";
+            case "DisasterReportEvaluationType" -> "평가 유형";
             default -> simpleName;
         };
     }

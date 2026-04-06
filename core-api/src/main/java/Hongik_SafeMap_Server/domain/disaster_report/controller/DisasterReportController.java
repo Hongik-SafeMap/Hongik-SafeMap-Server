@@ -1,11 +1,15 @@
 package Hongik_SafeMap_Server.domain.disaster_report.controller;
 
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportEvaluationRequest;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,29 +21,52 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/disaster-reports")
+@Tag(name = "재난 제보", description = "재난 제보 관련 API")
 public class DisasterReportController {
     private final DisasterReportService disasterReportService;
 
-    // 긴급 제보 등록
+    @Operation(summary = "재난 상황 제보", description = "재난 상황을 등록합니다.")
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody DisasterReportCreateRequest createRequest) {
         Long reportId = disasterReportService.create(createRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(reportId);
     }
 
-    // 제보 조회(일반, 관리자 공용)
+    @Operation(summary = "재난 상황 상세 조회", description = "재난 상황을 상세 조회합니다. 일반/관리자 공용 API입니다.")
     @GetMapping("/{reportId}")
-    public ResponseEntity<DisasterReportResponse> getById(@PathVariable Long reportId) {
+    public ResponseEntity<DisasterReportResponse> getById(@PathVariable("reportId") Long reportId) {
         return ResponseEntity.ok(disasterReportService.getById(reportId));
     }
 
-    // 전체 제보 목록 조회 (지도/관리자 제보검토용)
+    @Operation(summary = "재난 상황 목록 조회", description = "재난 상황 목록을 조회합니다. 관리자 제보 검토용 API입니다.")
     @GetMapping
     public ResponseEntity<DisasterReportPageResponse> getAll(
-            @RequestParam(required = false) List<DisasterType> disasterTypes,
-            @RequestParam(required = false) List<RiskLevel> riskLevels,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(value = "disasterTypes", required = false) List<DisasterType> disasterTypes,
+            @RequestParam(value = "riskLevels", required = false) List<RiskLevel> riskLevels,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         return ResponseEntity.ok(disasterReportService.getAll(disasterTypes, riskLevels, page, size));
+    }
+
+    @Operation(summary = "재난 제보 평가", description = "ID로 제보를 평가합니다. 여러 종류의 평가를 남길 수 있습니다.")
+    @PostMapping("/{reportId}/evaluations")
+    public ResponseEntity<Void> createReportEvaluation(
+            @PathVariable("reportId") Long reportId,
+            @Valid @RequestBody DisasterReportEvaluationRequest request) {
+        disasterReportService.evaluateReport(reportId, request.evaluationType());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "재난 제보 평가 취소", description = "ID로 제보 평가를 취소합니다.")
+    @DeleteMapping("/{reportId}/evaluations")
+    public ResponseEntity<Void> deleteReportEvaluation(@PathVariable("reportId") Long reportId) {
+        disasterReportService.deleteEvaluation(reportId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "재난 제보 평가 조회", description = "ID로 제보를 평가를 조회합니다.")
+    @GetMapping("/{reportId}/evaluations")
+    public ResponseEntity<DisasterReportEvaluationResponse> getReportEvaluation(@PathVariable("reportId") Long reportId) {
+        return ResponseEntity.ok(disasterReportService.getReportEvaluation(reportId));
     }
 }
