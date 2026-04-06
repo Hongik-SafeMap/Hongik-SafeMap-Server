@@ -1,13 +1,12 @@
 package Hongik_SafeMap_Server.domain.disaster_report.service;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportAccusation;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.UserEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.*;
+import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportAccusationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.UserEvaluationRepository;
@@ -30,8 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT;
-import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPORT_EVALUATION;
+import static Hongik_SafeMap_Server.exception.ErrorMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +37,7 @@ import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPO
 public class DisasterReportService {
     private final DisasterReportRepository disasterReportRepository;
     private final DisasterReportEvaluationRepository evaluationRepository;
+    private final DisasterReportAccusationRepository accusationRepository;
     private final UserEvaluationRepository userEvaluationRepository;
     private final DisasterReportGroupService groupService;
     private final MemberUtil memberUtil;
@@ -155,6 +154,7 @@ public class DisasterReportService {
             groupService.calculateGroupStatistics(groupId);
         }
     }
+
     // 제보 평가하기
     @Transactional
     public void evaluateReport(Long reportId, DisasterReportEvaluationType evaluationType) {
@@ -223,10 +223,11 @@ public class DisasterReportService {
         disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
-        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId);
+        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(reportId).orElse(null);
         if (evaluation == null) {
             return DisasterReportEvaluationResponse.ofDefault();
         }
+
         // 사용자의 평가 정보 조회
         UserEvaluation userEvaluation = userEvaluationRepository.findByMemberIdAndDisasterReportId(
                 member.getId(), reportId).orElse(null);
@@ -236,5 +237,37 @@ public class DisasterReportService {
 
         return DisasterReportEvaluationResponse.of(evaluation,
                 userEvaluatedHelpful, userEvaluatedNotHelpful);
+    }
+
+    @Transactional
+    public void accuseReport(Long disasterReportId) {
+        Member member = memberUtil.getLoggedInMember();
+
+        DisasterReport disasterReport = disasterReportRepository.findById(disasterReportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        if (accusationRepository.existsByMemberIdAndDisasterReportId(member.getId(), disasterReportId)) {
+            throw new DisasterReportException(ALREADY_ACCUSED_DISASTER_REPORT);
+        }
+
+        DisasterReportAccusation accusation = DisasterReportAccusation.builder()
+                .member(member)
+                .disasterReport(disasterReport)
+                .build();
+
+        accusationRepository.save(accusation);
+    }
+
+
+    // 도움 안됨 + 도움 됨 + 신고 count
+    public DisasterReportStatisticsResponse getStatistics(Long disasterReportId) {
+        if (!disasterReportRepository.existsById(disasterReportId)) {
+            throw new DisasterReportException(INVALID_DISASTER_REPORT);
+        }
+
+        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(disasterReportId).orElse(null);
+        int accusationCount = accusationRepository.countByDisasterReportId(disasterReportId);
+
+        return DisasterReportStatisticsResponse.of(disasterReportId, evaluation, accusationCount);
     }
 }
