@@ -12,6 +12,7 @@ public class ErrorMessage {
     public static final String INVALID_CURRENT_PASSWORD = "현재 비밀번호가 올바르지 않습니다.";
     public static final String PASSWORD_SAME_AS_OLD = "새 비밀번호가 기존 비밀번호와 동일합니다";
     public static final String INVALID_LOGIN_TYPE = "유효하지 않은 로그인 타입입니다.";
+    public static final String MEMBER_IS_NOT_ADMIN = "해당 회원은 관리자가 아닙니다.";
     public static final String EMERGENCY_CONTACT_NOT_FOUND = "비상연락망이 존재하지 않습니다.";
 
     // Auth
@@ -22,7 +23,6 @@ public class ErrorMessage {
     public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
     public static final String INVALID_DISASTER_REPORT_EVALUATION = "해당 제보의 제보 평가 정보를 찾을 수 없습니다.";
     public static final String CANNOT_APPROVE_BLINDED_REPORT = "블라인드 처리된 제보는 승인할 수 없습니다.";
-    public static final String CANNOT_APPROVE_FALSE_REPORT = "허위로 처리된 제보는 승인할 수 없습니다.";
 
     // DisasterReportGroup
     public static final String DISASTER_REPORT_GROUP_NOT_FOUND = "해당 id를 가진 그룹을 찾을 수 없습니다.";
@@ -32,6 +32,9 @@ public class ErrorMessage {
 
     // ResourceReport
     public static final String RESOURCE_REPORT_NOT_FOUND = "해당 id를 가진 자원 게시글을 찾을 수 없습니다.";
+
+    // SafetyTip
+    public static final String SAFETY_TIP_NOT_FOUND = "해당 재난 유형을 찾을 수 없습니다.";
 
     // 게시물 공통
     public static final String REPORT_DELETE_UNAUTHORIZED = "본인이 작성한 게시물만 삭제할 수 있습니다";
