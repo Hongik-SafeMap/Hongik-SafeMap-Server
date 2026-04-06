@@ -6,8 +6,10 @@ import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportL
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
+import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
+import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.DisasterType;
@@ -29,6 +31,7 @@ import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_DISASTER_REPO
 @Transactional(readOnly = true)
 public class DisasterReportService {
     private final DisasterReportRepository disasterReportRepository;
+    private final DisasterReportGroupService groupService;
     private final MemberUtil memberUtil;
 
     // 긴급 제보 등록
@@ -48,7 +51,13 @@ public class DisasterReportService {
                 .member(member)
                 .build();
 
-        return disasterReportRepository.save(disasterReport).getId();
+        // 제보 저장
+        DisasterReport savedReport = disasterReportRepository.save(disasterReport);
+
+        // 그룹에 할당 (@TODO: 비동기 처리)
+        groupService.assignReportToGroup(savedReport);
+
+        return savedReport.getId();
     }
 
     // 제보 조회 (일반/관리자 공용)
@@ -110,6 +119,14 @@ public class DisasterReportService {
         DisasterReport disasterReport = disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
+        // 이미 처리된 제보인지 검증(@TODO: 변경 가능하게 수정 - 통계 업데이트 문제 때문에 임시 에러 처리)
+        if (disasterReport.getStatus() == DisasterReportStatus.BLINDED) {
+            throw new DisasterReportException(ErrorMessage.CANNOT_APPROVE_BLINDED_REPORT);
+        }
+        if (disasterReport.getStatus() == DisasterReportStatus.FALSE) {
+            throw new DisasterReportException(ErrorMessage.CANNOT_APPROVE_FALSE_REPORT);
+        }
+
         disasterReport.approve();
     }
 
@@ -119,6 +136,40 @@ public class DisasterReportService {
         DisasterReport disasterReport = disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
+        Long groupId = null;
+        // 그룹에서 제거 (블라인드된 제보는 그룹 통계에서 제외)
+        if (disasterReport.getGroup() != null) {
+            groupId = disasterReport.getGroup().getId();
+            disasterReport.getGroup().removeReport(disasterReport);
+        }
+
         disasterReport.blind();
+
+        // 그룹 통계 재계산
+        if (groupId != null) {
+            groupService.calculateGroupStatistics(groupId);
+        }
     }
+
+    // 관리자 제보 허위 처리
+    @Transactional
+    public void markFalse(Long reportId) {
+        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
+
+        Long groupId = null;
+        // 그룹에서 제거 (허위 제보는 그룹 통계에서 제외)
+        if (disasterReport.getGroup() != null) {
+            groupId = disasterReport.getGroup().getId();
+            disasterReport.getGroup().removeReport(disasterReport);
+        }
+
+        disasterReport.markFalse();
+
+        // 그룹 통계 재계산
+        if (groupId != null) {
+            groupService.calculateGroupStatistics(groupId);
+        }
+    }
+
 }

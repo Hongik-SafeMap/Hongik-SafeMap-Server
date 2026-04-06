@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -57,4 +58,11 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
                 group by m.id, m.name, m.email, m.isCredible
             """)
     List<AdminMemberResponse> findAdminMemberList();
+
+    // 그룹 아이디로 제보 목록 조회
+    List<DisasterReport> findByGroupId(@Param("groupId") Long groupId);
+
+    // 여러 그룹의 제보들 조회
+    @Query("SELECT dr FROM DisasterReport dr WHERE dr.group.id IN :groupIds")
+    List<DisasterReport> findByGroupIdIn(@Param("groupIds") List<Long> groupIds);
 }
