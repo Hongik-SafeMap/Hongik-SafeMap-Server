@@ -1,11 +1,13 @@
 package Hongik_SafeMap_Server.domain.admin.activity.service;
 
 import Hongik_SafeMap_Server.domain.admin.activity.domain.AdminActivityLog;
+import Hongik_SafeMap_Server.domain.admin.activity.dto.response.AdminActivityLogPageResponse;
 import Hongik_SafeMap_Server.domain.admin.activity.dto.response.AdminActivityLogResponse;
 import Hongik_SafeMap_Server.domain.admin.activity.repository.AdminActivityLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,9 +41,23 @@ public class AdminActivityLogService {
         }
     }
 
-    public Page<AdminActivityLogResponse> getActivityLogs(int page, int size) {
+    public AdminActivityLogPageResponse getActivityLogs(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<AdminActivityLog> logs = adminActivityLogRepository.findAll(pageable);
-        return logs.map(AdminActivityLogResponse::of);
+        Page<AdminActivityLog> pageResult = adminActivityLogRepository.findAll(pageable);
+        
+        List<AdminActivityLogResponse> logs = pageResult.getContent()
+                .stream()
+                .map(AdminActivityLogResponse::of)
+                .toList();
+        
+        return new AdminActivityLogPageResponse(
+                logs,
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages(),
+                pageResult.isFirst(),
+                pageResult.isLast()
+        );
     }
 }
