@@ -77,25 +77,45 @@ public class DisasterReportService {
     }
 
     // 전체 제보 목록 (관리자 전체 제보/지도)
-    public DisasterReportPageResponse getAll(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, int page, int size) {
+    public DisasterReportPageResponse getAll(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Page<DisasterReportListResponse> pageResult;
-        if ((disasterTypes == null || disasterTypes.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
+        boolean hasDisasterTypeFilter = disasterTypes != null && !disasterTypes.isEmpty();
+        boolean hasRiskLevelFilter = riskLevels != null && !riskLevels.isEmpty();
+        boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
+        
+        if (!hasDisasterTypeFilter && !hasRiskLevelFilter && !hasStatusFilter) {
             // 필터 없음 - 전체 조회
             pageResult = disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
                     .map(DisasterReportListResponse::of);
-        } else if (disasterTypes != null && !disasterTypes.isEmpty() && riskLevels != null && !riskLevels.isEmpty()) {
+        } else if (hasDisasterTypeFilter && hasRiskLevelFilter && hasStatusFilter) {
+            // 재난 유형, 긴급도, 상태 모두 필터링
+            pageResult = disasterReportRepository.findByDisasterTypeInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(disasterTypes, riskLevels, statuses, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (hasDisasterTypeFilter && hasRiskLevelFilter) {
             // 재난 유형과 긴급도 둘 다 필터링
             pageResult = disasterReportRepository.findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(disasterTypes, riskLevels, pageable)
                     .map(DisasterReportListResponse::of);
-        } else if (disasterTypes != null && !disasterTypes.isEmpty()) {
+        } else if (hasDisasterTypeFilter && hasStatusFilter) {
+            // 재난 유형과 상태 필터링
+            pageResult = disasterReportRepository.findByDisasterTypeInAndStatusInOrderByCreatedAtDesc(disasterTypes, statuses, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (hasRiskLevelFilter && hasStatusFilter) {
+            // 긴급도와 상태 필터링
+            pageResult = disasterReportRepository.findByRiskLevelInAndStatusInOrderByCreatedAtDesc(riskLevels, statuses, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (hasDisasterTypeFilter) {
             // 재난 유형만 필터링
             pageResult = disasterReportRepository.findByDisasterTypeInOrderByCreatedAtDesc(disasterTypes, pageable)
                     .map(DisasterReportListResponse::of);
-        } else {
+        } else if (hasRiskLevelFilter) {
             // 긴급도만 필터링
             pageResult = disasterReportRepository.findByRiskLevelInOrderByCreatedAtDesc(riskLevels, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else {
+            // 상태만 필터링
+            pageResult = disasterReportRepository.findByStatusInOrderByCreatedAtDesc(statuses, pageable)
                     .map(DisasterReportListResponse::of);
         }
 
