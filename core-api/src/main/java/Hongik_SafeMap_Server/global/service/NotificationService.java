@@ -1,6 +1,8 @@
 package Hongik_SafeMap_Server.global.service;
 
-import Hongik_SafeMap_Server.domain.notification_preference.repository.NotificationPreferenceRepository;
+import Hongik_SafeMap_Server.domain.notification.domain.Notification;
+import Hongik_SafeMap_Server.domain.notification.repository.NotificationPreferenceRepository;
+import Hongik_SafeMap_Server.domain.notification.repository.NotificationRepository;
 import Hongik_SafeMap_Server.global.dto.request.MessagePushServiceRequest;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
     private final NotificationPreferenceRepository notificationPreferenceRepository;
+    private final NotificationRepository notificationRepository;
     private final FcmService fcmService;
 
     public void sendDisasterReportNotification(DisasterType disasterType, String locationName) {
@@ -31,9 +34,13 @@ public class NotificationService {
 
         // 각 사용자에게 푸시 알림 전송
         int successCount = 0;
-        
+
         for (var preference : enabledPreferences) {
             String fcmToken = preference.getMember().getFcmToken();
+
+            // 알림 이력 저장
+            Notification notification = Notification.of(preference.getMember(), title, content);
+            notificationRepository.save(notification);
 
             if (fcmToken != null && !fcmToken.isEmpty()) {
                 try {

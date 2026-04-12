@@ -1,6 +1,6 @@
-package Hongik_SafeMap_Server.domain.notification_preference.dto.response;
+package Hongik_SafeMap_Server.domain.notification.dto.response;
 
-import Hongik_SafeMap_Server.domain.notification_preference.domain.NotificationPreference;
+import Hongik_SafeMap_Server.domain.notification.domain.NotificationPreference;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import lombok.Builder;
 

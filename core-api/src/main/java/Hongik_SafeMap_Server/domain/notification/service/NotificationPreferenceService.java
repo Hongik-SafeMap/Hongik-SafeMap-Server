@@ -1,9 +1,9 @@
-package Hongik_SafeMap_Server.domain.notification_preference.service;
+package Hongik_SafeMap_Server.domain.notification.service;
 
-import Hongik_SafeMap_Server.domain.notification_preference.domain.NotificationPreference;
-import Hongik_SafeMap_Server.domain.notification_preference.dto.request.NotificationPreferenceRequest;
-import Hongik_SafeMap_Server.domain.notification_preference.dto.response.NotificationPreferenceResponse;
-import Hongik_SafeMap_Server.domain.notification_preference.repository.NotificationPreferenceRepository;
+import Hongik_SafeMap_Server.domain.notification.domain.NotificationPreference;
+import Hongik_SafeMap_Server.domain.notification.dto.request.NotificationPreferenceRequest;
+import Hongik_SafeMap_Server.domain.notification.dto.response.NotificationPreferenceResponse;
+import Hongik_SafeMap_Server.domain.notification.repository.NotificationPreferenceRepository;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import lombok.RequiredArgsConstructor;

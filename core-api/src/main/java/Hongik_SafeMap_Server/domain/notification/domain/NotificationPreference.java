@@ -1,4 +1,4 @@
-package Hongik_SafeMap_Server.domain.notification_preference.domain;
+package Hongik_SafeMap_Server.domain.notification.domain;
 
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.DisasterType;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NotificationPreference {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_preference_id")
