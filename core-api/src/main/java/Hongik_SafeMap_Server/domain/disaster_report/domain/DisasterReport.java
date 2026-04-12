@@ -60,6 +60,10 @@ public class DisasterReport extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private DisasterReportStatus status;
 
+    // 관리자 검토 의견
+    @Column(name = "review_comment", length = 1000)
+    private String reviewComment;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -100,6 +104,11 @@ public class DisasterReport extends BaseTimeEntity {
 
     public void blind() {
         this.status = DisasterReportStatus.BLINDED;
+    }
+
+    public void updateStatus(DisasterReportStatus status, String reviewComment) {
+        this.status = status;
+        this.reviewComment = reviewComment;
     }
 
     public void updateGroup(DisasterReportGroup group) {

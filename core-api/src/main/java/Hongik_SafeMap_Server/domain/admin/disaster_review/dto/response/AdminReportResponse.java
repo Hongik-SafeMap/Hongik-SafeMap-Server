@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -13,6 +14,12 @@ public record AdminReportResponse(
 
         @Schema(description = "제보 내용", example = "도로에 싱크홀이 발생했습니다")
         String description,
+
+        @Schema(description = "제보 상태")
+        DisasterReportStatus status,
+
+        @Schema(description = "검토 의견", example = "신뢰할 수 있는 제보로 판단됩니다.")
+        String reviewComment,
 
         @Schema(description = "도움됨 수", example = "25")
         int helpfulCount,
@@ -28,6 +35,8 @@ public record AdminReportResponse(
                 disasterReport.getId(),
                 disasterReport.getDisasterType(),
                 disasterReport.getDisasterDescription(),
+                disasterReport.getStatus(),
+                disasterReport.getReviewComment(),
                 0,
                 0,
                 0
@@ -44,6 +53,8 @@ public record AdminReportResponse(
                 disasterReport.getId(),
                 disasterReport.getDisasterType(),
                 disasterReport.getDisasterDescription(),
+                disasterReport.getStatus(),
+                disasterReport.getReviewComment(),
                 helpfulCount,
                 notHelpfulCount,
                 accusationCount
