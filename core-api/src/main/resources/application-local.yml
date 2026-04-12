@@ -6,3 +6,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+fcm:
+  validate_only: true

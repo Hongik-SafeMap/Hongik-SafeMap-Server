@@ -12,4 +12,6 @@ public interface NotificationPreferenceRepository extends JpaRepository<Notifica
     List<NotificationPreference> findByMemberId(Long memberId);
 
     Optional<NotificationPreference> findByMemberIdAndDisasterType(Long memberId, DisasterType disasterType);
+
+    List<NotificationPreference> findByDisasterTypeAndIsEnabledTrue(DisasterType disasterType);
 }

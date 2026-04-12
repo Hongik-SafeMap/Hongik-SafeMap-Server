@@ -10,9 +10,9 @@ public record MessagePushRequest(
         MessageRequest message
 ) {
 
-    public static MessagePushRequest of(MessagePushServiceRequest request) {
+    public static MessagePushRequest of(MessagePushServiceRequest request, boolean validateOnly) {
         return MessagePushRequest.builder()
-                .validateOnly(true) // @FIXME: 테스트용으로 validateOnly 모드 활성화
+                .validateOnly(validateOnly) // 개발 환경에서만 validateOnly 모드 활성화
                 .message(MessageRequest.of(request))
                 .build();
     }
