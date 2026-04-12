@@ -1,10 +1,10 @@
-package Hongik_SafeMap_Server.domain.admin.disaster_review;
+package Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.vo.DisasterType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record AdminReportListResponse(
+public record AdminReportResponse(
         @Schema(description = "제보 ID", example = "1")
         Long reportId,
 
@@ -23,8 +23,8 @@ public record AdminReportListResponse(
         @Schema(description = "신고 수", example = "2")
         int accusationCount
 ) {
-    public static AdminReportListResponse of(DisasterReport disasterReport) {
-        return new AdminReportListResponse(
+    public static AdminReportResponse of(DisasterReport disasterReport) {
+        return new AdminReportResponse(
                 disasterReport.getId(),
                 disasterReport.getDisasterType(),
                 disasterReport.getDisasterDescription(),
@@ -34,13 +34,13 @@ public record AdminReportListResponse(
         );
     }
 
-    public static AdminReportListResponse of(
+    public static AdminReportResponse of(
             DisasterReport disasterReport,
             int helpfulCount,
             int notHelpfulCount,
             int accusationCount
     ) {
-        return new AdminReportListResponse(
+        return new AdminReportResponse(
                 disasterReport.getId(),
                 disasterReport.getDisasterType(),
                 disasterReport.getDisasterDescription(),

@@ -1,5 +1,7 @@
-package Hongik_SafeMap_Server.domain.admin.disaster_review;
+package Hongik_SafeMap_Server.domain.admin.disaster_review.service;
 
+import Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response.AdminReportResponse;
+import Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response.AdminReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportAccusationRepository;
@@ -50,7 +52,7 @@ public class AdminReportService {
                 ));
 
         // 통계와 함께 응답 생성
-        List<AdminReportListResponse> reportsWithStatistics = reports.stream()
+        List<AdminReportResponse> reportsWithStatistics = reports.stream()
                 .map(report -> {
                     Long reportId = report.getId();
                     DisasterReportEvaluation evaluation = evaluationMap.get(reportId);
@@ -58,7 +60,7 @@ public class AdminReportService {
                     int notHelpfulCount = evaluation != null ? evaluation.getNotHelpfulCount() : 0;
                     int accusationCount = accusationCountMap.getOrDefault(reportId, 0);
 
-                    return AdminReportListResponse.of(report, helpfulCount, notHelpfulCount, accusationCount);
+                    return AdminReportResponse.of(report, helpfulCount, notHelpfulCount, accusationCount);
                 })
                 .collect(Collectors.toList());
 

@@ -1,5 +1,6 @@
-package Hongik_SafeMap_Server.domain.admin.disaster_review;
+package Hongik_SafeMap_Server.domain.admin.disaster_review.controller;
 
+import Hongik_SafeMap_Server.domain.admin.disaster_review.service.AdminReportService;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
 import Hongik_SafeMap_Server.vo.DisasterType;
