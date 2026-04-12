@@ -5,7 +5,10 @@ import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportAccusat
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.UserEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.*;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportAccusationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
@@ -84,7 +87,7 @@ public class DisasterReportService {
         boolean hasDisasterTypeFilter = disasterTypes != null && !disasterTypes.isEmpty();
         boolean hasRiskLevelFilter = riskLevels != null && !riskLevels.isEmpty();
         boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
-        
+
         if (!hasDisasterTypeFilter && !hasRiskLevelFilter && !hasStatusFilter) {
             // 필터 없음 - 전체 조회
             pageResult = disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
@@ -138,7 +141,7 @@ public class DisasterReportService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Page<DisasterReport> reportPage = disasterReportRepository.findByMemberOrderByCreatedAtDesc(member, pageable);
-        
+
         List<DisasterReportListResponse> reports = reportPage.getContent().stream()
                 .map(DisasterReportListResponse::of)
                 .toList();
@@ -289,18 +292,5 @@ public class DisasterReportService {
                 .build();
 
         accusationRepository.save(accusation);
-    }
-
-
-    // 도움 안됨 + 도움 됨 + 신고 count
-    public DisasterReportStatisticsResponse getStatistics(Long disasterReportId) {
-        if (!disasterReportRepository.existsById(disasterReportId)) {
-            throw new DisasterReportException(INVALID_DISASTER_REPORT);
-        }
-
-        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(disasterReportId).orElse(null);
-        int accusationCount = accusationRepository.countByDisasterReportId(disasterReportId);
-
-        return DisasterReportStatisticsResponse.of(disasterReportId, evaluation, accusationCount);
     }
 }
