@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [develop]
+    branches: [ develop ]
 
 jobs:
   build-and-deploy:
@@ -66,4 +66,6 @@ jobs:
               -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
               -e AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e JWT_SECRET=${{ secrets.FCM_PROJECT_ID }} \
+              -e JWT_SECRET=${{ secrets.FCM_SERVICE_ACCOUNT_FILE_PATH }} \
               ${{ env.IMAGE_URI }}
