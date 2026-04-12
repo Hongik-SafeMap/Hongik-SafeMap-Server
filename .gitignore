@@ -1,6 +1,7 @@
 HELP.md
 .gradle
 .env
+core-api/src/main/resources/firebase/safemap-fcm.json
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
