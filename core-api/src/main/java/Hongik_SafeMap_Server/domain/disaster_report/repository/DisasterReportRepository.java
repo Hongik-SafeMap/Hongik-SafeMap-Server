@@ -43,6 +43,18 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
     // 재난 유형과 긴급도 모두 필터링 조회
     Page<DisasterReport> findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, Pageable pageable);
 
+    // 상태별 필터링 조회
+    Page<DisasterReport> findByStatusInOrderByCreatedAtDesc(List<DisasterReportStatus> statuses, Pageable pageable);
+
+    // 재난 유형과 상태 필터링 조회
+    Page<DisasterReport> findByDisasterTypeInAndStatusInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, List<DisasterReportStatus> statuses, Pageable pageable);
+
+    // 긴급도와 상태 필터링 조회
+    Page<DisasterReport> findByRiskLevelInAndStatusInOrderByCreatedAtDesc(List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, Pageable pageable);
+
+    // 재난 유형, 긴급도, 상태 모두 필터링 조회
+    Page<DisasterReport> findByDisasterTypeInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, Pageable pageable);
+
     @Query("""
                 select new Hongik_SafeMap_Server.domain.admin.member.dto.AdminMemberResponse(
                     m.id,
