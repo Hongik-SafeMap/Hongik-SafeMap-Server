@@ -9,7 +9,6 @@ import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyActionRepository
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyTipRepository;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.exception.SafetyTipException;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +23,8 @@ public class SafetyTipService {
     private final SafetyTipRepository safetyTipRepository;
     private final SafetyActionRepository safetyActionRepository;
 
-    public SafetyTipResponse getSafetyTipByDisasterType(DisasterType disasterType) {
-        return safetyTipRepository.findByDisasterTypeWithActions(disasterType)
+    public SafetyTipResponse getSafetyTipByDisasterTypeId(Long disasterTypeId) {
+        return safetyTipRepository.findByDisasterTypeIdWithActions(disasterTypeId)
                 .map(SafetyTipResponse::of)
                 .orElseThrow(() -> new SafetyTipException(ErrorMessage.SAFETY_TIP_NOT_FOUND));
     }
@@ -47,8 +46,8 @@ public class SafetyTipService {
     }
 
     @Transactional
-    public void updateSafetyTipByDisasterType(DisasterType disasterType, SafetyTipUpdateRequest request) {
-        SafetyTip safetyTip = safetyTipRepository.findByDisasterType(disasterType)
+    public void updateSafetyTipByDisasterTypeId(Long disasterTypeId, SafetyTipUpdateRequest request) {
+        SafetyTip safetyTip = safetyTipRepository.findByDisasterTypeIdWithActions(disasterTypeId)
                 .orElseThrow(() -> new SafetyTipException(ErrorMessage.SAFETY_TIP_NOT_FOUND));
 
         safetyTip.updateTitle(request.title());

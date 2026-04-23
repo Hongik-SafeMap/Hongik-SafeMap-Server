@@ -1,8 +1,8 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record AdminReportResponse(
@@ -10,7 +10,7 @@ public record AdminReportResponse(
         Long reportId,
 
         @Schema(description = "재난 유형")
-        DisasterType disasterType,
+        DisasterTypeResponse disasterType,
 
         @Schema(description = "제보 내용", example = "도로에 싱크홀이 발생했습니다")
         String description,
@@ -33,7 +33,7 @@ public record AdminReportResponse(
     public static AdminReportResponse of(DisasterReport disasterReport) {
         return new AdminReportResponse(
                 disasterReport.getId(),
-                disasterReport.getDisasterType(),
+                DisasterTypeResponse.of(disasterReport.getDisasterType()),
                 disasterReport.getDisasterDescription(),
                 disasterReport.getStatus(),
                 disasterReport.getReviewComment(),
@@ -51,7 +51,7 @@ public record AdminReportResponse(
     ) {
         return new AdminReportResponse(
                 disasterReport.getId(),
-                disasterReport.getDisasterType(),
+                DisasterTypeResponse.of(disasterReport.getDisasterType()),
                 disasterReport.getDisasterDescription(),
                 disasterReport.getStatus(),
                 disasterReport.getReviewComment(),

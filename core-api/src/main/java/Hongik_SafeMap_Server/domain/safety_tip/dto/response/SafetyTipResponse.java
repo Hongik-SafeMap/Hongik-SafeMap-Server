@@ -1,14 +1,14 @@
 package Hongik_SafeMap_Server.domain.safety_tip.dto.response;
 
+import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyTip;
-import Hongik_SafeMap_Server.vo.DisasterType;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record SafetyTipResponse(
         Long id,
-        DisasterType disasterType,
+        DisasterTypeResponse disasterType,
         String title,
         String detail,
         List<String> supplies,
@@ -20,7 +20,7 @@ public record SafetyTipResponse(
     public static SafetyTipResponse of(SafetyTip safetyTip) {
         return new SafetyTipResponse(
                 safetyTip.getId(),
-                safetyTip.getDisasterType(),
+                DisasterTypeResponse.of(safetyTip.getDisasterType()),
                 safetyTip.getTitle(),
                 safetyTip.getDetail(),
                 safetyTip.getSupplies().stream().toList(),

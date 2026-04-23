@@ -1,37 +1,54 @@
 package Hongik_SafeMap_Server.config;
 
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
+import Hongik_SafeMap_Server.domain.disaster_type.repository.DisasterTypeRepository;
 import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyTip;
 import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyTipRepository;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
 
+    private static final List<String> DEFAULT_DISASTER_TYPES = List.of(
+            "화재", "지진", "홍수", "산사태", "태풍", "기타"
+    );
+
+    private final DisasterTypeRepository disasterTypeRepository;
     private final SafetyTipRepository safetyTipRepository;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        initializeDisasterTypes();
         initializeSafetyTips();
     }
 
-    private void initializeSafetyTips() {
+    private void initializeDisasterTypes() {
+        DEFAULT_DISASTER_TYPES.forEach(name -> {
+            if (!disasterTypeRepository.existsByName(name)) {
+                disasterTypeRepository.save(DisasterType.builder().name(name).build());
+            }
+        });
+        log.info("재난 유형 등록 완료");
+    }
 
-        Arrays.stream(DisasterType.values())
+    private void initializeSafetyTips() {
+        List<DisasterType> disasterTypes = disasterTypeRepository.findAllByOrderByIdAsc();
+        disasterTypes.stream()
+                .filter(dt -> !dt.getName().equals("기타"))
                 .forEach(disasterType -> {
-                    if (disasterType != DisasterType.ETC && safetyTipRepository.findByDisasterType(disasterType).isEmpty()) {
+                    if (safetyTipRepository.findByDisasterType(disasterType).isEmpty()) {
                         SafetyTip safetyTip = SafetyTip.builder()
                                 .disasterType(disasterType)
-                                .title(disasterType.getDescription() + " 발생 시 행동요령")
+                                .title(disasterType.getName() + " 발생 시 행동요령")
                                 .detail("")
                                 .build();
                         safetyTipRepository.save(safetyTip);

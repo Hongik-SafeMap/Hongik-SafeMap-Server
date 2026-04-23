@@ -1,7 +1,7 @@
 package Hongik_SafeMap_Server.domain.safety_tip.domain;
 
 import Hongik_SafeMap_Server.domain.common.BaseTimeEntity;
-import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,12 +21,12 @@ public class SafetyTip extends BaseTimeEntity {
     @Column(name = "safety_tip_id")
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disaster_type_id", nullable = false)
     private DisasterType disasterType;
+
     @Column(nullable = false, length = 20)
     private String title;
-
 
     @Column(nullable = false, length = 1000)
     private String detail;

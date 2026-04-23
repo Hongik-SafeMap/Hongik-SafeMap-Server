@@ -1,8 +1,8 @@
 package Hongik_SafeMap_Server.domain.admin.dashboard.dto;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 
 import java.time.LocalDateTime;
@@ -39,7 +39,7 @@ public record AdminDashboardResponse(
 
     public record RecentReport(
             Long id,
-            DisasterType disasterType,
+            DisasterTypeResponse disasterType,
             RiskLevel riskLevel,
             String disasterDescription,
             DisasterReportStatus status,
@@ -48,7 +48,7 @@ public record AdminDashboardResponse(
         public static RecentReport from(DisasterReport report) {
             return new RecentReport(
                     report.getId(),
-                    report.getDisasterType(),
+                    DisasterTypeResponse.of(report.getDisasterType()),
                     report.getRiskLevel(),
                     report.getDisasterDescription(),
                     report.getStatus(),
