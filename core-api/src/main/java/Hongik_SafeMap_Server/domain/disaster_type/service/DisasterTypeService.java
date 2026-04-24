@@ -36,7 +36,10 @@ public class DisasterTypeService {
         if (disasterTypeRepository.existsByName(request.name())) {
             throw new DisasterTypeException(ErrorMessage.DISASTER_TYPE_ALREADY_EXISTS);
         }
-        DisasterType disasterType = DisasterType.builder().name(request.name()).build();
+        DisasterType disasterType = DisasterType.builder()
+                .name(request.name())
+                .iconUrl(request.iconUrl())
+                .build();
         return DisasterTypeResponse.of(disasterTypeRepository.save(disasterType));
     }
 
@@ -45,6 +48,7 @@ public class DisasterTypeService {
         DisasterType disasterType = disasterTypeRepository.findById(id)
                 .orElseThrow(() -> new DisasterTypeException(ErrorMessage.DISASTER_TYPE_NOT_FOUND));
         disasterType.updateName(request.name());
+        disasterType.updateIconUrl(request.iconUrl());
         return DisasterTypeResponse.of(disasterType);
     }
 }

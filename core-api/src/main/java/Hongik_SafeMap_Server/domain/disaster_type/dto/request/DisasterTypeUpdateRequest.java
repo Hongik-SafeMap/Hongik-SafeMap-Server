@@ -6,5 +6,8 @@ import jakarta.validation.constraints.Size;
 public record DisasterTypeUpdateRequest(
         @NotBlank
         @Size(max = 50)
-        String name
+        String name,
+
+        @Size(max = 500)
+        String iconUrl
 ) {}

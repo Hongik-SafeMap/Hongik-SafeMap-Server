@@ -20,12 +20,20 @@ public class DisasterType {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
+    @Column(length = 500)
+    private String iconUrl;
+
     @Builder
-    private DisasterType(String name) {
+    private DisasterType(String name, String iconUrl) {
         this.name = name;
+        this.iconUrl = iconUrl;
     }
 
     public void updateName(String name) {
         this.name = name;
+    }
+
+    public void updateIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 }
