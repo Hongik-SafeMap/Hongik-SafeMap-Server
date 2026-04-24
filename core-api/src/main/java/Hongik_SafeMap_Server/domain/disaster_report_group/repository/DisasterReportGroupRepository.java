@@ -3,6 +3,7 @@ package Hongik_SafeMap_Server.domain.disaster_report_group.repository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -62,4 +63,14 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
     List<DisasterReportGroup> findAllGroupsWithFilters(
             @Param("disasterTypeIds") List<Long> disasterTypeIds,
             @Param("riskLevels") List<RiskLevel> riskLevels);
+
+    // 통계 요약 - 그룹별 평균 제보 수
+    @Query("SELECT AVG(drg.reportCount) FROM DisasterReportGroup drg")
+    Double findAverageReportCount();
+
+    // 통계 요약 - 가장 많이 등록된 재난 유형 (그룹 수 기준)
+    @Query("SELECT drg.disasterType FROM DisasterReportGroup drg " +
+            "GROUP BY drg.disasterType " +
+            "ORDER BY COUNT(drg) DESC")
+    List<DisasterType> findMostFrequentDisasterTypes(Pageable pageable);
 }
