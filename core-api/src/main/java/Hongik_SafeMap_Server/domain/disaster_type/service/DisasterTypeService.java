@@ -7,11 +7,13 @@ import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeRespo
 import Hongik_SafeMap_Server.domain.disaster_type.repository.DisasterTypeRepository;
 import Hongik_SafeMap_Server.exception.DisasterTypeException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
+import Hongik_SafeMap_Server.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ import java.util.List;
 public class DisasterTypeService {
 
     private final DisasterTypeRepository disasterTypeRepository;
+    private final S3Service s3Service;
 
     public List<DisasterTypeResponse> getAll() {
         return disasterTypeRepository.findAllByOrderByIdAsc().stream()
@@ -47,8 +50,15 @@ public class DisasterTypeService {
     public DisasterTypeResponse update(Long id, DisasterTypeUpdateRequest request) {
         DisasterType disasterType = disasterTypeRepository.findById(id)
                 .orElseThrow(() -> new DisasterTypeException(ErrorMessage.DISASTER_TYPE_NOT_FOUND));
+        String oldIconUrl = disasterType.getIconUrl();
+        String newIconUrl = request.iconUrl();
+
+        if (oldIconUrl != null && !Objects.equals(oldIconUrl, newIconUrl)) {
+            s3Service.deleteFile(oldIconUrl);
+        }
+
         disasterType.updateName(request.name());
-        disasterType.updateIconUrl(request.iconUrl());
+        disasterType.updateIconUrl(newIconUrl);
         return DisasterTypeResponse.of(disasterType);
     }
 }
