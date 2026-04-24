@@ -20,7 +20,7 @@ public class DisasterType {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    @Column(length = 500)
+    @Column(nullable = false, length = 500)
     private String iconUrl;
 
     @Builder

@@ -22,7 +22,6 @@ public class DataInitializer implements CommandLineRunner {
 
     private static final String ICON_FOLDER = "disaster-type-icons";
 
-    // 이름 → 아이콘 파일명 (null = 아이콘 없음)
     private static final Map<String, String> DEFAULT_DISASTER_TYPES = new LinkedHashMap<>() {{
         put("화재", "fire.svg");
         put("지진", "earthquake.svg");
@@ -30,15 +29,12 @@ public class DataInitializer implements CommandLineRunner {
         put("산사태", "landslide.svg");
         put("태풍", "typhoon.svg");
     }};
-
-    @Value("${aws.s3.bucket}")
-    private String bucketName;
-
-    @Value("${aws.s3.region}")
-    private String region;
-
     private final DisasterTypeRepository disasterTypeRepository;
     private final SafetyTipRepository safetyTipRepository;
+    @Value("${aws.s3.bucket}")
+    private String bucketName;
+    @Value("${aws.s3.region}")
+    private String region;
 
     @Override
     @Transactional

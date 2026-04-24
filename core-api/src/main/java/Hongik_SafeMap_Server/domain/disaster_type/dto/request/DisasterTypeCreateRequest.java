@@ -8,6 +8,7 @@ public record DisasterTypeCreateRequest(
         @Size(max = 50)
         String name,
 
+        @NotBlank
         @Size(max = 500)
         String iconUrl
 ) {}
