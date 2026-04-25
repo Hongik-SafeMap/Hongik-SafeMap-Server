@@ -49,6 +49,9 @@ public class DisasterReportGroup {
     @Column(nullable = false)
     private boolean isActive;
 
+    @Column(length = 255)
+    private String earliestAddress;
+
     /**
      * 첫 번째 제보로부터 새 그룹 생성
      */
@@ -62,6 +65,7 @@ public class DisasterReportGroup {
                 .reportCount(1)
                 .latestRiskLevel(report.getRiskLevel())
                 .isActive(true)
+                .earliestAddress(report.getAddress())
                 .build();
     }
 
@@ -82,7 +86,8 @@ public class DisasterReportGroup {
 
     // 그룹 통계 업데이트
     public void updateStatistics(double centerLat, double centerLng, LocalDateTime earliestTime,
-                                 LocalDateTime latestTime, int reportCount, RiskLevel latestRisk, boolean isActive) {
+                                 LocalDateTime latestTime, int reportCount, RiskLevel latestRisk,
+                                 boolean isActive, String earliestAddress) {
         this.centerLatitude = centerLat;
         this.centerLongitude = centerLng;
         this.earliestReportTime = earliestTime;
@@ -90,6 +95,7 @@ public class DisasterReportGroup {
         this.reportCount = reportCount;
         this.latestRiskLevel = latestRisk;
         this.isActive = isActive;
+        this.earliestAddress = earliestAddress;
     }
 
     // 그룹이 새로운 제보와 매칭되는지 확인

@@ -4,6 +4,9 @@ import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.Disaster
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.DisasterTypeStatistics;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.RiskLevelStatistics;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
+import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.vo.RiskLevel;
@@ -23,6 +26,7 @@ import java.util.List;
 public class AdminDisasterArchiveService {
 
     private final DisasterReportRepository disasterReportRepository;
+    private final DisasterReportGroupService disasterReportGroupService;
 
     public DisasterStatisticsSummaryResponse getStatisticsSummary(
             List<Long> disasterTypeIds,
@@ -69,5 +73,11 @@ public class AdminDisasterArchiveService {
                 disasterTypeStats,
                 riskLevelDistribution
         );
+    }
+
+    public DisasterRecordListResponse getDisasterRecords() {
+        List<GroupedDisasterReportResponse> records =
+                disasterReportGroupService.getGroupedReports(null, null, 0, false, null, null);
+        return DisasterRecordListResponse.of(records);
     }
 }

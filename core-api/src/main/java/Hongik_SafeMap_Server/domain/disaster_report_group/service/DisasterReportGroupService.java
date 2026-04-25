@@ -64,7 +64,7 @@ public class DisasterReportGroupService {
 
             // 통계 업데이트 (증분)
             group.updateStatistics(newCenterLat, newCenterLng, group.getEarliestReportTime(),
-                    newLatestTime, newCount, newLatestRisk, true);
+                    newLatestTime, newCount, newLatestRisk, true, group.getEarliestAddress());
             DisasterReportGroup savedGroup = groupRepository.save(group);
 
             log.info("기존 그룹에 제보 추가: groupId={}, reportId={}", group.getId(), report.getId());
@@ -171,10 +171,15 @@ public class DisasterReportGroupService {
                 .map(DisasterReport::getRiskLevel)
                 .orElse(RiskLevel.LOW);
 
+        String earliestAddress = approvedReports.stream()
+                .min(Comparator.comparing(DisasterReport::getCreatedAt))
+                .map(DisasterReport::getAddress)
+                .orElse(null);
+
         long hoursDiff = java.time.Duration.between(latestTime, LocalDateTime.now()).toHours();
         boolean isActive = hoursDiff < GROUP_DEACTIVATE_HOURS;
 
-        group.updateStatistics(avgLat, avgLng, earliestTime, latestTime, approvedReports.size(), latestRisk, isActive);
+        group.updateStatistics(avgLat, avgLng, earliestTime, latestTime, approvedReports.size(), latestRisk, isActive, earliestAddress);
     }
 
     // 지역별/재난유형별 그룹화 조회 (지도 클러스터링용) - 그룹 테이블 기반
@@ -192,18 +197,6 @@ public class DisasterReportGroupService {
                     .toList();
         }
 
-        // 모든 그룹 ID를 수집
-        List<Long> groupIds = groups.stream()
-                .map(DisasterReportGroup::getId)
-                .toList();
-
-        List<DisasterReport> allReports = reportRepository.findByGroupIdIn(groupIds);
-
-        // 그룹별로 제보들을 분류
-        Map<Long, List<DisasterReport>> reportsByGroup = allReports.stream()
-                .collect(Collectors.groupingBy(report -> report.getGroup().getId()));
-
-        // 각 그룹을 응답 객체로 변환
         return groups.stream()
                 .map(group -> new GroupedDisasterReportResponse(
                         group.getId(),
@@ -213,7 +206,8 @@ public class DisasterReportGroupService {
                         group.getEarliestReportTime(),
                         group.getLatestReportTime(),
                         group.getReportCount(),
-                        group.getLatestRiskLevel()
+                        group.getLatestRiskLevel(),
+                        group.getEarliestAddress()
                 ))
                 .toList();
     }

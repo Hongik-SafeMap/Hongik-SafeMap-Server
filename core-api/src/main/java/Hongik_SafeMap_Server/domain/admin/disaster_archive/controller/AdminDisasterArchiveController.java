@@ -1,5 +1,6 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_archive.controller;
 
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.service.AdminDisasterArchiveService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,5 +33,11 @@ public class AdminDisasterArchiveController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
         return ResponseEntity.ok(adminDisasterArchiveService.getStatisticsSummary(disasterTypeIds, from, to));
+    }
+
+    @Operation(summary = "재난 기록 전체 조회", description = "활성/비활성 포함 전체 재난 기록(그룹) 목록을 조회합니다.")
+    @GetMapping("/disaster-records")
+    public ResponseEntity<DisasterRecordListResponse> getDisasterRecords() {
+        return ResponseEntity.ok(adminDisasterArchiveService.getDisasterRecords());
     }
 }
