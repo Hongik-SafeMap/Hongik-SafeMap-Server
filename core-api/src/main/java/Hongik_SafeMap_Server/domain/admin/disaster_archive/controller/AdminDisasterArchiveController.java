@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.admin.disaster_archive.controller;
 
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse;
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.GroupLocationResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.service.AdminDisasterArchiveService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,5 +41,11 @@ public class AdminDisasterArchiveController {
     @GetMapping("/disaster-records")
     public ResponseEntity<DisasterRecordListResponse> getDisasterRecords() {
         return ResponseEntity.ok(adminDisasterArchiveService.getDisasterRecords());
+    }
+
+    @Operation(summary = "재난 기록 위치 조회", description = "그룹 정보와 속한 각 제보의 위도·경도를 조회합니다.")
+    @GetMapping("/disaster-records/{groupId}/locations")
+    public ResponseEntity<GroupLocationResponse> getGroupLocation(@PathVariable Long groupId) {
+        return ResponseEntity.ok(adminDisasterArchiveService.getGroupLocation(groupId));
     }
 }

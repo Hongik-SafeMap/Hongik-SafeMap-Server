@@ -1,14 +1,19 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_archive.service;
 
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.DisasterTypeStatistics;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.RiskLevelStatistics;
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.GroupLocationResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
-import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
+import Hongik_SafeMap_Server.domain.disaster_report_group.repository.DisasterReportGroupRepository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
+import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,7 @@ import java.util.List;
 public class AdminDisasterArchiveService {
 
     private final DisasterReportRepository disasterReportRepository;
+    private final DisasterReportGroupRepository disasterReportGroupRepository;
     private final DisasterReportGroupService disasterReportGroupService;
 
     public DisasterStatisticsSummaryResponse getStatisticsSummary(
@@ -79,5 +85,12 @@ public class AdminDisasterArchiveService {
         List<GroupedDisasterReportResponse> records =
                 disasterReportGroupService.getGroupedReports(null, null, 0, false, null, null);
         return DisasterRecordListResponse.of(records);
+    }
+
+    public GroupLocationResponse getGroupLocation(Long groupId) {
+        DisasterReportGroup group = disasterReportGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorMessage.DISASTER_REPORT_GROUP_NOT_FOUND));
+        List<DisasterReport> reports = disasterReportRepository.findByGroupId(groupId);
+        return GroupLocationResponse.of(group, reports);
     }
 }
