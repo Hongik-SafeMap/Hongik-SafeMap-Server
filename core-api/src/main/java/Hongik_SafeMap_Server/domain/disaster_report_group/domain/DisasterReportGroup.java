@@ -1,8 +1,8 @@
 package Hongik_SafeMap_Server.domain.disaster_report_group.domain;
 
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.util.DistanceUtil;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +23,8 @@ public class DisasterReportGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disaster_type_id", nullable = false)
     private DisasterType disasterType;
 
     @Column(nullable = false)
@@ -99,7 +99,7 @@ public class DisasterReportGroup {
         }
 
         // 재난 타입 일치 확인
-        if (!this.disasterType.equals(report.getDisasterType())) {
+        if (!this.disasterType.getId().equals(report.getDisasterType().getId())) {
             return false;
         }
 

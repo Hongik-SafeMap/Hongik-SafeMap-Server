@@ -2,9 +2,9 @@ package Hongik_SafeMap_Server.domain.disaster_report.domain;
 
 import Hongik_SafeMap_Server.domain.common.BaseTimeEntity;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,8 +24,8 @@ public class DisasterReport extends BaseTimeEntity {
     @Column(name = "disaster_report_id")
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disaster_type_id", nullable = false)
     private DisasterType disasterType;
 
     @Enumerated(EnumType.STRING)

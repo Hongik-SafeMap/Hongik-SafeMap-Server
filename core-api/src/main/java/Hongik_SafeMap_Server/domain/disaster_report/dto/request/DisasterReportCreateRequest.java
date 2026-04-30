@@ -1,6 +1,5 @@
 package Hongik_SafeMap_Server.domain.disaster_report.dto.request;
 
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public record DisasterReportCreateRequest(
         @NotNull
-        DisasterType disasterType,
+        Long disasterTypeId,
         @NotNull
         RiskLevel riskLevel,
 

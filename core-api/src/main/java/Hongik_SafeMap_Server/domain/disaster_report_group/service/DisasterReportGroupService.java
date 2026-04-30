@@ -7,9 +7,9 @@ import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportG
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupDetailResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.repository.DisasterReportGroupRepository;
+import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.util.DistanceUtil;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class DisasterReportGroupService {
     @Transactional
     public DisasterReportGroup assignReportToGroup(DisasterReport report) {
         log.info("제보 그룹핑 시작: reportId={}, type={}, location={}",
-                report.getId(), report.getDisasterType(), report.getAddress());
+                report.getId(), report.getDisasterType().getName(), report.getAddress());
 
         // 1. 기존 그룹에서 매칭 가능한 그룹 찾기 (거리, 시간 기반)
         Optional<DisasterReportGroup> matchingGroup = findMatchingGroup(report);
@@ -125,15 +125,15 @@ public class DisasterReportGroupService {
     /**
      * 그룹 목록 조회 (활성 여부, 재난 유형, 위험 수준에 따라 필터링)
      */
-    public List<DisasterReportGroup> getGroups(Boolean activeOnly, List<DisasterType> disasterTypes, List<RiskLevel> riskLevels) {
+    public List<DisasterReportGroup> getGroups(Boolean activeOnly, List<Long> disasterTypeIds, List<RiskLevel> riskLevels) {
         // 필터가 없는 경우 기존 메소드 사용
-        if ((disasterTypes == null || disasterTypes.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
+        if ((disasterTypeIds == null || disasterTypeIds.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
             return activeOnly ? groupRepository.findActiveGroupsSummary() : groupRepository.findAllGroupsSummary();
         }
 
         return activeOnly ?
-                groupRepository.findActiveGroupsWithFilters(disasterTypes, riskLevels) :
-                groupRepository.findAllGroupsWithFilters(disasterTypes, riskLevels);
+                groupRepository.findActiveGroupsWithFilters(disasterTypeIds, riskLevels) :
+                groupRepository.findAllGroupsWithFilters(disasterTypeIds, riskLevels);
     }
 
 
@@ -179,8 +179,8 @@ public class DisasterReportGroupService {
 
     // 지역별/재난유형별 그룹화 조회 (지도 클러스터링용) - 그룹 테이블 기반
     @Transactional(readOnly = true)
-    public List<GroupedDisasterReportResponse> getGroupedReports(Double userLatitude, Double userLongitude, int radiusMeters, Boolean isActive, List<DisasterType> disasterTypes, List<RiskLevel> riskLevels) {
-        List<DisasterReportGroup> groups = getGroups(isActive, disasterTypes, riskLevels);
+    public List<GroupedDisasterReportResponse> getGroupedReports(Double userLatitude, Double userLongitude, int radiusMeters, Boolean isActive, List<Long> disasterTypeIds, List<RiskLevel> riskLevels) {
+        List<DisasterReportGroup> groups = getGroups(isActive, disasterTypeIds, riskLevels);
 
         // 사용자 위치가 제공된 경우 거리 필터링
         if (userLatitude != null && userLongitude != null) {
@@ -207,7 +207,7 @@ public class DisasterReportGroupService {
         return groups.stream()
                 .map(group -> new GroupedDisasterReportResponse(
                         group.getId(),
-                        group.getDisasterType(),
+                        DisasterTypeResponse.of(group.getDisasterType()),
                         group.getCenterLatitude(),
                         group.getCenterLongitude(),
                         group.getEarliestReportTime(),
@@ -229,7 +229,7 @@ public class DisasterReportGroupService {
 
         return new GroupDetailResponse(
                 group.getId(),
-                group.getDisasterType(),
+                Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse.of(group.getDisasterType()),
                 group.getCenterLatitude(),
                 group.getCenterLongitude(),
                 group.getEarliestReportTime(),

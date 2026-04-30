@@ -11,7 +11,6 @@ import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRep
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,27 +34,27 @@ public class AdminReportService {
     private final DisasterReportAccusationRepository accusationRepository;
 
     // 제보 검토 - 전체 제보 목록 (제보 평가 및 신고수 포함)
-    public AdminReportPageResponse findAllReports(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, int page, int size) {
+    public AdminReportPageResponse findAllReports(List<Long> disasterTypeIds, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         // 필터링 로직
         Page<DisasterReport> pageResult;
-        boolean hasDisasterTypeFilter = disasterTypes != null && !disasterTypes.isEmpty();
+        boolean hasDisasterTypeFilter = disasterTypeIds != null && !disasterTypeIds.isEmpty();
         boolean hasRiskLevelFilter = riskLevels != null && !riskLevels.isEmpty();
         boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
 
         if (!hasDisasterTypeFilter && !hasRiskLevelFilter && !hasStatusFilter) {
             pageResult = disasterReportRepository.findAll(pageable);
         } else if (hasDisasterTypeFilter && hasRiskLevelFilter && hasStatusFilter) {
-            pageResult = disasterReportRepository.findByDisasterTypeInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(disasterTypes, riskLevels, statuses, pageable);
+            pageResult = disasterReportRepository.findByDisasterTypeIdInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(disasterTypeIds, riskLevels, statuses, pageable);
         } else if (hasDisasterTypeFilter && hasRiskLevelFilter) {
-            pageResult = disasterReportRepository.findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(disasterTypes, riskLevels, pageable);
+            pageResult = disasterReportRepository.findByDisasterTypeIdInAndRiskLevelInOrderByCreatedAtDesc(disasterTypeIds, riskLevels, pageable);
         } else if (hasDisasterTypeFilter && hasStatusFilter) {
-            pageResult = disasterReportRepository.findByDisasterTypeInAndStatusInOrderByCreatedAtDesc(disasterTypes, statuses, pageable);
+            pageResult = disasterReportRepository.findByDisasterTypeIdInAndStatusInOrderByCreatedAtDesc(disasterTypeIds, statuses, pageable);
         } else if (hasRiskLevelFilter && hasStatusFilter) {
             pageResult = disasterReportRepository.findByRiskLevelInAndStatusInOrderByCreatedAtDesc(riskLevels, statuses, pageable);
         } else if (hasDisasterTypeFilter) {
-            pageResult = disasterReportRepository.findByDisasterTypeInOrderByCreatedAtDesc(disasterTypes, pageable);
+            pageResult = disasterReportRepository.findByDisasterTypeIdInOrderByCreatedAtDesc(disasterTypeIds, pageable);
         } else if (hasRiskLevelFilter) {
             pageResult = disasterReportRepository.findByRiskLevelInOrderByCreatedAtDesc(riskLevels, pageable);
         } else {
