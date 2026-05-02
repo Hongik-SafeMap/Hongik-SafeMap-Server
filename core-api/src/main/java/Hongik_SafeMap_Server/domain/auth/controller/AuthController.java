@@ -24,7 +24,7 @@ public class AuthController {
     // 1) 일반 로그인 (✅ 쿠키 X, 토큰을 바디로 반환)
     @PostMapping("/login/general")
     public ResponseEntity<LoginResponse> generalLogin(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.generalLogin(request.email(), request.password()));
+        return ResponseEntity.ok(authService.generalLogin(request.email(), request.password(), request.fcmToken()));
     }
 
     // 2) SNS 로그인 (✅ 쿠키 X)

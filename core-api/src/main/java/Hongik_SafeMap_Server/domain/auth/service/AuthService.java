@@ -30,7 +30,7 @@ public class AuthService {
     private final Hongik_SafeMap_Server.domain.auth.SnsLambdaClient snsLambdaClient;
 
     @Transactional
-    public LoginResponse generalLogin(String email, String password) {
+    public LoginResponse generalLogin(String email, String password, String fcmToken) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException(EMAIL_DOES_NOT_EXIST));
 
@@ -40,6 +40,11 @@ public class AuthService {
 
         if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new MemberException(PASSWORD_IS_DIFFERENT_FROM_CHECK);
+        }
+
+        // FCM 토큰 업데이트
+        if (fcmToken != null && !fcmToken.isEmpty()) {
+            member.updateFcmToken(fcmToken);
         }
 
         return issueTokensAndSaveToDB(member);
@@ -65,7 +70,13 @@ public class AuthService {
                         .status(MemberStatus.USER)
                         .loginType(loginType)
                         .socialId(socialId)
+                        .fcmToken(request.fcmToken())
                         .build()));
+
+        // 기존 사용자인 경우 FCM 토큰 업데이트
+        if (request.fcmToken() != null && !request.fcmToken().isEmpty()) {
+            member.updateFcmToken(request.fcmToken());
+        }
 
         return issueTokensAndSaveToDB(member);
     }

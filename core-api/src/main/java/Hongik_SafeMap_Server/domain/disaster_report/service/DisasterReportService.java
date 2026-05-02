@@ -19,6 +19,7 @@ import Hongik_SafeMap_Server.domain.disaster_type.service.DisasterTypeService;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
+import Hongik_SafeMap_Server.global.service.NotificationService;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
@@ -46,6 +47,7 @@ public class DisasterReportService {
     private final DisasterReportGroupService groupService;
     private final DisasterTypeService disasterTypeService;
     private final MemberUtil memberUtil;
+    private final NotificationService notificationService;
 
     // 긴급 제보 등록
     @Transactional
@@ -70,6 +72,12 @@ public class DisasterReportService {
 
         // 그룹에 할당 (@TODO: 비동기 처리)
         groupService.assignReportToGroup(savedReport);
+
+        // 해당 재난 유형에 대해 알림을 활성화한 사용자들에게 알림 전송
+        notificationService.sendDisasterReportNotification(
+                savedReport.getDisasterType(),
+                savedReport.getAddress()
+        );
 
         return savedReport.getId();
     }

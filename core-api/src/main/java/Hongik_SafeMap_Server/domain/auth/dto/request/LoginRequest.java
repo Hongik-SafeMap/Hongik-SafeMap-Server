@@ -24,6 +24,9 @@ public record LoginRequest(
                 regexp = PASSWORD_REGEX,
                 message = PASSWORD_INVALID_FORMAT
         )
-        String password
+        String password,
+
+        @Schema(description = "FCM 토큰", example = "fcm_token")
+        String fcmToken
 ) {
 }

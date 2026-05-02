@@ -49,8 +49,11 @@ public class Member {
     @Column(length = 10)
     private String adminNickname;
 
+    @Column(length = 255)
+    private String fcmToken;
+
     @Builder
-    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId, boolean isCredible, String adminNickname) {
+    public Member(String email, String password, MemberStatus status, String name, String phone, LoginType loginType, String socialId, boolean isCredible, String adminNickname, String fcmToken) {
         this.email = email;
         this.password = password;
         this.status = status;
@@ -59,6 +62,7 @@ public class Member {
         this.loginType = loginType;
         this.socialId = socialId;
         this.isCredible = isCredible;
+        this.fcmToken = fcmToken;
     }
 
     public void validateEmail(String email) {
@@ -86,5 +90,9 @@ public class Member {
     public void demoteFromAdmin() {
         this.status = MemberStatus.USER;
         this.adminNickname = null;
+    }
+
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

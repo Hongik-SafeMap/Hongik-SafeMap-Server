@@ -10,5 +10,7 @@ public record SnsLoginRequest(
         String token,
 
         @ValidEnum(enumClass = LoginType.class, message = "로그인 타입(카카오, 네이버 등)은 필수입니다.")
-        String loginType
+        String loginType,
+
+        String fcmToken
 ) {}
