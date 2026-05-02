@@ -47,17 +47,48 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: IMAGE_URI
           script: |
             aws ecr get-login-password --region ap-northeast-2 | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-            docker pull ${{ env.IMAGE_URI }}
+            docker pull $IMAGE_URI
             docker stop safemap || true
             docker rm safemap || true
+
+            # 이전 이미지 최신 2개만 남기고 삭제
+            docker images "${{ secrets.ECR_REGISTRY }}/safemap" --format "{{.Tag}} {{.ID}}" | \
+              tail -n +3 | \
+              awk '{print $2}' | \
+              xargs -r docker rmi -f || true
+
+            # Docker 네트워크 생성 (이미 있으면 무시)
+            docker network create safemap-network || true
+
+            # MySQL 컨테이너 실행 (이미 실행 중이면 start, 없으면 새로 생성)
+            docker start safemap-mysql 2>/dev/null || docker run -d \
+              --name safemap-mysql \
+              --network safemap-network \
+              -e MYSQL_ROOT_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
+              -e MYSQL_DATABASE=${{ secrets.DATABASE_NAME }} \
+              -e MYSQL_USER=${{ secrets.DATABASE_USERNAME }} \
+              -e MYSQL_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
+              -v safemap-mysql-data:/var/lib/mysql \
+              --restart unless-stopped \
+              mysql:8.0
+
+            # MySQL 준비될 때까지 대기
+            until docker exec safemap-mysql mysqladmin ping -h localhost --silent; do
+              echo "MySQL 대기 중..."
+              sleep 2
+            done
+
+            # 앱 컨테이너 실행
             docker run -d \
               --name safemap \
+              --network safemap-network \
               -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=datasource \
-              -e DATABASE_HOST=${{ secrets.DATABASE_HOST }} \
+              -e DATABASE_HOST=safemap-mysql \
               -e DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
               -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
               -e DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
@@ -68,4 +99,5 @@ jobs:
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               -e JWT_SECRET=${{ secrets.FCM_PROJECT_ID }} \
               -e JWT_SECRET=${{ secrets.FCM_SERVICE_ACCOUNT_FILE_PATH }} \
-              ${{ env.IMAGE_URI }}
+              --restart unless-stopped \
+              $IMAGE_URI

@@ -2,9 +2,9 @@ package Hongik_SafeMap_Server.domain.disaster_report.domain;
 
 import Hongik_SafeMap_Server.domain.common.BaseTimeEntity;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,8 +24,8 @@ public class DisasterReport extends BaseTimeEntity {
     @Column(name = "disaster_report_id")
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disaster_type_id", nullable = false)
     private DisasterType disasterType;
 
     @Enumerated(EnumType.STRING)
@@ -59,6 +59,10 @@ public class DisasterReport extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DisasterReportStatus status;
+
+    // 관리자 검토 의견
+    @Column(name = "review_comment", length = 1000)
+    private String reviewComment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -100,6 +104,11 @@ public class DisasterReport extends BaseTimeEntity {
 
     public void blind() {
         this.status = DisasterReportStatus.BLINDED;
+    }
+
+    public void updateStatus(DisasterReportStatus status, String reviewComment) {
+        this.status = status;
+        this.reviewComment = reviewComment;
     }
 
     public void updateGroup(DisasterReportGroup group) {

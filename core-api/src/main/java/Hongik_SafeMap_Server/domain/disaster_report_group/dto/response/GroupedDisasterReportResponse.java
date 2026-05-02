@@ -1,6 +1,6 @@
 package Hongik_SafeMap_Server.domain.disaster_report_group.dto.response;
 
-import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public record GroupedDisasterReportResponse(
         Long id,
-        DisasterType disasterType,
+        DisasterTypeResponse disasterType,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
         Double centerLatitude,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)

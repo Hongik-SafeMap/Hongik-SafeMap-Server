@@ -4,7 +4,6 @@ import Hongik_SafeMap_Server.domain.safety_tip.dto.request.SafetyTipUpdateReques
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipSummaryResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.service.SafetyTipService;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,12 +25,12 @@ public class SafetyTipController {
 
     private final SafetyTipService safetyTipService;
 
-    @Operation(summary = "재난 유형별 행동 요령 조회", description = "특정 재난 유형에 해당하는 행동 요령을 조회합니다.")
+    @Operation(summary = "재난 유형별 행동 요령 조회", description = "특정 재난 유형 ID에 해당하는 행동 요령을 조회합니다.")
     @GetMapping("/disaster-type")
     public ResponseEntity<SafetyTipResponse> getSafetyTipByDisasterType(
-            @Parameter(description = "재난 유형", example = "화재")
-            @RequestParam(name = "disasterType") DisasterType disasterType) {
-        SafetyTipResponse response = safetyTipService.getSafetyTipByDisasterType(disasterType);
+            @Parameter(description = "재난 유형 ID", example = "1")
+            @RequestParam(name = "disasterTypeId") Long disasterTypeId) {
+        SafetyTipResponse response = safetyTipService.getSafetyTipByDisasterTypeId(disasterTypeId);
         return ResponseEntity.ok(response);
     }
 
@@ -49,14 +48,14 @@ public class SafetyTipController {
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "재난 유형별 행동 요령 수정", description = "특정 재난 유형의 행동 요령을 수정합니다. (관리자)")
+    @Operation(summary = "재난 유형별 행동 요령 수정", description = "특정 재난 유형 ID의 행동 요령을 수정합니다. (관리자)")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/disaster-type")
     public ResponseEntity<Void> updateSafetyTip(
-            @Parameter(description = "재난 유형", example = "화재")
-            @RequestParam(name = "disasterType") DisasterType disasterType,
+            @Parameter(description = "재난 유형 ID", example = "1")
+            @RequestParam(name = "disasterTypeId") Long disasterTypeId,
             @Valid @RequestBody SafetyTipUpdateRequest request) {
-        safetyTipService.updateSafetyTipByDisasterType(disasterType, request);
+        safetyTipService.updateSafetyTipByDisasterTypeId(disasterTypeId, request);
         return ResponseEntity.ok().build();
     }
 }

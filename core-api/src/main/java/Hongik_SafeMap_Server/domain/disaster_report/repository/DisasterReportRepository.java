@@ -4,7 +4,6 @@ import Hongik_SafeMap_Server.domain.admin.member.dto.AdminMemberResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,13 +34,25 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
     Page<DisasterReport> findByStatusOrderByCreatedAtDesc(DisasterReportStatus status, Pageable pageable);
 
     // 재난 유형별 필터링 조회
-    Page<DisasterReport> findByDisasterTypeInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, Pageable pageable);
+    Page<DisasterReport> findByDisasterTypeIdInOrderByCreatedAtDesc(List<Long> disasterTypeIds, Pageable pageable);
 
     // 긴급도별 필터링 조회
     Page<DisasterReport> findByRiskLevelInOrderByCreatedAtDesc(List<RiskLevel> riskLevels, Pageable pageable);
 
     // 재난 유형과 긴급도 모두 필터링 조회
-    Page<DisasterReport> findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, Pageable pageable);
+    Page<DisasterReport> findByDisasterTypeIdInAndRiskLevelInOrderByCreatedAtDesc(List<Long> disasterTypeIds, List<RiskLevel> riskLevels, Pageable pageable);
+
+    // 상태별 필터링 조회
+    Page<DisasterReport> findByStatusInOrderByCreatedAtDesc(List<DisasterReportStatus> statuses, Pageable pageable);
+
+    // 재난 유형과 상태 필터링 조회
+    Page<DisasterReport> findByDisasterTypeIdInAndStatusInOrderByCreatedAtDesc(List<Long> disasterTypeIds, List<DisasterReportStatus> statuses, Pageable pageable);
+
+    // 긴급도와 상태 필터링 조회
+    Page<DisasterReport> findByRiskLevelInAndStatusInOrderByCreatedAtDesc(List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, Pageable pageable);
+
+    // 재난 유형, 긴급도, 상태 모두 필터링 조회
+    Page<DisasterReport> findByDisasterTypeIdInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(List<Long> disasterTypeIds, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, Pageable pageable);
 
     @Query("""
                 select new Hongik_SafeMap_Server.domain.admin.member.dto.AdminMemberResponse(

@@ -5,12 +5,17 @@ import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportAccusat
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.UserEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.*;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportAccusationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.UserEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
+import Hongik_SafeMap_Server.domain.disaster_type.service.DisasterTypeService;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
@@ -18,7 +23,6 @@ import Hongik_SafeMap_Server.global.service.NotificationService;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,6 +45,7 @@ public class DisasterReportService {
     private final DisasterReportAccusationRepository accusationRepository;
     private final UserEvaluationRepository userEvaluationRepository;
     private final DisasterReportGroupService groupService;
+    private final DisasterTypeService disasterTypeService;
     private final MemberUtil memberUtil;
     private final NotificationService notificationService;
 
@@ -48,9 +53,10 @@ public class DisasterReportService {
     @Transactional
     public Long create(DisasterReportCreateRequest request) {
         Member member = memberUtil.getLoggedInMember();
+        DisasterType disasterType = disasterTypeService.getEntityById(request.disasterTypeId());
 
         DisasterReport disasterReport = DisasterReport.builder()
-                .disasterType(request.disasterType())
+                .disasterType(disasterType)
                 .riskLevel(request.riskLevel())
                 .disasterDescription(request.disasterDescription())
                 .latitude(request.latitude())
@@ -85,25 +91,45 @@ public class DisasterReportService {
     }
 
     // 전체 제보 목록 (관리자 전체 제보/지도)
-    public DisasterReportPageResponse getAll(List<DisasterType> disasterTypes, List<RiskLevel> riskLevels, int page, int size) {
+    public DisasterReportPageResponse getAll(List<Long> disasterTypeIds, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Page<DisasterReportListResponse> pageResult;
-        if ((disasterTypes == null || disasterTypes.isEmpty()) && (riskLevels == null || riskLevels.isEmpty())) {
+        boolean hasDisasterTypeFilter = disasterTypeIds != null && !disasterTypeIds.isEmpty();
+        boolean hasRiskLevelFilter = riskLevels != null && !riskLevels.isEmpty();
+        boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
+
+        if (!hasDisasterTypeFilter && !hasRiskLevelFilter && !hasStatusFilter) {
             // 필터 없음 - 전체 조회
             pageResult = disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
                     .map(DisasterReportListResponse::of);
-        } else if (disasterTypes != null && !disasterTypes.isEmpty() && riskLevels != null && !riskLevels.isEmpty()) {
+        } else if (hasDisasterTypeFilter && hasRiskLevelFilter && hasStatusFilter) {
+            // 재난 유형, 긴급도, 상태 모두 필터링
+            pageResult = disasterReportRepository.findByDisasterTypeIdInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(disasterTypeIds, riskLevels, statuses, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (hasDisasterTypeFilter && hasRiskLevelFilter) {
             // 재난 유형과 긴급도 둘 다 필터링
-            pageResult = disasterReportRepository.findByDisasterTypeInAndRiskLevelInOrderByCreatedAtDesc(disasterTypes, riskLevels, pageable)
+            pageResult = disasterReportRepository.findByDisasterTypeIdInAndRiskLevelInOrderByCreatedAtDesc(disasterTypeIds, riskLevels, pageable)
                     .map(DisasterReportListResponse::of);
-        } else if (disasterTypes != null && !disasterTypes.isEmpty()) {
+        } else if (hasDisasterTypeFilter && hasStatusFilter) {
+            // 재난 유형과 상태 필터링
+            pageResult = disasterReportRepository.findByDisasterTypeIdInAndStatusInOrderByCreatedAtDesc(disasterTypeIds, statuses, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (hasRiskLevelFilter && hasStatusFilter) {
+            // 긴급도와 상태 필터링
+            pageResult = disasterReportRepository.findByRiskLevelInAndStatusInOrderByCreatedAtDesc(riskLevels, statuses, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else if (hasDisasterTypeFilter) {
             // 재난 유형만 필터링
-            pageResult = disasterReportRepository.findByDisasterTypeInOrderByCreatedAtDesc(disasterTypes, pageable)
+            pageResult = disasterReportRepository.findByDisasterTypeIdInOrderByCreatedAtDesc(disasterTypeIds, pageable)
                     .map(DisasterReportListResponse::of);
-        } else {
+        } else if (hasRiskLevelFilter) {
             // 긴급도만 필터링
             pageResult = disasterReportRepository.findByRiskLevelInOrderByCreatedAtDesc(riskLevels, pageable)
+                    .map(DisasterReportListResponse::of);
+        } else {
+            // 상태만 필터링
+            pageResult = disasterReportRepository.findByStatusInOrderByCreatedAtDesc(statuses, pageable)
                     .map(DisasterReportListResponse::of);
         }
 
@@ -277,18 +303,5 @@ public class DisasterReportService {
                 .build();
 
         accusationRepository.save(accusation);
-    }
-
-
-    // 도움 안됨 + 도움 됨 + 신고 count
-    public DisasterReportStatisticsResponse getStatistics(Long disasterReportId) {
-        if (!disasterReportRepository.existsById(disasterReportId)) {
-            throw new DisasterReportException(INVALID_DISASTER_REPORT);
-        }
-
-        DisasterReportEvaluation evaluation = evaluationRepository.findDisasterReportEvaluationById(disasterReportId).orElse(null);
-        int accusationCount = accusationRepository.countByDisasterReportId(disasterReportId);
-
-        return DisasterReportStatisticsResponse.of(disasterReportId, evaluation, accusationCount);
     }
 }

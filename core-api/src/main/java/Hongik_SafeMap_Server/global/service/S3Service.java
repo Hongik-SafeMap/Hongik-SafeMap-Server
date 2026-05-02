@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -13,7 +15,6 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Slf4j
@@ -21,6 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class S3Service {
 
+    private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
     @Value("${aws.s3.bucket}")
@@ -33,7 +35,11 @@ public class S3Service {
     private String region;
 
     public PresignedUrlResponse generatePresignedUrl(PresignedUrlRequest request) {
-        String uniqueFileName = generateUniqueFileName(request.getFileName());
+        return generatePresignedUrl(request, "uploads");
+    }
+
+    public PresignedUrlResponse generatePresignedUrl(PresignedUrlRequest request, String folder) {
+        String uniqueFileName = generateUniqueFileName(request.getFileName(), folder);
         Duration expiration = Duration.ofMinutes(expirationMinutes);
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -51,15 +57,24 @@ public class S3Service {
         String presignedUrl = presignedRequest.url().toString();
 
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(expirationMinutes);
-        String imageUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", 
-                bucketName, region, uniqueFileName);
+        String fileUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, uniqueFileName);
 
-        log.info("Generated presigned URL for file: {} with imageUrl: {}", request.getFileName(), imageUrl);
+        log.info("Generated presigned URL for file: {} with fileUrl: {}", request.getFileName(), fileUrl);
 
-        return new PresignedUrlResponse(presignedUrl, imageUrl, expiresAt);
+        return new PresignedUrlResponse(presignedUrl, fileUrl, expiresAt);
     }
 
-    private String generateUniqueFileName(String originalFileName) {
+    public void deleteFile(String fileUrl) {
+        // URL에서 S3 key 추출: https://{bucket}.s3.{region}.amazonaws.com/{key}
+        String key = fileUrl.substring(fileUrl.indexOf(".amazonaws.com/") + ".amazonaws.com/".length());
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build());
+        log.info("Deleted S3 file: {}", key);
+    }
+
+    private String generateUniqueFileName(String originalFileName, String folder) {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         // 타임스탬프 + uuid 조합해서 S3 파일 경로 생성 -> 동일한 파일명 업로드해도 덮어쓰지 않음
@@ -71,9 +86,7 @@ public class S3Service {
         }
 
         // S3 파일 경로: uploads/timestamp_uuid.확장자
-        return String.format("uploads/%s_%s%s",
-                timestamp,
-                uuid, 
-                extension);
+        // 재난 유형 아이콘 S3 파일 경로: disaster-type-icons/timestamp_uuid.확장자
+        return String.format("%s/%s_%s%s", folder, timestamp, uuid, extension);
     }
 }

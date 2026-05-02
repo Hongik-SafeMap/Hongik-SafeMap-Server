@@ -1,6 +1,5 @@
 package Hongik_SafeMap_Server.domain.disaster_report.dto.request;
 
-import Hongik_SafeMap_Server.vo.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -12,9 +11,8 @@ import java.util.List;
 public record DisasterReportCreateRequest(
         @Schema(description = "재난 유형", example = "화재")
         @NotNull
-        DisasterType disasterType,
+        Long disasterTypeId,
 
-        @Schema(description = "위험도", example = "긴급")
         @NotNull
         RiskLevel riskLevel,
 
