@@ -92,6 +92,26 @@ public class LostReportService {
         return createLostReportsPageResponse(lostReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
     }
 
+    public LostReportsPageResponse getMyLostReports(int page, int size) {
+        Member member = memberUtil.getLoggedInMember();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<LostReportWithCommentCount> result = lostReportRepository.findByMemberIdWithCommentCount(member.getId(), pageable);
+
+        List<LostReportResponse> reportResponses = result.getContent().stream()
+                .map(dto -> LostReportResponse.of(dto.lostReport(), dto.commentCount(), true))
+                .toList();
+
+        return new LostReportsPageResponse(
+                reportResponses,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isFirst(),
+                result.isLast()
+        );
+    }
+
     private LostReportsPageResponse createLostReportsPageResponse(Page<LostReportWithCommentCount> page) {
         Member currentMember = memberUtil.getLoggedInMember();
 

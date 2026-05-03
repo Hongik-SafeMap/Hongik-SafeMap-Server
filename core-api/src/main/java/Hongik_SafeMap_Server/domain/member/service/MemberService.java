@@ -2,10 +2,14 @@ package Hongik_SafeMap_Server.domain.member.service;
 
 import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.service.DisasterReportService;
+import Hongik_SafeMap_Server.domain.lost_report.dto.response.LostReportsPageResponse;
+import Hongik_SafeMap_Server.domain.lost_report.service.LostReportService;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.member.dto.request.MemberPasswordChangeRequest;
 import Hongik_SafeMap_Server.domain.member.dto.response.MyPageResponse;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
+import Hongik_SafeMap_Server.domain.resource_report.dto.response.ResourceReportsPageResponse;
+import Hongik_SafeMap_Server.domain.resource_report.service.ResourceReportService;
 import Hongik_SafeMap_Server.exception.MemberException;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ public class MemberService {
     private final MemberUtil memberUtil;
     private final PasswordEncoder passwordEncoder;
     private final DisasterReportService disasterReportService;
+    private final ResourceReportService resourceReportService;
+    private final LostReportService lostReportService;
 
     public MyPageResponse getMyPage() {
         Member member = memberUtil.getLoggedInMember();
@@ -32,6 +38,14 @@ public class MemberService {
 
     public DisasterReportPageResponse getMyReports(int page, int size) {
         return disasterReportService.getMyReports(page, size);
+    }
+
+    public ResourceReportsPageResponse getMyResourceReports(int page, int size) {
+        return resourceReportService.getMyResourceReports(page, size);
+    }
+
+    public LostReportsPageResponse getMyLostReports(int page, int size) {
+        return lostReportService.getMyLostReports(page, size);
     }
 
     @Transactional

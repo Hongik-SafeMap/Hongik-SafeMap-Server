@@ -186,6 +186,26 @@ public class ResourceReportService {
         return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryAndStatusWithCommentCount(type, category, status, pageable));
     }
 
+    public ResourceReportsPageResponse getMyResourceReports(int page, int size) {
+        Member member = memberUtil.getLoggedInMember();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<ResourceReportWithCommentCount> result = resourceReportRepository.findByMemberIdWithCommentCount(member.getId(), pageable);
+
+        List<ResourceReportResponse> reportResponses = result.getContent().stream()
+                .map(dto -> ResourceReportResponse.from(dto.resourceReport(), dto.commentCount(), true))
+                .toList();
+
+        return new ResourceReportsPageResponse(
+                reportResponses,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isFirst(),
+                result.isLast()
+        );
+    }
+
     private ResourceReportsPageResponse createResourceReportsPageResponse(Page<ResourceReportWithCommentCount> page) {
         Member currentMember = memberUtil.getLoggedInMember();
 
