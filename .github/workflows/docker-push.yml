@@ -1,0 +1,75 @@
+name: Docker Push
+
+on:
+  workflow_run:
+    workflows: [ Build ]
+    types: [ completed ]
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  docker-push:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    outputs:
+      image_uri: ${{ steps.push.outputs.image_uri }}
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: JAR 아티팩트 다운로드 (자동 실행)
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: core-api/build/libs/
+
+      - name: JDK 설정 (수동 실행)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: JAR 빌드 (수동 실행)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          chmod +x gradlew
+          ./gradlew bootJar
+
+      - name: SHA 설정
+        id: set-sha
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: ECR 로그인
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Docker 이미지 빌드 & ECR 푸시
+        id: push
+        run: |
+          IMAGE_URI=${{ secrets.ECR_REGISTRY }}/safemap:${{ steps.set-sha.outputs.sha }}
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+          echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+          echo "$IMAGE_URI" > image-uri.txt
+
+      - name: IMAGE_URI 아티팩트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-uri
+          path: image-uri.txt
