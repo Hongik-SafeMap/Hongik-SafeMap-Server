@@ -4,7 +4,7 @@ import Hongik_SafeMap_Server.domain.notification.domain.Notification;
 import Hongik_SafeMap_Server.domain.notification.repository.NotificationPreferenceRepository;
 import Hongik_SafeMap_Server.domain.notification.repository.NotificationRepository;
 import Hongik_SafeMap_Server.global.dto.request.MessagePushServiceRequest;
-import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,13 +24,13 @@ public class NotificationService {
                 .findByDisasterTypeAndIsEnabledTrue(disasterType);
 
         if (enabledPreferences.isEmpty()) {
-            log.info("재난 유형 {} 알림을 설정한 사용자가 없습니다", disasterType.getDescription());
+            log.info("재난 유형 {} 알림을 설정한 사용자가 없습니다", disasterType.getName());
             return;
         }
 
-        String title = String.format("새로운 %s 재난 제보", disasterType.getDescription());
+        String title = String.format("새로운 %s 재난 제보", disasterType.getName());
         String content = String.format("%s에 %s 관련 제보가 등록되었습니다",
-                locationName, disasterType.getDescription()); // 서울특별시 강남구 역삼동에 화재 관련 제보가 등록되었습니다.
+                locationName, disasterType.getName()); // 서울특별시 강남구 역삼동에 화재 관련 제보가 등록되었습니다.
 
         // 각 사용자에게 푸시 알림 전송
         int successCount = 0;
@@ -46,7 +46,7 @@ public class NotificationService {
                 try {
                     fcmService.pushMessage(MessagePushServiceRequest.of(fcmToken, title, content));
                     log.info("사용자 {}에게 {} 재난 알림 전송 완료",
-                            preference.getMember().getEmail(), disasterType.getDescription());
+                            preference.getMember().getEmail(), disasterType.getName());
                     successCount++;
                 } catch (Exception e) {
                     log.error("사용자 {}에게 알림 전송 실패: {}",
@@ -56,6 +56,6 @@ public class NotificationService {
         }
 
         log.info("재난 유형 {} 알림 전송 완료: 성공 {}명, 실패 {}명",
-                disasterType.getDescription(), successCount, enabledPreferences.size() - successCount);
+                disasterType.getName(), successCount, enabledPreferences.size() - successCount);
     }
 }

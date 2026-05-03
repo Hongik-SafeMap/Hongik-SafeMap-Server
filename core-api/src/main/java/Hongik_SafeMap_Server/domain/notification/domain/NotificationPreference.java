@@ -1,7 +1,7 @@
 package Hongik_SafeMap_Server.domain.notification.domain;
 
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
-import Hongik_SafeMap_Server.vo.DisasterType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,8 +22,8 @@ public class NotificationPreference {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "disaster_type", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disaster_type_id", nullable = false)
     private DisasterType disasterType;
 
     @Column(name = "is_enabled", nullable = false)
