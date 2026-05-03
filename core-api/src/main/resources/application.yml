@@ -25,6 +25,7 @@ fcm:
   google_api: https://www.googleapis.com/auth/cloud-platform
   project_id: ${FCM_PROJECT_ID}
   validate_only: false
+
 ai:
   server:
-    url: http://localhost:8000
+    url: ${AI_SERVER_URL:http://localhost:8000}
