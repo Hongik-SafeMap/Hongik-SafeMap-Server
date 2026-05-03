@@ -5,10 +5,7 @@ import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportAccusat
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.UserEvaluation;
 import Hongik_SafeMap_Server.domain.disaster_report.dto.request.DisasterReportCreateRequest;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportEvaluationResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportListResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportPageResponse;
-import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.*;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportAccusationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
@@ -24,6 +21,7 @@ import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +33,7 @@ import java.util.List;
 
 import static Hongik_SafeMap_Server.exception.ErrorMessage.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -46,6 +45,7 @@ public class DisasterReportService {
     private final DisasterReportGroupService groupService;
     private final DisasterTypeService disasterTypeService;
     private final MemberUtil memberUtil;
+    private final AiAnalyzeClient aiAnalyzeClient;
 
     // 긴급 제보 등록
     @Transactional
@@ -67,6 +67,8 @@ public class DisasterReportService {
 
         // 제보 저장
         DisasterReport savedReport = disasterReportRepository.save(disasterReport);
+
+        analyzeReportImage(savedReport);
 
         // 그룹에 할당 (@TODO: 비동기 처리)
         groupService.assignReportToGroup(savedReport);
@@ -295,5 +297,30 @@ public class DisasterReportService {
                 .build();
 
         accusationRepository.save(accusation);
+    }
+
+    private void analyzeReportImage(DisasterReport savedReport) {
+        if (savedReport.getFileUrls() == null || savedReport.getFileUrls().isEmpty()) {
+            return;
+        }
+
+        try {
+            String imageUrl = savedReport.getFileUrls().get(0);
+
+            AiAnalyzeResponse aiResult = aiAnalyzeClient.analyze(savedReport.getId(), imageUrl);
+
+            savedReport.updateAiAnalysisResult(
+                    aiResult.aiGeneratedProbability(),
+                    aiResult.realProbability(),
+                    aiResult.aiPrediction(),
+                    aiResult.informativeProbability(),
+                    aiResult.notInformativeProbability(),
+                    aiResult.informativePrediction(),
+                    aiResult.trustScore(),
+                    DisasterReportStatus.valueOf(aiResult.status())
+            );
+        } catch (Exception e) {
+            log.warn("AI 분석 실패 reportId={}, reason={}", savedReport.getId(), e.getMessage());
+        }
     }
 }

@@ -60,6 +60,30 @@ public class DisasterReport extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private DisasterReportStatus status;
 
+    // AI 이미지 생성 탐지 결과
+    @Column(name = "ai_generated_probability")
+    private Double aiGeneratedProbability;
+
+    @Column(name = "real_probability")
+    private Double realProbability;
+
+    @Column(name = "ai_prediction", length = 30)
+    private String aiPrediction;
+
+    // AI 정보성 분류 결과
+    @Column(name = "informative_probability")
+    private Double informativeProbability;
+
+    @Column(name = "not_informative_probability")
+    private Double notInformativeProbability;
+
+    @Column(name = "informative_prediction", length = 30)
+    private String informativePrediction;
+
+    // 최종 AI 신뢰도 점수
+    @Column(name = "trust_score")
+    private Integer trustScore;
+
     // 관리자 검토 의견
     @Column(name = "review_comment", length = 1000)
     private String reviewComment;
@@ -81,6 +105,13 @@ public class DisasterReport extends BaseTimeEntity {
             Double longitude,
             String address,
             List<String> fileUrls,
+            Double aiGeneratedProbability,
+            Double realProbability,
+            String aiPrediction,
+            Double informativeProbability,
+            Double notInformativeProbability,
+            String informativePrediction,
+            Integer trustScore,
             DisasterReportStatus status,
             Member member
     ) {
@@ -91,6 +122,13 @@ public class DisasterReport extends BaseTimeEntity {
         this.longitude = longitude;
         this.address = address;
         this.fileUrls = (fileUrls == null) ? new ArrayList<>() : fileUrls;
+        this.aiGeneratedProbability = aiGeneratedProbability;
+        this.realProbability = realProbability;
+        this.aiPrediction = aiPrediction;
+        this.informativeProbability = informativeProbability;
+        this.notInformativeProbability = notInformativeProbability;
+        this.informativePrediction = informativePrediction;
+        this.trustScore = trustScore;
         this.status = (status == null) ? DisasterReportStatus.PENDING : status;
         this.member = member;
     }
@@ -109,6 +147,26 @@ public class DisasterReport extends BaseTimeEntity {
     public void updateStatus(DisasterReportStatus status, String reviewComment) {
         this.status = status;
         this.reviewComment = reviewComment;
+    }
+
+    public void updateAiAnalysisResult(
+            Double aiGeneratedProbability,
+            Double realProbability,
+            String aiPrediction,
+            Double informativeProbability,
+            Double notInformativeProbability,
+            String informativePrediction,
+            Integer trustScore,
+            DisasterReportStatus status
+    ) {
+        this.aiGeneratedProbability = aiGeneratedProbability;
+        this.realProbability = realProbability;
+        this.aiPrediction = aiPrediction;
+        this.informativeProbability = informativeProbability;
+        this.notInformativeProbability = notInformativeProbability;
+        this.informativePrediction = informativePrediction;
+        this.trustScore = trustScore;
+        this.status = status;
     }
 
     public void updateGroup(DisasterReportGroup group) {

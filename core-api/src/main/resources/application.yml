@@ -17,3 +17,7 @@ aws:
     bucket: ${AWS_S3_BUCKET}
     upload:
       expiration-minutes: 15
+
+ai:
+  server:
+    url: http://localhost:8000
