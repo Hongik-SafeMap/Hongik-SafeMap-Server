@@ -97,7 +97,8 @@ jobs:
               -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
               -e AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e JWT_SECRET=${{ secrets.FCM_PROJECT_ID }} \
-              -e JWT_SECRET=${{ secrets.FCM_SERVICE_ACCOUNT_FILE_PATH }} \
+              -e FCM_PROJECT_ID=${{ secrets.FCM_PROJECT_ID }} \
+              -e FCM_SERVICE_ACCOUNT_FILE_PATH=${{ secrets.FCM_SERVICE_ACCOUNT_FILE_PATH }} \
+              -e AI_SERVER_URL=http://172.31.19.214:8000 \
               --restart unless-stopped \
               $IMAGE_URI
