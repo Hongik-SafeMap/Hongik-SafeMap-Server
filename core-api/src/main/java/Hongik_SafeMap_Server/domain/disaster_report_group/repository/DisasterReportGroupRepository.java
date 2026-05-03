@@ -3,6 +3,7 @@ package Hongik_SafeMap_Server.domain.disaster_report_group.repository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,6 +32,7 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
 
     // 활성 그룹들의 요약 정보 조회 (실시간 지도용)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.isActive = true " +
             "AND drg.reportCount > 0 " +
             "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
@@ -38,12 +40,14 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
 
     // 모든 그룹들의 요약 정보 조회 (활성/비활성 포함)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.reportCount > 0 " +
             "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
     List<DisasterReportGroup> findAllGroupsSummary();
 
     // 활성 그룹들의 요약 정보 조회 (필터링 포함)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.isActive = true " +
             "AND drg.reportCount > 0 " +
             "AND (:disasterTypeIds IS NULL OR drg.disasterType.id IN :disasterTypeIds) " +
@@ -55,6 +59,7 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
 
     // 모든 그룹들의 요약 정보 조회 (필터링 포함)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.reportCount > 0 " +
             "AND (:disasterTypeIds IS NULL OR drg.disasterType.id IN :disasterTypeIds) " +
             "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
@@ -62,4 +67,14 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
     List<DisasterReportGroup> findAllGroupsWithFilters(
             @Param("disasterTypeIds") List<Long> disasterTypeIds,
             @Param("riskLevels") List<RiskLevel> riskLevels);
+
+    // 통계 요약 - 그룹별 평균 제보 수
+    @Query("SELECT AVG(drg.reportCount) FROM DisasterReportGroup drg")
+    Double findAverageReportCount();
+
+    // 통계 요약 - 가장 많이 등록된 재난 유형 (그룹 수 기준)
+    @Query("SELECT drg.disasterType FROM DisasterReportGroup drg " +
+            "GROUP BY drg.disasterType " +
+            "ORDER BY COUNT(drg) DESC")
+    List<DisasterType> findMostFrequentDisasterTypes(Pageable pageable);
 }

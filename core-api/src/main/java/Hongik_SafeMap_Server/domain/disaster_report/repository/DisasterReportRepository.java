@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DisasterReportRepository extends JpaRepository<DisasterReport, Long> {
@@ -76,4 +77,40 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
     // 여러 그룹의 제보들 조회
     @Query("SELECT dr FROM DisasterReport dr WHERE dr.group.id IN :groupIds")
     List<DisasterReport> findByGroupIdIn(@Param("groupIds") List<Long> groupIds);
+
+    // 통계 - 필터 적용 재난 그룹 수 (중복 제거)
+    @Query("SELECT COUNT(DISTINCT dr.group.id) FROM DisasterReport dr " +
+            "WHERE dr.group IS NOT NULL " +
+            "AND (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "AND (:from IS NULL OR dr.createdAt >= :from) " +
+            "AND (:to IS NULL OR dr.createdAt <= :to)")
+    long countDistinctGroupsWithFilters(
+            @Param("disasterTypeIds") List<Long> disasterTypeIds,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+    // 통계 - 재난 유형별 제보 수 (필터 포함, 재난 유형 ID 오름차순)
+    @Query("SELECT dr.disasterType, COUNT(dr) FROM DisasterReport dr " +
+            "WHERE (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "AND (:from IS NULL OR dr.createdAt >= :from) " +
+            "AND (:to IS NULL OR dr.createdAt <= :to) " +
+            "GROUP BY dr.disasterType ORDER BY dr.disasterType.id ASC")
+    List<Object[]> countReportsByDisasterTypeWithFilters(
+            @Param("disasterTypeIds") List<Long> disasterTypeIds,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+    // 통계 - 심각도별 제보 수 (필터 포함)
+    @Query("SELECT dr.riskLevel, COUNT(dr) FROM DisasterReport dr " +
+            "WHERE (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "AND (:from IS NULL OR dr.createdAt >= :from) " +
+            "AND (:to IS NULL OR dr.createdAt <= :to) " +
+            "GROUP BY dr.riskLevel")
+    List<Object[]> countReportsByRiskLevelWithFilters(
+            @Param("disasterTypeIds") List<Long> disasterTypeIds,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
 }
