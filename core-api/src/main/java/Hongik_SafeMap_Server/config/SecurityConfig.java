@@ -35,6 +35,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
+                "https://hongik-safe-map-client.vercel.app",
+                "https://www.safemap.kr",
                 "https://safemap.kr"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
