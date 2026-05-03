@@ -49,6 +49,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: IMAGE_URI
           script: |
+            # Firebase 키 파일 생성
+            echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > /home/ubuntu/firebase-key.json
+            chmod 600 /home/ubuntu/firebase-key.json
+
             aws ecr get-login-password --region ap-northeast-2 | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
             docker pull $IMAGE_URI
@@ -87,6 +91,7 @@ jobs:
               --name safemap \
               --network safemap-network \
               -p 8080:8080 \
+              -v /home/ubuntu/firebase-key.json:/app/firebase-key.json \
               -e SPRING_PROFILES_ACTIVE=datasource \
               -e DATABASE_HOST=safemap-mysql \
               -e DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
@@ -97,7 +102,7 @@ jobs:
               -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
               -e AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e JWT_SECRET=${{ secrets.FCM_PROJECT_ID }} \
-              -e JWT_SECRET=${{ secrets.FCM_SERVICE_ACCOUNT_FILE_PATH }} \
+              -e FCM_PROJECT_ID=${{ secrets.FCM_PROJECT_ID }} \
+              -e FCM_SERVICE_ACCOUNT_FILE_PATH=/app/firebase-key.json \
               --restart unless-stopped \
               $IMAGE_URI
