@@ -30,9 +30,9 @@ public class AdminDisasterArchiveController {
             description = "재난 유형 ID 목록(disasterTypeIds)과 기간(from, to)으로 필터링 가능. 모두 선택사항.")
     @GetMapping("/statistics")
     public ResponseEntity<DisasterStatisticsSummaryResponse> getStatisticsSummary(
-            @RequestParam(required = false) List<Long> disasterTypeIds,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+            @RequestParam(name = "disasterTypeIds", required = false) List<Long> disasterTypeIds,
+            @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
         return ResponseEntity.ok(adminDisasterArchiveService.getStatisticsSummary(disasterTypeIds, from, to));
     }
@@ -45,7 +45,7 @@ public class AdminDisasterArchiveController {
 
     @Operation(summary = "재난 기록 위치 조회", description = "그룹 정보와 속한 각 제보의 위도·경도를 조회합니다.")
     @GetMapping("/disaster-records/{groupId}/locations")
-    public ResponseEntity<GroupLocationResponse> getGroupLocation(@PathVariable Long groupId) {
+    public ResponseEntity<GroupLocationResponse> getGroupLocation(@PathVariable("groupId") Long groupId) {
         return ResponseEntity.ok(adminDisasterArchiveService.getGroupLocation(groupId));
     }
 }
