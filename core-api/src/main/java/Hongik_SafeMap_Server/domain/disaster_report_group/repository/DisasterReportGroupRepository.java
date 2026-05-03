@@ -2,6 +2,7 @@ package Hongik_SafeMap_Server.domain.disaster_report_group.repository;
 
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
+import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -94,6 +95,14 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
             Pageable pageable);
+
+    // 아카이브 - 그룹 ID 목록으로 상태별 제보 수 배치 조회
+    @Query("SELECT dr.group.id, dr.status, COUNT(dr) FROM DisasterReport dr " +
+            "WHERE dr.group.id IN :groupIds AND dr.status IN :statuses " +
+            "GROUP BY dr.group.id, dr.status")
+    List<Object[]> countReportsByStatusForGroupIds(
+            @Param("groupIds") List<Long> groupIds,
+            @Param("statuses") List<DisasterReportStatus> statuses);
 
     // 통계 요약 - 그룹별 평균 제보 수
     @Query("SELECT AVG(drg.reportCount) FROM DisasterReportGroup drg")

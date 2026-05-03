@@ -113,4 +113,17 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
     );
+
+    // 통계 - 상태별 제보 수
+    @Query("SELECT COUNT(dr) FROM DisasterReport dr " +
+            "WHERE dr.status = :status " +
+            "AND (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "AND (:from IS NULL OR dr.createdAt >= :from) " +
+            "AND (:to IS NULL OR dr.createdAt <= :to)")
+    long countReportsByStatusWithFilters(
+            @Param("status") DisasterReportStatus status,
+            @Param("disasterTypeIds") List<Long> disasterTypeIds,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
 }
