@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.Disaster
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.DisasterTypeStatistics;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.RiskLevelStatistics;
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterSimulationResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.GroupLocationResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
@@ -92,5 +93,12 @@ public class AdminDisasterArchiveService {
                 .orElseThrow(() -> new IllegalArgumentException(ErrorMessage.DISASTER_REPORT_GROUP_NOT_FOUND));
         List<DisasterReport> reports = disasterReportRepository.findByGroupId(groupId);
         return GroupLocationResponse.of(group, reports);
+    }
+
+    public DisasterSimulationResponse getDisasterSimulation(Long groupId) {
+        DisasterReportGroup group = disasterReportGroupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorMessage.DISASTER_REPORT_GROUP_NOT_FOUND));
+        List<DisasterReport> reports = disasterReportRepository.findByGroupId(groupId);
+        return DisasterSimulationResponse.of(group, reports);
     }
 }

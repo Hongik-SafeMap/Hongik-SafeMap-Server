@@ -1,6 +1,7 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_archive.controller;
 
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterSimulationResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.GroupLocationResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.service.AdminDisasterArchiveService;
@@ -47,5 +48,11 @@ public class AdminDisasterArchiveController {
     @GetMapping("/disaster-records/{groupId}/locations")
     public ResponseEntity<GroupLocationResponse> getGroupLocation(@PathVariable("groupId") Long groupId) {
         return ResponseEntity.ok(adminDisasterArchiveService.getGroupLocation(groupId));
+    }
+
+    @Operation(summary = "재난 시뮬레이션 조회", description = "제보가 들어온 순서대로 위치와 통계 변화를 프레임 단위로 조회합니다.")
+    @GetMapping("/disaster-records/{groupId}/simulation")
+    public ResponseEntity<DisasterSimulationResponse> getDisasterSimulation(@PathVariable("groupId") Long groupId) {
+        return ResponseEntity.ok(adminDisasterArchiveService.getDisasterSimulation(groupId));
     }
 }
