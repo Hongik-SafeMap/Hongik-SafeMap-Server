@@ -8,15 +8,19 @@ import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.Disaster
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.GroupLocationResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterArchiveRecordResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
-import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.repository.DisasterReportGroupRepository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
+import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,10 +59,12 @@ public class AdminDisasterArchiveService {
                 .toList();
 
         long totalGroupCount = disasterReportRepository.countDistinctGroupsWithFilters(disasterTypeIds, from, to);
-        long totalReportCount = disasterTypeStats.stream().mapToLong(DisasterTypeStatistics::reportCount).sum();
+        long blindedReportCount = disasterReportRepository.countReportsByStatusWithFilters(DisasterReportStatus.BLINDED, disasterTypeIds, from, to);
+        long approvedReportCount = disasterTypeStats.stream().mapToLong(DisasterTypeStatistics::reportCount).sum();
+        long totalReportCount = approvedReportCount + blindedReportCount;
 
         double averageReportsPerGroup = totalGroupCount == 0 ? 0.0
-                : Math.round((double) totalReportCount / totalGroupCount * 10.0) / 10.0;
+                : Math.round((double) approvedReportCount / totalGroupCount * 10.0) / 10.0;
 
         DisasterTypeResponse mostFrequentDisasterType = disasterTypeStats.stream()
                 .max(Comparator.comparingLong(DisasterTypeStatistics::reportCount))
@@ -75,6 +83,7 @@ public class AdminDisasterArchiveService {
         return DisasterStatisticsSummaryResponse.of(
                 totalGroupCount,
                 totalReportCount,
+                blindedReportCount,
                 averageReportsPerGroup,
                 mostFrequentDisasterType,
                 disasterTypeStats,
@@ -82,10 +91,62 @@ public class AdminDisasterArchiveService {
         );
     }
 
-    public DisasterRecordListResponse getDisasterRecords() {
-        List<GroupedDisasterReportResponse> records =
-                disasterReportGroupService.getGroupedReports(null, null, 0, false, null, null);
-        return DisasterRecordListResponse.of(records);
+    public DisasterRecordListResponse getDisasterRecords(
+            List<RiskLevel> riskLevels,
+            LocalDate fromDate,
+            LocalDate toDate,
+            int page,
+            int size
+    ) {
+        LocalDateTime from = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime to = toDate != null ? toDate.atTime(LocalTime.MAX) : null;
+        List<RiskLevel> riskLevelFilter = (riskLevels != null && riskLevels.isEmpty()) ? null : riskLevels;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DisasterReportGroup> result = disasterReportGroupRepository.findAllGroupsForArchive(
+                riskLevelFilter, from, to, pageable);
+
+        List<Long> groupIds = result.getContent().stream().map(DisasterReportGroup::getId).toList();
+
+        // 그룹 ID 목록으로 상태별 제보 수 배치 조회 (N+1 방지)
+        Map<Long, Map<DisasterReportStatus, Long>> statusCountsByGroup = disasterReportGroupRepository
+                .countReportsByStatusForGroupIds(
+                        groupIds,
+                        List.of(DisasterReportStatus.APPROVED, DisasterReportStatus.PENDING))
+                .stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0],
+                        Collectors.toMap(row -> (DisasterReportStatus) row[1], row -> (Long) row[2])
+                ));
+
+        List<DisasterArchiveRecordResponse> records = result.getContent().stream()
+                .map(group -> {
+                    Map<DisasterReportStatus, Long> counts = statusCountsByGroup.getOrDefault(group.getId(), Map.of());
+                    return new DisasterArchiveRecordResponse(
+                            group.getId(),
+                            DisasterTypeResponse.of(group.getDisasterType()),
+                            group.getCenterLatitude(),
+                            group.getCenterLongitude(),
+                            group.getEarliestReportTime(),
+                            group.getLatestReportTime(),
+                            group.getReportCount(),
+                            counts.getOrDefault(DisasterReportStatus.APPROVED, 0L).intValue(),
+                            counts.getOrDefault(DisasterReportStatus.PENDING, 0L).intValue(),
+                            group.getLatestRiskLevel(),
+                            group.getEarliestAddress()
+                    );
+                })
+                .toList();
+
+        return new DisasterRecordListResponse(
+                records,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isFirst(),
+                result.isLast()
+        );
     }
 
     public GroupLocationResponse getGroupLocation(Long groupId) {

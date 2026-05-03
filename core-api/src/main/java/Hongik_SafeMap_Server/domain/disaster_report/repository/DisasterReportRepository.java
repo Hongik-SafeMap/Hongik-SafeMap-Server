@@ -16,11 +16,8 @@ import java.util.List;
 
 public interface DisasterReportRepository extends JpaRepository<DisasterReport, Long> {
 
-    // 긴급 제보 전체 조회
-    Page<DisasterReport> findAllByOrderByCreatedAtDesc(Pageable pageable);
-
-    // 마이페이지 - 내가 작성한 제보 목록
-    Page<DisasterReport> findByMemberOrderByCreatedAtDesc(Member member, Pageable pageable);
+    // 마이페이지 - 내가 작성한 제보 목록 (BLINDED 제외)
+    Page<DisasterReport> findByMemberAndStatusNotOrderByCreatedAtDesc(Member member, DisasterReportStatus status, Pageable pageable);
 
     // 전체 제보 수
     long count();
@@ -81,6 +78,7 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
     // 통계 - 필터 적용 재난 그룹 수 (중복 제거)
     @Query("SELECT COUNT(DISTINCT dr.group.id) FROM DisasterReport dr " +
             "WHERE dr.group IS NOT NULL " +
+            "AND dr.status <> 'BLINDED' " +
             "AND (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
             "AND (:from IS NULL OR dr.createdAt >= :from) " +
             "AND (:to IS NULL OR dr.createdAt <= :to)")
@@ -92,7 +90,8 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
 
     // 통계 - 재난 유형별 제보 수 (필터 포함, 재난 유형 ID 오름차순)
     @Query("SELECT dr.disasterType, COUNT(dr) FROM DisasterReport dr " +
-            "WHERE (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "WHERE dr.status <> 'BLINDED' " +
+            "AND (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
             "AND (:from IS NULL OR dr.createdAt >= :from) " +
             "AND (:to IS NULL OR dr.createdAt <= :to) " +
             "GROUP BY dr.disasterType ORDER BY dr.disasterType.id ASC")
@@ -104,11 +103,25 @@ public interface DisasterReportRepository extends JpaRepository<DisasterReport, 
 
     // 통계 - 심각도별 제보 수 (필터 포함)
     @Query("SELECT dr.riskLevel, COUNT(dr) FROM DisasterReport dr " +
-            "WHERE (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "WHERE dr.status <> 'BLINDED' " +
+            "AND (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
             "AND (:from IS NULL OR dr.createdAt >= :from) " +
             "AND (:to IS NULL OR dr.createdAt <= :to) " +
             "GROUP BY dr.riskLevel")
     List<Object[]> countReportsByRiskLevelWithFilters(
+            @Param("disasterTypeIds") List<Long> disasterTypeIds,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
+
+    // 통계 - 상태별 제보 수
+    @Query("SELECT COUNT(dr) FROM DisasterReport dr " +
+            "WHERE dr.status = :status " +
+            "AND (:disasterTypeIds IS NULL OR dr.disasterType.id IN :disasterTypeIds) " +
+            "AND (:from IS NULL OR dr.createdAt >= :from) " +
+            "AND (:to IS NULL OR dr.createdAt <= :to)")
+    long countReportsByStatusWithFilters(
+            @Param("status") DisasterReportStatus status,
             @Param("disasterTypeIds") List<Long> disasterTypeIds,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to

@@ -8,6 +8,7 @@ import java.util.List;
 public record DisasterStatisticsSummaryResponse(
         long totalGroupCount,
         long totalReportCount,
+        long blindedReportCount,
         double averageReportsPerGroup,
         DisasterTypeResponse mostFrequentDisasterType,
         List<DisasterTypeStatistics> disasterTypeStats,
@@ -16,6 +17,7 @@ public record DisasterStatisticsSummaryResponse(
     public static DisasterStatisticsSummaryResponse of(
             long totalGroupCount,
             long totalReportCount,
+            long blindedReportCount,
             double averageReportsPerGroup,
             DisasterTypeResponse mostFrequentDisasterType,
             List<DisasterTypeStatistics> disasterTypeStats,
@@ -24,6 +26,7 @@ public record DisasterStatisticsSummaryResponse(
         return new DisasterStatisticsSummaryResponse(
                 totalGroupCount,
                 totalReportCount,
+                blindedReportCount,
                 averageReportsPerGroup,
                 mostFrequentDisasterType,
                 disasterTypeStats,

@@ -27,7 +27,7 @@ public class DisasterReportController {
         return ResponseEntity.status(HttpStatus.CREATED).body(reportId);
     }
 
-    @Operation(summary = "재난 상황 상세 조회", description = "재난 상황을 상세 조회합니다. 일반/관리자 공용 API입니다.")
+    @Operation(summary = "재난 상황 상세 조회", description = "재난 상황을 상세 조회합니다.")
     @GetMapping("/{reportId}")
     public ResponseEntity<DisasterReportResponse> getById(@PathVariable("reportId") Long reportId) {
         return ResponseEntity.ok(disasterReportService.getById(reportId));

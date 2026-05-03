@@ -86,6 +86,13 @@ public interface ResourceReportRepository extends JpaRepository<ResourceReport, 
             @Param("status") ResourceReportStatus status,
             Pageable pageable);
 
+    // 내가 작성한 자원 게시물 조회 (삭제되지 않은 것만, 최신순, 페이징)
+    @Query("SELECT new Hongik_SafeMap_Server.global.dto.response.ResourceReportWithCommentCount(rr, COUNT(rrc)) " +
+            "FROM ResourceReport rr LEFT JOIN FETCH rr.member LEFT JOIN ResourceReportComment rrc ON rr.id = rrc.resourceReport.id " +
+            "WHERE rr.deletedAt IS NULL AND rr.member.id = :memberId " +
+            "GROUP BY rr")
+    Page<ResourceReportWithCommentCount> findByMemberIdWithCommentCount(@Param("memberId") Long memberId, Pageable pageable);
+
     // 삭제되지 않은 게시물만 조회
     @Query("SELECT rr FROM ResourceReport rr LEFT JOIN FETCH rr.member WHERE rr.id = :id AND rr.deletedAt IS NULL")
     Optional<ResourceReport> findByIdAndNotDeleted(@Param("id") Long id);

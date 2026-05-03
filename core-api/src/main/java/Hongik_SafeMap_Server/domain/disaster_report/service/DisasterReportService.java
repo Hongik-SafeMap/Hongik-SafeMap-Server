@@ -20,7 +20,6 @@ import Hongik_SafeMap_Server.global.service.NotificationService;
 import Hongik_SafeMap_Server.util.MemberUtil;
 import Hongik_SafeMap_Server.vo.DisasterReportEvaluationType;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
-import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -84,68 +83,16 @@ public class DisasterReportService {
         return savedReport.getId();
     }
 
-    // 제보 조회 (일반/관리자 공용)
+    // 제보 상세 조회
     public DisasterReportResponse getById(Long reportId) {
         DisasterReport disasterReport = disasterReportRepository.findById(reportId)
                 .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
 
-        return DisasterReportResponse.of(disasterReport);
-    }
-
-    // 전체 제보 목록 (관리자 전체 제보/지도)
-    public DisasterReportPageResponse getAll(List<Long> disasterTypeIds, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        Page<DisasterReportListResponse> pageResult;
-        boolean hasDisasterTypeFilter = disasterTypeIds != null && !disasterTypeIds.isEmpty();
-        boolean hasRiskLevelFilter = riskLevels != null && !riskLevels.isEmpty();
-        boolean hasStatusFilter = statuses != null && !statuses.isEmpty();
-
-        if (!hasDisasterTypeFilter && !hasRiskLevelFilter && !hasStatusFilter) {
-            // 필터 없음 - 전체 조회
-            pageResult = disasterReportRepository.findAllByOrderByCreatedAtDesc(pageable)
-                    .map(DisasterReportListResponse::of);
-        } else if (hasDisasterTypeFilter && hasRiskLevelFilter && hasStatusFilter) {
-            // 재난 유형, 긴급도, 상태 모두 필터링
-            pageResult = disasterReportRepository.findByDisasterTypeIdInAndRiskLevelInAndStatusInOrderByCreatedAtDesc(disasterTypeIds, riskLevels, statuses, pageable)
-                    .map(DisasterReportListResponse::of);
-        } else if (hasDisasterTypeFilter && hasRiskLevelFilter) {
-            // 재난 유형과 긴급도 둘 다 필터링
-            pageResult = disasterReportRepository.findByDisasterTypeIdInAndRiskLevelInOrderByCreatedAtDesc(disasterTypeIds, riskLevels, pageable)
-                    .map(DisasterReportListResponse::of);
-        } else if (hasDisasterTypeFilter && hasStatusFilter) {
-            // 재난 유형과 상태 필터링
-            pageResult = disasterReportRepository.findByDisasterTypeIdInAndStatusInOrderByCreatedAtDesc(disasterTypeIds, statuses, pageable)
-                    .map(DisasterReportListResponse::of);
-        } else if (hasRiskLevelFilter && hasStatusFilter) {
-            // 긴급도와 상태 필터링
-            pageResult = disasterReportRepository.findByRiskLevelInAndStatusInOrderByCreatedAtDesc(riskLevels, statuses, pageable)
-                    .map(DisasterReportListResponse::of);
-        } else if (hasDisasterTypeFilter) {
-            // 재난 유형만 필터링
-            pageResult = disasterReportRepository.findByDisasterTypeIdInOrderByCreatedAtDesc(disasterTypeIds, pageable)
-                    .map(DisasterReportListResponse::of);
-        } else if (hasRiskLevelFilter) {
-            // 긴급도만 필터링
-            pageResult = disasterReportRepository.findByRiskLevelInOrderByCreatedAtDesc(riskLevels, pageable)
-                    .map(DisasterReportListResponse::of);
-        } else {
-            // 상태만 필터링
-            pageResult = disasterReportRepository.findByStatusInOrderByCreatedAtDesc(statuses, pageable)
-                    .map(DisasterReportListResponse::of);
+        if (disasterReport.getStatus() == DisasterReportStatus.BLINDED) {
+            throw new DisasterReportException(ErrorMessage.BLINDED_DISASTER_REPORT);
         }
 
-        List<DisasterReportListResponse> reports = pageResult.getContent();
-
-        return new DisasterReportPageResponse(
-                reports,
-                pageResult.getNumber(),
-                pageResult.getSize(),
-                pageResult.getTotalElements(),
-                pageResult.getTotalPages(),
-                pageResult.isFirst(),
-                pageResult.isLast()
-        );
+        return DisasterReportResponse.of(disasterReport);
     }
 
     // 내 제보 목록(마이 페이지)
@@ -153,7 +100,7 @@ public class DisasterReportService {
         Member member = memberUtil.getLoggedInMember();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        Page<DisasterReport> reportPage = disasterReportRepository.findByMemberOrderByCreatedAtDesc(member, pageable);
+        Page<DisasterReport> reportPage = disasterReportRepository.findByMemberAndStatusNotOrderByCreatedAtDesc(member, DisasterReportStatus.BLINDED, pageable);
 
         List<DisasterReportListResponse> reports = reportPage.getContent().stream()
                 .map(DisasterReportListResponse::of)
@@ -168,40 +115,6 @@ public class DisasterReportService {
                 reportPage.isFirst(),
                 reportPage.isLast()
         );
-    }
-
-    // 관리자 제보 승인 처리
-    @Transactional
-    public void approve(Long reportId) {
-        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
-                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
-
-        // 이미 처리된 제보인지 검증(@TODO: 변경 가능하게 수정 - 통계 업데이트 문제 때문에 임시 에러 처리)
-        if (disasterReport.getStatus() == DisasterReportStatus.BLINDED) {
-            throw new DisasterReportException(ErrorMessage.CANNOT_APPROVE_BLINDED_REPORT);
-        }
-        disasterReport.approve();
-    }
-
-    // 관리자 제보 블라인드 처리
-    @Transactional
-    public void blind(Long reportId) {
-        DisasterReport disasterReport = disasterReportRepository.findById(reportId)
-                .orElseThrow(() -> new DisasterReportException(INVALID_DISASTER_REPORT));
-
-        Long groupId = null;
-        // 그룹에서 제거 (블라인드된 제보는 그룹 통계에서 제외)
-        if (disasterReport.getGroup() != null) {
-            groupId = disasterReport.getGroup().getId();
-            disasterReport.getGroup().removeReport(disasterReport);
-        }
-
-        disasterReport.blind();
-
-        // 그룹 통계 재계산
-        if (groupId != null) {
-            groupService.calculateGroupStatistics(groupId);
-        }
     }
 
     // 제보 평가하기

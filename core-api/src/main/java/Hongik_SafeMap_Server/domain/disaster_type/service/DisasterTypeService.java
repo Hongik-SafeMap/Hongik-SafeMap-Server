@@ -5,6 +5,11 @@ import Hongik_SafeMap_Server.domain.disaster_type.dto.request.DisasterTypeCreate
 import Hongik_SafeMap_Server.domain.disaster_type.dto.request.DisasterTypeUpdateRequest;
 import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
 import Hongik_SafeMap_Server.domain.disaster_type.repository.DisasterTypeRepository;
+import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyAction;
+import Hongik_SafeMap_Server.domain.safety_tip.domain.SafetyTip;
+import Hongik_SafeMap_Server.domain.safety_tip.dto.request.SafetyTipUpdateRequest;
+import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyActionRepository;
+import Hongik_SafeMap_Server.domain.safety_tip.repository.SafetyTipRepository;
 import Hongik_SafeMap_Server.exception.DisasterTypeException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.global.service.S3Service;
@@ -21,6 +26,8 @@ import java.util.Objects;
 public class DisasterTypeService {
 
     private final DisasterTypeRepository disasterTypeRepository;
+    private final SafetyTipRepository safetyTipRepository;
+    private final SafetyActionRepository safetyActionRepository;
     private final S3Service s3Service;
 
     public List<DisasterTypeResponse> getAll() {
@@ -43,7 +50,11 @@ public class DisasterTypeService {
                 .name(request.name())
                 .iconUrl(request.iconUrl())
                 .build();
-        return DisasterTypeResponse.of(disasterTypeRepository.save(disasterType));
+        disasterTypeRepository.save(disasterType);
+
+        saveSafetyTip(disasterType, request.safetyTip());
+
+        return DisasterTypeResponse.of(disasterType);
     }
 
     @Transactional
@@ -59,6 +70,53 @@ public class DisasterTypeService {
 
         disasterType.updateName(request.name());
         disasterType.updateIconUrl(newIconUrl);
+
+        upsertSafetyTip(disasterType, request.safetyTip());
+
         return DisasterTypeResponse.of(disasterType);
+    }
+
+    private void saveSafetyTip(DisasterType disasterType, SafetyTipUpdateRequest request) {
+        SafetyTip safetyTip = SafetyTip.builder()
+                .disasterType(disasterType)
+                .title(request.title())
+                .detail(request.detail())
+                .build();
+        safetyTip.updateSupplies(request.supplies());
+        safetyTip.updateWarnings(request.warnings());
+        safetyTipRepository.save(safetyTip);
+
+        List<SafetyAction> actions = request.actions().stream()
+                .map(a -> SafetyAction.builder()
+                        .title(a.title())
+                        .guide(a.guide())
+                        .safetyTip(safetyTip)
+                        .build())
+                .toList();
+        safetyActionRepository.saveAll(actions);
+    }
+
+    private void upsertSafetyTip(DisasterType disasterType, SafetyTipUpdateRequest request) {
+        SafetyTip safetyTip = safetyTipRepository.findByDisasterType(disasterType)
+                .orElseGet(() -> safetyTipRepository.save(SafetyTip.builder()
+                        .disasterType(disasterType)
+                        .title(request.title())
+                        .detail(request.detail())
+                        .build()));
+
+        safetyTip.updateTitle(request.title());
+        safetyTip.updateDetail(request.detail());
+        safetyTip.updateSupplies(request.supplies());
+        safetyTip.updateWarnings(request.warnings());
+
+        safetyActionRepository.deleteBySafetyTip(safetyTip);
+        List<SafetyAction> actions = request.actions().stream()
+                .map(a -> SafetyAction.builder()
+                        .title(a.title())
+                        .guide(a.guide())
+                        .safetyTip(safetyTip)
+                        .build())
+                .toList();
+        safetyActionRepository.saveAll(actions);
     }
 }

@@ -1,17 +1,14 @@
 package Hongik_SafeMap_Server.domain.safety_tip.controller;
 
-import Hongik_SafeMap_Server.domain.safety_tip.dto.request.SafetyTipUpdateRequest;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.dto.response.SafetyTipSummaryResponse;
 import Hongik_SafeMap_Server.domain.safety_tip.service.SafetyTipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,14 +45,4 @@ public class SafetyTipController {
         return ResponseEntity.ok(responses);
     }
 
-    @Operation(summary = "재난 유형별 행동 요령 수정", description = "특정 재난 유형 ID의 행동 요령을 수정합니다. (관리자)")
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/disaster-type")
-    public ResponseEntity<Void> updateSafetyTip(
-            @Parameter(description = "재난 유형 ID", example = "1")
-            @RequestParam(name = "disasterTypeId") Long disasterTypeId,
-            @Valid @RequestBody SafetyTipUpdateRequest request) {
-        safetyTipService.updateSafetyTipByDisasterTypeId(disasterTypeId, request);
-        return ResponseEntity.ok().build();
-    }
 }
