@@ -91,10 +91,11 @@ jobs:
               mysql:8.0
 
             # MySQL 준비될 때까지 대기
-            until docker exec safemap-mysql mysqladmin ping -h localhost --silent; do
-              echo "MySQL 대기 중..."
-              sleep 2
-            done
+            RETRIES=30
+            until docker exec safemap-mysql mysqladmin ping -h localhost --silent || [ $RETRIES -eq 0 ]; do
+            echo "MySQL 대기 중... ($RETRIES)"
+            sleep 2
+            RETRIES=$((RETRIES-1))
 
             # 앱 컨테이너 실행
             docker run -d \
