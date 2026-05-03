@@ -2,7 +2,7 @@ spring:
   application:
     name: Hongik-SafeMap-Server
   profiles:
-    include: []
+    include: [ ]
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
     driver-class-name: org.h2.Driver
@@ -36,3 +36,7 @@ fcm:
   google_api: https://www.googleapis.com/auth/cloud-platform
   project_id: test-project
   validate_only: true
+
+ai:
+  server:
+    url: http://localhost:8081
