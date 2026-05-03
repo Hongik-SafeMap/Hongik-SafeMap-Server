@@ -62,6 +62,7 @@ public class Member {
         this.loginType = loginType;
         this.socialId = socialId;
         this.isCredible = isCredible;
+        this.adminNickname = adminNickname;
         this.fcmToken = fcmToken;
     }
 
