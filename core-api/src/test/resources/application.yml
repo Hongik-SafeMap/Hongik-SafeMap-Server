@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: Hongik-SafeMap-Server
+  profiles:
+    include: []
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: false
+
+jwt:
+  secret: test-jwt-secret-key-for-testing-purposes-only-1234567890
+
+aws:
+  s3:
+    access-key: test-access-key
+    secret-key: test-secret-key
+    region: ap-northeast-2
+    bucket: test-bucket
+    upload:
+      expiration-minutes: 15
+
+fcm:
+  file_url: classpath:firebase/safemap-fcm.json
+  url: https://fcm.googleapis.com/v1/projects/test-project/messages:send
+  google_api: https://www.googleapis.com/auth/cloud-platform
+  project_id: test-project
+  validate_only: true
