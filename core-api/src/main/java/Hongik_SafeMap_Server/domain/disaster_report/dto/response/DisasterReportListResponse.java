@@ -14,6 +14,7 @@ public record DisasterReportListResponse(
         String disasterDescription,
         String address,
         DisasterReportStatus status,
+        Integer trustScore,
         LocalDateTime createdAt
 ) {
     public static DisasterReportListResponse of(DisasterReport dr) {
@@ -24,6 +25,7 @@ public record DisasterReportListResponse(
                 dr.getDisasterDescription(),
                 dr.getAddress(),
                 dr.getStatus(),
+                dr.getTrustScore(),
                 dr.getCreatedAt()
         );
     }
