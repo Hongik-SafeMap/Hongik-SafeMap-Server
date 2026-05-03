@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -90,6 +88,49 @@ public class DisasterReportGroupService {
         return candidateGroups.stream()
                 .filter(group -> group.canAcceptReport(report, MAX_DISTANCE_M, MAX_TIME_SPAN_HOURS))
                 .findFirst();
+    }
+
+    /**
+     * 블라인드 해제된 제보 그룹 재배치
+     * 활성/비활성 구분 없이 거리 기준으로 가장 가까운 그룹에 추가
+     * 매칭 없으면 새 그룹 생성 (오래된 제보면 즉시 비활성화)
+     */
+    @Transactional
+    public void reAssignReportToGroup(DisasterReport report) {
+        List<DisasterReportGroup> allGroups = groupRepository.findAllGroupsForReAssignment(report.getDisasterType());
+        Optional<DisasterReportGroup> match = allGroups.stream()
+                .filter(g -> DistanceUtil.calculateDistance(
+                        g.getCenterLatitude(), g.getCenterLongitude(),
+                        report.getLatitude(), report.getLongitude()) <= MAX_DISTANCE_M)
+                .findFirst();
+
+        if (match.isPresent()) {
+            DisasterReportGroup group = match.get();
+            group.addReport(report);
+            int newCount = group.getReportCount() + 1;
+            double newLat = (group.getCenterLatitude() * group.getReportCount() + report.getLatitude()) / newCount;
+            double newLng = (group.getCenterLongitude() * group.getReportCount() + report.getLongitude()) / newCount;
+            LocalDateTime earliest = report.getCreatedAt().isBefore(group.getEarliestReportTime())
+                    ? report.getCreatedAt() : group.getEarliestReportTime();
+            LocalDateTime latest = report.getCreatedAt().isAfter(group.getLatestReportTime())
+                    ? report.getCreatedAt() : group.getLatestReportTime();
+            String earliestAddress = earliest.equals(report.getCreatedAt()) ? report.getAddress() : group.getEarliestAddress();
+            long hoursDiff = java.time.Duration.between(latest, LocalDateTime.now()).toHours();
+            boolean isActive = hoursDiff < GROUP_DEACTIVATE_HOURS;
+            group.updateStatistics(newLat, newLng, earliest, latest, newCount, group.getLatestRiskLevel(), isActive, earliestAddress);
+            groupRepository.save(group);
+            log.info("블라인드 해제 제보 그룹 재배치: groupId={}, reportId={}", group.getId(), report.getId());
+            return;
+        }
+
+        DisasterReportGroup newGroup = createNewGroup(report);
+        newGroup.addReport(report);
+        long hoursSince = java.time.Duration.between(report.getCreatedAt(), LocalDateTime.now()).toHours();
+        if (hoursSince >= GROUP_DEACTIVATE_HOURS) {
+            newGroup.deactivate();
+        }
+        groupRepository.save(newGroup);
+        log.info("블라인드 해제 제보 새 그룹 생성: reportId={}, isActive={}", report.getId(), hoursSince < GROUP_DEACTIVATE_HOURS);
     }
 
     /**

@@ -25,6 +25,14 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
     List<DisasterReportGroup> findActiveGroupsForMatching(
             @Param("disasterType") DisasterType disasterType);
 
+    // 모든 그룹(활성+비활성) 찾기 (블라인드 해제 제보 재배치용)
+    @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
+            "WHERE drg.disasterType = :disasterType " +
+            "ORDER BY drg.latestReportTime DESC")
+    List<DisasterReportGroup> findAllGroupsForReAssignment(
+            @Param("disasterType") DisasterType disasterType);
+
     // 특정 시간 이전에 마지막 업데이트된 그룹들 (비활성화 대상)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
             "WHERE drg.isActive = true " +

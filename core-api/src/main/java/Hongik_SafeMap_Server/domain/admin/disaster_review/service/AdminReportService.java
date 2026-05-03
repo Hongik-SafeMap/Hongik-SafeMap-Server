@@ -5,9 +5,11 @@ import Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response.AdminRepo
 import Hongik_SafeMap_Server.domain.admin.disaster_review.dto.response.AdminReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReportEvaluation;
+import Hongik_SafeMap_Server.domain.disaster_report.dto.response.DisasterReportResponse;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportAccusationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportEvaluationRepository;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
+import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
@@ -32,6 +34,7 @@ public class AdminReportService {
     private final DisasterReportRepository disasterReportRepository;
     private final DisasterReportEvaluationRepository evaluationRepository;
     private final DisasterReportAccusationRepository accusationRepository;
+    private final DisasterReportGroupService groupService;
 
     // 제보 검토 - 전체 제보 목록 (제보 평가 및 신고수 포함)
     public AdminReportPageResponse findAllReports(List<Long> disasterTypeIds, List<RiskLevel> riskLevels, List<DisasterReportStatus> statuses, int page, int size) {
@@ -87,7 +90,6 @@ public class AdminReportService {
                     int helpfulCount = evaluation != null ? evaluation.getHelpfulCount() : 0;
                     int notHelpfulCount = evaluation != null ? evaluation.getNotHelpfulCount() : 0;
                     int accusationCount = accusationCountMap.getOrDefault(reportId, 0);
-
                     return AdminReportResponse.of(report, helpfulCount, notHelpfulCount, accusationCount);
                 })
                 .collect(Collectors.toList());
@@ -103,6 +105,12 @@ public class AdminReportService {
         );
     }
 
+    public DisasterReportResponse getById(Long reportId) {
+        DisasterReport report = disasterReportRepository.findById(reportId)
+                .orElseThrow(() -> new DisasterReportException(ErrorMessage.INVALID_DISASTER_REPORT));
+        return DisasterReportResponse.of(report);
+    }
+
     // 재난 제보 상태 변경 및 검토 의견 저장
     @Transactional
     public void updateStatus(Long reportId, DisasterReportStatusUpdateRequest request) {
@@ -110,5 +118,19 @@ public class AdminReportService {
                 .orElseThrow(() -> new DisasterReportException(ErrorMessage.INVALID_DISASTER_REPORT));
 
         report.updateStatus(request.status(), request.reviewComment());
+
+        if (request.status() == DisasterReportStatus.APPROVED) {
+            // BLINDED였던 경우 group이 null이므로 새 제보처럼 그룹 재배치
+            if (report.getGroup() == null) {
+                groupService.reAssignReportToGroup(report);
+            }
+        } else if (request.status() == DisasterReportStatus.BLINDED) {
+            // 그룹에서 제거 후 통계 재계산
+            if (report.getGroup() != null) {
+                Long groupId = report.getGroup().getId();
+                report.getGroup().removeReport(report);
+                groupService.calculateGroupStatistics(groupId);
+            }
+        }
     }
 }

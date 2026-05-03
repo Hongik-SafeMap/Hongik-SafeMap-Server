@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 public record DisasterReportStatusUpdateRequest(
-        @Schema(description = "변경할 상태", example = "APPROVED")
+        @Schema(description = "변경할 상태", example = "승인")
         @NotNull(message = "상태는 필수입니다")
         DisasterReportStatus status,
 
