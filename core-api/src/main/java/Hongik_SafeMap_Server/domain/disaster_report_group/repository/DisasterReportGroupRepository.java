@@ -32,6 +32,7 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
 
     // 활성 그룹들의 요약 정보 조회 (실시간 지도용)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.isActive = true " +
             "AND drg.reportCount > 0 " +
             "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
@@ -39,12 +40,14 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
 
     // 모든 그룹들의 요약 정보 조회 (활성/비활성 포함)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.reportCount > 0 " +
             "ORDER BY drg.reportCount DESC, drg.latestReportTime DESC")
     List<DisasterReportGroup> findAllGroupsSummary();
 
     // 활성 그룹들의 요약 정보 조회 (필터링 포함)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.isActive = true " +
             "AND drg.reportCount > 0 " +
             "AND (:disasterTypeIds IS NULL OR drg.disasterType.id IN :disasterTypeIds) " +
@@ -56,6 +59,7 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
 
     // 모든 그룹들의 요약 정보 조회 (필터링 포함)
     @Query("SELECT drg FROM DisasterReportGroup drg " +
+            "JOIN FETCH drg.disasterType " +
             "WHERE drg.reportCount > 0 " +
             "AND (:disasterTypeIds IS NULL OR drg.disasterType.id IN :disasterTypeIds) " +
             "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
