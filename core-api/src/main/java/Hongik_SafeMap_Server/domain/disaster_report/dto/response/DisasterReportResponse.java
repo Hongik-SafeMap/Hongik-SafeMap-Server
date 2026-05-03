@@ -18,6 +18,15 @@ public record DisasterReportResponse(
         String address,
         List<String> fileUrls,
         DisasterReportStatus status,
+
+        Double aiGeneratedProbability,
+        Double realProbability,
+        String aiPrediction,
+        Double informativeProbability,
+        Double notInformativeProbability,
+        String informativePrediction,
+        Integer trustScore,
+
         LocalDateTime createdAt,
         Long memberId
 ) {
@@ -32,6 +41,15 @@ public record DisasterReportResponse(
                 dr.getAddress(),
                 dr.getFileUrls(),
                 dr.getStatus(),
+
+                dr.getAiGeneratedProbability(),
+                dr.getRealProbability(),
+                dr.getAiPrediction(),
+                dr.getInformativeProbability(),
+                dr.getNotInformativeProbability(),
+                dr.getInformativePrediction(),
+                dr.getTrustScore(),
+
                 dr.getCreatedAt(),
                 dr.getMember().getId()
         );

@@ -115,5 +115,6 @@ jobs:
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               -e FCM_PROJECT_ID=${{ secrets.FCM_PROJECT_ID }} \
               -e FCM_SERVICE_ACCOUNT_FILE_PATH=/app/firebase-key.json \
+              -e AI_SERVER_URL=http://172.31.19.214:8000 \
               --restart unless-stopped \
               $IMAGE_URI
