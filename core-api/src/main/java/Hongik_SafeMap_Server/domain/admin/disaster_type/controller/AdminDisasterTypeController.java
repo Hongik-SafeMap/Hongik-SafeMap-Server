@@ -28,13 +28,13 @@ public class AdminDisasterTypeController {
     private final DisasterTypeService disasterTypeService;
     private final S3Service s3Service;
 
-    @Operation(summary = "재난 유형 등록", description = "새로운 재난 유형을 등록합니다.")
+    @Operation(summary = "재난 유형 등록", description = "새로운 재난 유형과 행동 요령을 함께 등록합니다.")
     @PostMapping
     public ResponseEntity<DisasterTypeResponse> create(@Valid @RequestBody DisasterTypeCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(disasterTypeService.create(request));
     }
 
-    @Operation(summary = "재난 유형 수정", description = "재난 유형 이름 및 아이콘을 수정합니다.")
+    @Operation(summary = "재난 유형 수정", description = "재난 유형 이름, 아이콘, 행동 요령을 수정합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<DisasterTypeResponse> update(
             @PathVariable Long id,
