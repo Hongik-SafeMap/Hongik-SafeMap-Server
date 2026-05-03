@@ -23,20 +23,25 @@ jobs:
         id: set-image-uri
         run: |
           if [ -n "${{ inputs.image_uri }}" ]; then
-            echo "image_uri=${{ inputs.image_uri }}" >> "$GITHUB_OUTPUT"
+            IMAGE_URI="${{ inputs.image_uri }}"
           else
             LATEST_TAG=$(aws ecr describe-images \
               --repository-name safemap \
               --region ap-northeast-2 \
               --query 'sort_by(imageDetails, &imagePushedAt)[-1].imageTags[0]' \
               --output text)
-            echo "image_uri=${{ secrets.ECR_REGISTRY }}/safemap:$LATEST_TAG" >> "$GITHUB_OUTPUT"
+            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "None" ]; then
+              echo "ECR에서 이미지를 찾을 수 없습니다."
+              exit 1
+            fi
+            IMAGE_URI="${{ secrets.ECR_REGISTRY }}/safemap:$LATEST_TAG"
           fi
+          echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
 
       - name: EC2 배포
         uses: appleboy/ssh-action@v1
         env:
-          IMAGE_URI: ${{ steps.set-image-uri.outputs.image_uri }}
+          IMAGE_URI: ${{ env.IMAGE_URI }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
