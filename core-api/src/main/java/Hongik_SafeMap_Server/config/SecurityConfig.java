@@ -1,5 +1,6 @@
 package Hongik_SafeMap_Server.config;
 
+import Hongik_SafeMap_Server.global.filter.MaintenanceFilter;
 import Hongik_SafeMap_Server.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +47,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter, MaintenanceFilter maintenanceFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -67,6 +68,7 @@ public class SecurityConfig {
                         // 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(maintenanceFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
