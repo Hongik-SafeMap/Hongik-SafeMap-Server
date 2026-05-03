@@ -3,6 +3,7 @@ package Hongik_SafeMap_Server.domain.disaster_report_group.repository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.vo.RiskLevel;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -67,6 +68,24 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
     List<DisasterReportGroup> findAllGroupsWithFilters(
             @Param("disasterTypeIds") List<Long> disasterTypeIds,
             @Param("riskLevels") List<RiskLevel> riskLevels);
+
+    // 재난 기록 아카이브 - 페이지네이션 + riskLevel/날짜 필터
+    @Query(value = "SELECT drg FROM DisasterReportGroup drg JOIN FETCH drg.disasterType " +
+            "WHERE drg.reportCount > 0 " +
+            "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
+            "AND (:from IS NULL OR drg.earliestReportTime >= :from) " +
+            "AND (:to IS NULL OR drg.earliestReportTime <= :to) " +
+            "ORDER BY drg.earliestReportTime DESC",
+            countQuery = "SELECT COUNT(drg) FROM DisasterReportGroup drg " +
+            "WHERE drg.reportCount > 0 " +
+            "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
+            "AND (:from IS NULL OR drg.earliestReportTime >= :from) " +
+            "AND (:to IS NULL OR drg.earliestReportTime <= :to)")
+    Page<DisasterReportGroup> findAllGroupsForArchive(
+            @Param("riskLevels") List<RiskLevel> riskLevels,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
 
     // 통계 요약 - 그룹별 평균 제보 수
     @Query("SELECT AVG(drg.reportCount) FROM DisasterReportGroup drg")

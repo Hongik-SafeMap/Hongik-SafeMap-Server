@@ -17,6 +17,9 @@ import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeRespo
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.vo.RiskLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,10 +85,44 @@ public class AdminDisasterArchiveService {
         );
     }
 
-    public DisasterRecordListResponse getDisasterRecords() {
-        List<GroupedDisasterReportResponse> records =
-                disasterReportGroupService.getGroupedReports(null, null, 0, false, null, null);
-        return DisasterRecordListResponse.of(records);
+    public DisasterRecordListResponse getDisasterRecords(
+            List<RiskLevel> riskLevels,
+            LocalDate fromDate,
+            LocalDate toDate,
+            int page,
+            int size
+    ) {
+        LocalDateTime from = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime to = toDate != null ? toDate.atTime(LocalTime.MAX) : null;
+        List<RiskLevel> riskLevelFilter = (riskLevels != null && riskLevels.isEmpty()) ? null : riskLevels;
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DisasterReportGroup> result = disasterReportGroupRepository.findAllGroupsForArchive(
+                riskLevelFilter, from, to, pageable);
+
+        List<GroupedDisasterReportResponse> records = result.getContent().stream()
+                .map(group -> new GroupedDisasterReportResponse(
+                        group.getId(),
+                        DisasterTypeResponse.of(group.getDisasterType()),
+                        group.getCenterLatitude(),
+                        group.getCenterLongitude(),
+                        group.getEarliestReportTime(),
+                        group.getLatestReportTime(),
+                        group.getReportCount(),
+                        group.getLatestRiskLevel(),
+                        group.getEarliestAddress()
+                ))
+                .toList();
+
+        return new DisasterRecordListResponse(
+                records,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isFirst(),
+                result.isLast()
+        );
     }
 
     public GroupLocationResponse getGroupLocation(Long groupId) {

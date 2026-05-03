@@ -5,10 +5,12 @@ import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupedDi
 import java.util.List;
 
 public record DisasterRecordListResponse(
-        long total,
-        List<GroupedDisasterReportResponse> disasterRecords
+        List<GroupedDisasterReportResponse> disasterRecords,
+        int page,
+        int size,
+        long totalElements,
+        int totalPages,
+        boolean first,
+        boolean last
 ) {
-    public static DisasterRecordListResponse of(List<GroupedDisasterReportResponse> records) {
-        return new DisasterRecordListResponse(records.size(), records);
-    }
 }
