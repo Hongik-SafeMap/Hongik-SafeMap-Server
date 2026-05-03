@@ -1,4 +1,4 @@
-package Hongik_SafeMap.Hongik_SafeMap_Server;
+package Hongik_SafeMap_Server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

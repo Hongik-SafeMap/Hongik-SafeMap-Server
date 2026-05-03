@@ -1,7 +1,7 @@
 package Hongik_SafeMap_Server.domain.notification.repository;
 
 import Hongik_SafeMap_Server.domain.notification.domain.NotificationPreference;
-import Hongik_SafeMap_Server.vo.DisasterType;
+import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
