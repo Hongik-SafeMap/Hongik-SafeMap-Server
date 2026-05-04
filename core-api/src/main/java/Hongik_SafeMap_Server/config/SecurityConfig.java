@@ -37,7 +37,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://hongik-safe-map-client.vercel.app",
                 "https://www.safemap.kr",
-                "https://safemap.kr"
+                "https://safemap.kr",
+                "https://api.safemap.kr"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
