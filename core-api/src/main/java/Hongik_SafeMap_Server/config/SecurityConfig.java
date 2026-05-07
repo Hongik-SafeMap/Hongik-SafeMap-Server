@@ -5,6 +5,7 @@ import Hongik_SafeMap_Server.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -64,6 +65,9 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/terms/my-agreements").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/terms/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/privacy-policy/**").permitAll()
 
                         // 관리 기능은 관리자 권한 필요
                         .requestMatchers("/admin/**").hasRole("ADMIN")

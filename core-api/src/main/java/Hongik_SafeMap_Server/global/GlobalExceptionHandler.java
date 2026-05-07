@@ -4,6 +4,7 @@ import Hongik_SafeMap_Server.exception.AuthException;
 import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.LostReportException;
 import Hongik_SafeMap_Server.exception.MemberException;
+import Hongik_SafeMap_Server.exception.TermsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -78,6 +79,18 @@ public class GlobalExceptionHandler {
         return ErrorResponse.create(
                 ex,
                 HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
+    }
+
+    // Terms 도메인 예외처리(400/404)
+    @ExceptionHandler(TermsException.class)
+    public ErrorResponse handleTermsException(TermsException ex) {
+        log.info("exception.TermsException: {}", ex.getMessage());
+
+        return ErrorResponse.create(
+                ex,
+                HttpStatus.BAD_REQUEST,
                 ex.getMessage()
         );
     }
