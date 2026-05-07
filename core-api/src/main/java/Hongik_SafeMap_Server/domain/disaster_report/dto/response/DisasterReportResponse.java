@@ -28,7 +28,8 @@ public record DisasterReportResponse(
         Integer trustScore,
 
         LocalDateTime createdAt,
-        Long memberId
+        Long memberId,
+        String groupTitle
 ) {
     public static DisasterReportResponse of(DisasterReport dr) {
         return new DisasterReportResponse(
@@ -51,7 +52,8 @@ public record DisasterReportResponse(
                 dr.getTrustScore(),
 
                 dr.getCreatedAt(),
-                dr.getMember().getId()
+                dr.getMember().getId(),
+                dr.getGroup() != null ? dr.getGroup().getTitle() : null
         );
     }
 }

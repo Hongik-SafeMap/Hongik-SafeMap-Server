@@ -248,7 +248,8 @@ public class DisasterReportGroupService {
                         group.getLatestReportTime(),
                         group.getReportCount(),
                         group.getLatestRiskLevel(),
-                        group.getEarliestAddress()
+                        group.getEarliestAddress(),
+                        group.getTitle()
                 ))
                 .toList();
     }
@@ -272,6 +273,7 @@ public class DisasterReportGroupService {
                 group.getReportCount(),
                 group.getLatestRiskLevel(),
                 group.isActive(),
+                group.getTitle(),
                 reportResponses
         );
     }

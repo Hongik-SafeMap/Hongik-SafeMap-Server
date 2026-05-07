@@ -52,6 +52,9 @@ public class DisasterReportGroup {
     @Column(length = 255)
     private String earliestAddress;
 
+    @Column(length = 100)
+    private String title;
+
     /**
      * 첫 번째 제보로부터 새 그룹 생성
      */
@@ -77,6 +80,10 @@ public class DisasterReportGroup {
     // 제보 제거시 그룹 참조 해제만 수행 (통계는 Service에서 별도 관리)
     public void removeReport(DisasterReport report) {
         report.updateGroup(null);
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
     }
 
     // 그룹 비활성화

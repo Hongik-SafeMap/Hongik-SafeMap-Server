@@ -12,6 +12,7 @@ import java.util.List;
 
 public record GroupLocationResponse(
         Long groupId,
+        String title,
         DisasterTypeResponse disasterType,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
         Double centerLatitude,
@@ -32,6 +33,7 @@ public record GroupLocationResponse(
                 .toList();
         return new GroupLocationResponse(
                 group.getId(),
+                group.getTitle(),
                 DisasterTypeResponse.of(group.getDisasterType()),
                 group.getCenterLatitude(),
                 group.getCenterLongitude(),

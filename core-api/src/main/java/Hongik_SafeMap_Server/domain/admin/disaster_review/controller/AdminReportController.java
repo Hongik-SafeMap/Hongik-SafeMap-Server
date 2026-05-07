@@ -24,7 +24,7 @@ import java.util.List;
 public class AdminReportController {
     private final AdminReportService adminReportService;
 
-    @Operation(summary = "재난 상황 목록 조회", description = "재난 상황 목록을 조회합니다.")
+    @Operation(summary = "재난 제보 목록 조회", description = "재난 제보 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<AdminReportPageResponse> getAll(
             @RequestParam(value = "disasterTypeIds", required = false) List<Long> disasterTypeIds,
