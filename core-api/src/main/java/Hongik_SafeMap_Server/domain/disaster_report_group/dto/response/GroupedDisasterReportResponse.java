@@ -19,7 +19,9 @@ public record GroupedDisasterReportResponse(
         int reportCount,
         RiskLevel latestRiskLevel,
         @Schema(example = "서울특별시 마포구 와우산로 94")
-        String address
+        String address,
+        @Schema(example = "홍익대 인근 화재")
+        String title
 ) {
     public GroupedDisasterReportResponse {
         centerLatitude = centerLatitude != null ? Math.round(centerLatitude * 1000000.0) / 1000000.0 : null;

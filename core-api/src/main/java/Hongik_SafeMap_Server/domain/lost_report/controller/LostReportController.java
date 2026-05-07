@@ -14,11 +14,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "실종 신고", description = "실종 신고 관련 API")
 @RestController
@@ -28,25 +28,14 @@ public class LostReportController {
 
     private final LostReportService lostReportService;
 
-    @Operation(summary = "실종 신고 목록 조회", description = "실종신고 게시물 목록을 페이징으로 조회합니다. 카테고리나 상태로 필터링 가능합니다.")
+    @Operation(summary = "실종 신고 목록 조회", description = "실종신고 게시물 목록을 페이징으로 조회합니다. 카테고리나 상태로 필터링 가능하며 각 항목은 다중 선택이 가능합니다.")
     @GetMapping
     public ResponseEntity<LostReportsPageResponse> getAllLostReports(
-            @RequestParam(required = false) LostReportCategory category,
-            @RequestParam(required = false) LostReportStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        LostReportsPageResponse response;
-        
-        if (category != null && status != null) {
-            response = lostReportService.getLostReportsByCategoryAndStatus(category, status, page, size);
-        } else if (category != null) {
-            response = lostReportService.getLostReportsByCategory(category, page, size);
-        } else if (status != null) {
-            response = lostReportService.getLostReportsByStatus(status, page, size);
-        } else {
-            response = lostReportService.getLostReports(page, size);
-        }
-        
+            @RequestParam(name = "category", required = false) List<LostReportCategory> category,
+            @RequestParam(name = "status", required = false) List<LostReportStatus> status,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        LostReportsPageResponse response = lostReportService.getLostReports(category, status, page, size);
         return ResponseEntity.ok(response);
     }
 
@@ -82,7 +71,7 @@ public class LostReportController {
     @Operation(summary = "실종 신고 수정", description = "실종신고 게시물을 수정합니다. 작성자만 수정 가능합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<LostReportResponse> update(@PathVariable Long id,
-                                                   @Valid @RequestBody LostReportUpdateRequest request) {
+                                                     @Valid @RequestBody LostReportUpdateRequest request) {
         LostReportResponse response = lostReportService.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -90,7 +79,7 @@ public class LostReportController {
     @Operation(summary = "실종 신고 상태 변경", description = "실종신고 상태를 변경합니다. 작성자만 변경 가능합니다.")
     @PatchMapping("/{id}/status")
     public ResponseEntity<LostReportResponse> updateStatus(@PathVariable Long id,
-                                                          @Valid @RequestBody LostReportStatusPatchRequest request) {
+                                                           @Valid @RequestBody LostReportStatusPatchRequest request) {
         LostReportResponse response = lostReportService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }

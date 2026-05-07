@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "자원 요청/공급", description = "자원 요청/공급 관련 API")
 @RestController
@@ -29,34 +29,15 @@ public class ResourceReportController {
 
     private final ResourceReportService resourceReportService;
 
-    @Operation(summary = "자원 게시글 목록 조회", description = "자원 게시글 목록을 페이징으로 조회합니다. 유형, 카테고리, 상태로 필터링 가능합니다.")
+    @Operation(summary = "자원 게시글 목록 조회", description = "자원 게시글 목록을 페이징으로 조회합니다. 유형, 카테고리, 상태로 필터링 가능하며 각 항목은 다중 선택이 가능합니다.")
     @GetMapping
     public ResponseEntity<ResourceReportsPageResponse> getResourceReports(
-            @RequestParam(required = false) ResourceReportType type,
-            @RequestParam(required = false) ResourceReportCategory category,
-            @RequestParam(required = false) ResourceReportStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        ResourceReportsPageResponse response;
-        
-        if (type != null && category != null && status != null) {
-            response = resourceReportService.getResourceReportsByTypeAndCategoryAndStatus(type, category, status, page, size);
-        } else if (type != null && category != null) {
-            response = resourceReportService.getResourceReportsByTypeAndCategory(type, category, page, size);
-        } else if (type != null && status != null) {
-            response = resourceReportService.getResourceReportsByTypeAndStatus(type, status, page, size);
-        } else if (category != null && status != null) {
-            response = resourceReportService.getResourceReportsByCategoryAndStatus(category, status, page, size);
-        } else if (type != null) {
-            response = resourceReportService.getResourceReportsByType(type, page, size);
-        } else if (category != null) {
-            response = resourceReportService.getResourceReportsByCategory(category, page, size);
-        } else if (status != null) {
-            response = resourceReportService.getResourceReportsByStatus(status, page, size);
-        } else {
-            response = resourceReportService.getResourceReports(page, size);
-        }
-        
+            @RequestParam(name = "type", required = false) List<ResourceReportType> type,
+            @RequestParam(name = "category", required = false) List<ResourceReportCategory> category,
+            @RequestParam(name = "status", required = false) List<ResourceReportStatus> status,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        ResourceReportsPageResponse response = resourceReportService.getResourceReports(type, category, status, page, size);
         return ResponseEntity.ok(response);
     }
 
@@ -93,7 +74,7 @@ public class ResourceReportController {
     @Operation(summary = "자원 게시글 상태 변경", description = "자원 게시글 상태를 변경합니다. 작성자만 변경 가능합니다.")
     @PatchMapping("/{id}/status")
     public ResponseEntity<ResourceReportResponse> updateStatus(@PathVariable Long id,
-                                                              @Valid @RequestBody ResourceReportStatusPatchRequest request) {
+                                                               @Valid @RequestBody ResourceReportStatusPatchRequest request) {
         ResourceReportResponse response = resourceReportService.updateStatus(id, request);
         return ResponseEntity.ok(response);
     }

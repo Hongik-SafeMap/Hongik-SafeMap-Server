@@ -124,6 +124,7 @@ public class AdminDisasterArchiveService {
                     Map<DisasterReportStatus, Long> counts = statusCountsByGroup.getOrDefault(group.getId(), Map.of());
                     return new DisasterArchiveRecordResponse(
                             group.getId(),
+                            group.getTitle(),
                             DisasterTypeResponse.of(group.getDisasterType()),
                             group.getCenterLatitude(),
                             group.getCenterLongitude(),

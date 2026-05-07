@@ -41,6 +41,14 @@ public class ErrorMessage {
     // SafetyTip
     public static final String SAFETY_TIP_NOT_FOUND = "해당 재난 유형을 찾을 수 없습니다.";
 
+    // Terms (이용약관)
+    public static final String TERMS_NOT_FOUND = "해당 이용약관을 찾을 수 없습니다.";
+    public static final String TERMS_ALREADY_EXISTS = "이미 존재하는 버전의 이용약관입니다.";
+
+    // PrivacyPolicy (개인정보처리방침)
+    public static final String PRIVACY_POLICY_NOT_FOUND = "해당 개인정보처리방침을 찾을 수 없습니다.";
+    public static final String PRIVACY_POLICY_ALREADY_EXISTS = "이미 존재하는 버전의 개인정보처리방침입니다.";
+
     // 게시물 공통
     public static final String REPORT_DELETE_UNAUTHORIZED = "본인이 작성한 게시물만 삭제할 수 있습니다";
     public static final String REPORT_UPDATE_UNAUTHORIZED = "본인이 작성한 게시물만 수정할 수 있습니다";

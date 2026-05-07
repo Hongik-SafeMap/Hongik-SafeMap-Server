@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 public record DisasterArchiveRecordResponse(
         Long id,
+        String title,
         DisasterTypeResponse disasterType,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
         Double centerLatitude,

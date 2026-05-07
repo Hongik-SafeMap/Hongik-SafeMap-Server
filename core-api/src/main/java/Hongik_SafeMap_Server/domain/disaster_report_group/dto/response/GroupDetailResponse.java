@@ -20,6 +20,7 @@ public record GroupDetailResponse(
         int reportCount,
         RiskLevel latestRiskLevel,
         boolean isActive,
+        String title,
         List<DisasterReportListResponse> reports
 ) {
     public GroupDetailResponse {

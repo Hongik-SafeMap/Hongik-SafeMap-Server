@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.*;
 public class DisasterReportController {
     private final DisasterReportService disasterReportService;
 
-    @Operation(summary = "재난 상황 제보", description = "재난 상황을 등록합니다.")
+    @Operation(summary = "재난 제보", description = "재난 상황을 등록합니다.")
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody DisasterReportCreateRequest createRequest) {
         Long reportId = disasterReportService.create(createRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(reportId);
     }
 
-    @Operation(summary = "재난 상황 상세 조회", description = "재난 상황을 상세 조회합니다.")
+    @Operation(summary = "재난 제보 상세 조회", description = "재난 제보를 상세 조회합니다.")
     @GetMapping("/{reportId}")
     public ResponseEntity<DisasterReportResponse> getById(@PathVariable("reportId") Long reportId) {
         return ResponseEntity.ok(disasterReportService.getById(reportId));
