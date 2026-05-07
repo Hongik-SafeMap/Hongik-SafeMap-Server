@@ -146,44 +146,16 @@ public class ResourceReportService {
         resourceReportRepository.save(resourceReport);
     }
 
-    public ResourceReportsPageResponse getResourceReports(int page, int size) {
+    public ResourceReportsPageResponse getResourceReports(
+            List<ResourceReportType> types,
+            List<ResourceReportCategory> categories,
+            List<ResourceReportStatus> statuses,
+            int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findAllWithCommentCount(pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByType(ResourceReportType type, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByTypeWithCommentCount(type, pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByCategory(ResourceReportCategory category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByCategoryWithCommentCount(category, pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByStatus(ResourceReportStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByStatusWithCommentCount(status, pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByTypeAndCategory(ResourceReportType type, ResourceReportCategory category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryWithCommentCount(type, category, pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByTypeAndStatus(ResourceReportType type, ResourceReportStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndStatusWithCommentCount(type, status, pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByCategoryAndStatus(ResourceReportCategory category, ResourceReportStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
-    }
-
-    public ResourceReportsPageResponse getResourceReportsByTypeAndCategoryAndStatus(ResourceReportType type, ResourceReportCategory category, ResourceReportStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createResourceReportsPageResponse(resourceReportRepository.findByTypeAndCategoryAndStatusWithCommentCount(type, category, status, pageable));
+        List<ResourceReportType> typeFilter = (types == null || types.isEmpty()) ? List.of(ResourceReportType.values()) : types;
+        List<ResourceReportCategory> categoryFilter = (categories == null || categories.isEmpty()) ? List.of(ResourceReportCategory.values()) : categories;
+        List<ResourceReportStatus> statusFilter = (statuses == null || statuses.isEmpty()) ? List.of(ResourceReportStatus.values()) : statuses;
+        return createResourceReportsPageResponse(resourceReportRepository.findWithFilters(typeFilter, categoryFilter, statusFilter, pageable));
     }
 
     public ResourceReportsPageResponse getMyResourceReports(int page, int size) {

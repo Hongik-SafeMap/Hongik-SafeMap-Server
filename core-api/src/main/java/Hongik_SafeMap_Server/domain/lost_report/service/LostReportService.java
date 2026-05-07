@@ -72,24 +72,14 @@ public class LostReportService {
         return LostReportResponse.of(lostReport, commentCount, isAuthor);
     }
 
-    public LostReportsPageResponse getLostReports(int page, int size) {
+    public LostReportsPageResponse getLostReports(
+            List<LostReportCategory> categories,
+            List<LostReportStatus> statuses,
+            int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createLostReportsPageResponse(lostReportRepository.findAllWithCommentCount(pageable));
-    }
-
-    public LostReportsPageResponse getLostReportsByCategory(LostReportCategory category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createLostReportsPageResponse(lostReportRepository.findByCategoryWithCommentCount(category, pageable));
-    }
-
-    public LostReportsPageResponse getLostReportsByStatus(LostReportStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createLostReportsPageResponse(lostReportRepository.findByStatusWithCommentCount(status, pageable));
-    }
-
-    public LostReportsPageResponse getLostReportsByCategoryAndStatus(LostReportCategory category, LostReportStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return createLostReportsPageResponse(lostReportRepository.findByCategoryAndStatusWithCommentCount(category, status, pageable));
+        List<LostReportCategory> categoryFilter = (categories == null || categories.isEmpty()) ? List.of(LostReportCategory.values()) : categories;
+        List<LostReportStatus> statusFilter = (statuses == null || statuses.isEmpty()) ? List.of(LostReportStatus.values()) : statuses;
+        return createLostReportsPageResponse(lostReportRepository.findWithFilters(categoryFilter, statusFilter, pageable));
     }
 
     public LostReportsPageResponse getMyLostReports(int page, int size) {
