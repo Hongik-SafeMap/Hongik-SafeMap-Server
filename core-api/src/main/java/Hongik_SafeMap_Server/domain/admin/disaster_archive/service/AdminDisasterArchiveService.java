@@ -1,5 +1,6 @@
 package Hongik_SafeMap_Server.domain.admin.disaster_archive.service;
 
+import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.request.UpdateGroupTitleRequest;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterRecordListResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterStatisticsSummaryResponse.DisasterTypeStatistics;
@@ -10,10 +11,12 @@ import Hongik_SafeMap_Server.domain.disaster_report.domain.DisasterReport;
 import Hongik_SafeMap_Server.domain.disaster_report.repository.DisasterReportRepository;
 import Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.response.DisasterArchiveRecordResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.domain.DisasterReportGroup;
+import Hongik_SafeMap_Server.domain.disaster_report_group.dto.response.GroupDetailResponse;
 import Hongik_SafeMap_Server.domain.disaster_report_group.repository.DisasterReportGroupRepository;
 import Hongik_SafeMap_Server.domain.disaster_report_group.service.DisasterReportGroupService;
 import Hongik_SafeMap_Server.domain.disaster_type.domain.DisasterType;
 import Hongik_SafeMap_Server.domain.disaster_type.dto.response.DisasterTypeResponse;
+import Hongik_SafeMap_Server.exception.DisasterReportException;
 import Hongik_SafeMap_Server.exception.ErrorMessage;
 import Hongik_SafeMap_Server.vo.DisasterReportStatus;
 import Hongik_SafeMap_Server.vo.RiskLevel;
@@ -162,5 +165,16 @@ public class AdminDisasterArchiveService {
                 .orElseThrow(() -> new IllegalArgumentException(ErrorMessage.DISASTER_REPORT_GROUP_NOT_FOUND));
         List<DisasterReport> reports = disasterReportRepository.findByGroupId(groupId);
         return DisasterSimulationResponse.of(group, reports);
+    }
+
+    public GroupDetailResponse getGroupDetail(Long groupId) {
+        return disasterReportGroupService.getGroupDetail(groupId);
+    }
+
+    @Transactional
+    public void updateGroupTitle(Long groupId, UpdateGroupTitleRequest request) {
+        DisasterReportGroup group = disasterReportGroupRepository.findById(groupId)
+                .orElseThrow(() -> new DisasterReportException(ErrorMessage.DISASTER_REPORT_GROUP_NOT_FOUND));
+        group.updateTitle(request.title());
     }
 }

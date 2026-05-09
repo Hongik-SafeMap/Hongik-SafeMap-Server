@@ -1,4 +1,4 @@
-package Hongik_SafeMap_Server.domain.admin.disaster_report_group.dto.request;
+package Hongik_SafeMap_Server.domain.admin.disaster_archive.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
