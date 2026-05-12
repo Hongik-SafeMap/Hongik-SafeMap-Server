@@ -4,10 +4,10 @@ package Hongik_SafeMap_Server.domain.auth.service;
 import Hongik_SafeMap_Server.domain.auth.dto.response.LoginResponse;
 import Hongik_SafeMap_Server.domain.auth.domain.RefreshToken;
 import Hongik_SafeMap_Server.domain.auth.dto.request.SnsLoginRequest;
+import Hongik_SafeMap_Server.domain.auth.dto.response.SnsAuthResponse;
 import Hongik_SafeMap_Server.domain.auth.repository.RefreshTokenRepository;
 import Hongik_SafeMap_Server.domain.member.domain.Member;
 import Hongik_SafeMap_Server.domain.member.repository.MemberRepository;
-import Hongik_SafeMap_Server.dto.SnsAuthResponse;
 import Hongik_SafeMap_Server.exception.MemberException;
 import Hongik_SafeMap_Server.util.TokenUtil;
 import Hongik_SafeMap_Server.vo.LoginType;
@@ -27,7 +27,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenUtil tokenUtil;
-    private final Hongik_SafeMap_Server.domain.auth.SnsLambdaClient snsLambdaClient;
+    private final SnsService snsService;
 
     @Transactional
     public LoginResponse generalLogin(String email, String password, String fcmToken) {
@@ -52,29 +52,37 @@ public class AuthService {
 
     @Transactional
     public LoginResponse processSnsLogin(SnsLoginRequest request) {
-        SnsAuthResponse snsData = snsLambdaClient.callLambda(request);
-
-        String email = snsData.getEmail();
-        String socialId = snsData.getSocialId();
-        String name = snsData.getName();
-        String phone = snsData.getPhone();
-
         LoginType loginType = LoginType.from(request.loginType());
 
-        Member member = memberRepository.findByEmail(email)
-                .orElseGet(() -> memberRepository.save(Member.builder()
-                        .email(email)
-                        .password(null)
-                        .name(name != null ? name : "사용자")
-                        .phone(phone)
-                        .status(MemberStatus.USER)
-                        .loginType(loginType)
-                        .socialId(socialId)
-                        .fcmToken(request.fcmToken())
-                        .build()));
+        SnsAuthResponse snsData = snsService.verifyToken(
+                request.token(),
+                loginType
+        );
 
-        // 기존 사용자인 경우 FCM 토큰 업데이트
-        if (request.fcmToken() != null && !request.fcmToken().isEmpty()) {
+        String email = snsData.email();
+        String socialId = snsData.socialId();
+        String name = snsData.name();
+        String phone = snsData.phone();
+
+        Member member = memberRepository.findByLoginTypeAndSocialId(loginType, socialId)
+                .orElseGet(() -> {
+                    memberRepository.findByEmail(email).ifPresent(existingMember -> {
+                        throw new MemberException(SOCIAL_ACCOUNT_ALREADY_REGISTERED_WITH_OTHER_TYPE);
+                    });
+
+                    return memberRepository.save(Member.builder()
+                            .email(email)
+                            .password(null)
+                            .name(name != null && !name.isBlank() ? name : "사용자")
+                            .phone(phone)
+                            .status(MemberStatus.USER)
+                            .loginType(loginType)
+                            .socialId(socialId)
+                            .fcmToken(request.fcmToken())
+                            .build());
+                });
+
+        if (request.fcmToken() != null && !request.fcmToken().isBlank()) {
             member.updateFcmToken(request.fcmToken());
         }
 
