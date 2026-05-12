@@ -1,6 +1,6 @@
-package Hongik_SafeMap_Server.domain.auth.dto.response;
+package Hongik_SafeMap_Server.dto;
 
-public record SnsAuthResponse(
+public record SnsResponse(
         String email,
         String socialId,
         String name,

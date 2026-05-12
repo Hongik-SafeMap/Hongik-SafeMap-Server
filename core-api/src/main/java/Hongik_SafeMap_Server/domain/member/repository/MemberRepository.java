@@ -1,7 +1,6 @@
 package Hongik_SafeMap_Server.domain.member.repository;
 
 import Hongik_SafeMap_Server.domain.member.domain.Member;
-import Hongik_SafeMap_Server.vo.LoginType;
 import Hongik_SafeMap_Server.vo.MemberStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,7 +9,6 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
-    Optional<Member> findByLoginTypeAndSocialId(LoginType loginType, String socialId);
     Optional<Member> findByEmailIgnoreCase(String email);
     List<Member> findAllByStatus(MemberStatus status);
     boolean existsByEmail(String email);
