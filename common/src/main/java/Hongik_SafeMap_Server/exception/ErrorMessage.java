@@ -19,6 +19,16 @@ public class ErrorMessage {
     public static final String INVALID_REFRESH_TOKEN = "유효하지 않은 Refresh Token입니다.";
     public static final String REFRESH_TOKEN_DOES_NOT_MATCH = "Refresh token이 일치하지 않습니다.";
 
+    // SNS Auth
+    public static final String UNSUPPORTED_SNS_LOGIN_TYPE = "지원하지 않는 소셜 로그인 타입입니다.";
+    public static final String SNS_TOKEN_INVALID = "유효하지 않은 SNS 액세스 토큰입니다.";
+    public static final String SNS_USER_INFO_REQUEST_FAILED = "SNS 사용자 정보 조회에 실패했습니다.";
+    public static final String SNS_RESPONSE_EMPTY = "SNS 응답이 비어있습니다.";
+    public static final String SNS_EMAIL_NOT_PROVIDED = "SNS 계정에서 이메일 정보를 제공하지 않았습니다.";
+    public static final String SNS_SOCIAL_ID_NOT_PROVIDED = "SNS 사용자 식별자를 가져오지 못했습니다.";
+    public static final String KAKAO_ACCOUNT_NOT_PROVIDED = "카카오 계정 정보를 가져오지 못했습니다.";
+    public static final String SOCIAL_ACCOUNT_ALREADY_REGISTERED_WITH_OTHER_TYPE = "이미 다른 로그인 방식으로 가입된 이메일입니다.";
+
     // DisasterReport
     public static final String INVALID_DISASTER_REPORT = "해당 id를 가진 제보를 찾을 수 없습니다.";
     public static final String INVALID_DISASTER_REPORT_EVALUATION = "해당 제보의 제보 평가 정보를 찾을 수 없습니다.";
