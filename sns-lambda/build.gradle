@@ -1,0 +1,26 @@
+dependencies {
+    // 공통 모듈 (DTO 및 예외 처리 공유)
+    implementation project(':common')
+
+    // Spring Cloud Function
+    // - starter-function-web: 로컬에서 8081 포트로 웹 서버처럼 실행해서 테스트하기 위함
+    // - function-adapter-aws: AWS Lambda 환경에 배포했을 때 핸들러로 동작하기 위함
+    implementation 'org.springframework.cloud:spring-cloud-starter-function-web'
+    implementation 'org.springframework.cloud:spring-cloud-function-adapter-aws'
+
+    // 외부 API 통신 (카카오/구글 서버에 토큰 검증 요청용)
+    // RestTemplate보다 성능이 좋은 WebClient 사용을 위해 WebFlux 추가
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+}
+
+// Spring Cloud 버전 변수 설정
+ext {
+    set('springCloudVersion', "2024.0.0")
+}
+
+// Spring Cloud 의존성 매니지먼트
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
