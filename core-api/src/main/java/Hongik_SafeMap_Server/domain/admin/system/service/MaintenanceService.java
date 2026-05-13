@@ -1,19 +1,23 @@
 package Hongik_SafeMap_Server.domain.admin.system.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Service
+@RequiredArgsConstructor
 public class MaintenanceService {
 
-    private final AtomicBoolean maintenanceMode = new AtomicBoolean(false);
+    private static final String KEY = "maintenace_mode";
+
+    private final StringRedisTemplate redisTemplate;
 
     public boolean isUnderMaintenance() {
-        return maintenanceMode.get();
+        String value = redisTemplate.opsForValue().get(KEY);
+        return "true".equals(value);
     }
 
     public void setMaintenance(boolean status) {
-        maintenanceMode.set(status);
+        redisTemplate.opsForValue().set(KEY, String.valueOf(status));
     }
 }
