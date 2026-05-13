@@ -17,6 +17,7 @@ public class ErrorMessage {
 
     // Auth
     public static final String INVALID_REFRESH_TOKEN = "유효하지 않은 Refresh Token입니다.";
+    public static final String LOGIN_RATE_LIMIT_EXCEEDED = "로그인 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.";
     public static final String REFRESH_TOKEN_DOES_NOT_MATCH = "Refresh token이 일치하지 않습니다.";
 
     // SNS Auth

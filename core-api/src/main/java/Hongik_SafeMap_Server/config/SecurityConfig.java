@@ -1,5 +1,6 @@
 package Hongik_SafeMap_Server.config;
 
+import Hongik_SafeMap_Server.global.filter.LoginRateLimitFilter;
 import Hongik_SafeMap_Server.global.filter.MaintenanceFilter;
 import Hongik_SafeMap_Server.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter, MaintenanceFilter maintenanceFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter, MaintenanceFilter maintenanceFilter, LoginRateLimitFilter loginRateLimitFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -75,6 +76,7 @@ public class SecurityConfig {
                         // 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(loginRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(maintenanceFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

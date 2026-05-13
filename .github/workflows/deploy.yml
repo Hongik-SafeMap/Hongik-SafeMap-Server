@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: AWS 자격증명 설정
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -38,6 +41,15 @@ jobs:
           fi
           echo "IMAGE_URI=$IMAGE_URI" >> "$GITHUB_ENV"
 
+      - name: docker-compose.yml EC2 전송
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: docker-compose.yml
+          target: /home/ubuntu
+
       - name: EC2 배포
         uses: appleboy/ssh-action@v1
         env:
@@ -52,57 +64,31 @@ jobs:
             echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' | base64 -d > /home/ubuntu/firebase-key.json
             chmod 600 /home/ubuntu/firebase-key.json
 
+            # .env 파일 생성
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" > /home/ubuntu/.env
+            echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> /home/ubuntu/.env
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> /home/ubuntu/.env
+            echo "AWS_S3_ACCESS_KEY=${{ secrets.AWS_S3_ACCESS_KEY }}" >> /home/ubuntu/.env
+            echo "AWS_S3_SECRET_KEY=${{ secrets.AWS_S3_SECRET_KEY }}" >> /home/ubuntu/.env
+            echo "AWS_S3_REGION=${{ secrets.AWS_S3_REGION }}" >> /home/ubuntu/.env
+            echo "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> /home/ubuntu/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> /home/ubuntu/.env
+            echo "FCM_PROJECT_ID=${{ secrets.FCM_PROJECT_ID }}" >> /home/ubuntu/.env
+            chmod 600 /home/ubuntu/.env
+
+            # ECR 로그인
             aws ecr get-login-password --region ap-northeast-2 | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-            docker pull "$IMAGE_URI"
-            docker stop safemap || true
-            docker rm safemap || true
 
-            docker images "${{ secrets.ECR_REGISTRY }}/safemap" --format "{{.Tag}} {{.ID}}" | \
-              tail -n +3 | \
-              awk '{print $2}' | \
-              xargs -r docker rmi -f || true
+            # 기존 수동 컨테이너 정리
+            docker stop safemap safemap-mysql || true
+            docker rm safemap safemap-mysql || true
 
-            docker network create safemap-network || true
+            cd /home/ubuntu
 
-            docker start safemap-mysql 2>/dev/null || docker run -d \
-              --name safemap-mysql \
-              --network safemap-network \
-              -e MYSQL_ROOT_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
-              -e MYSQL_DATABASE=${{ secrets.DATABASE_NAME }} \
-              -e MYSQL_USER=${{ secrets.DATABASE_USERNAME }} \
-              -e MYSQL_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
-              -v safemap-mysql-data:/var/lib/mysql \
-              --restart unless-stopped \
-              mysql:8.0
+            # 새 이미지 pull 및 재시작
+            IMAGE_URI=$IMAGE_URI docker compose pull app
+            IMAGE_URI=$IMAGE_URI docker compose up -d
 
-            RETRIES=30
-            until docker exec safemap-mysql mysqladmin ping -h localhost --silent; do
-              if [ $RETRIES -eq 0 ]; then
-                echo "MySQL 시작 실패"
-                exit 1
-              fi
-              echo "MySQL 대기 중... ($RETRIES)"
-              sleep 2
-              RETRIES=$((RETRIES - 1))
-            done
-
-            docker run -d \
-              --name safemap \
-              --network safemap-network \
-              -p 8080:8080 \
-              -v /home/ubuntu/firebase-key.json:/app/firebase-key.json \
-              -e SPRING_PROFILES_ACTIVE=datasource \
-              -e DATABASE_HOST=safemap-mysql \
-              -e DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
-              -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
-              -e DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
-              -e AWS_S3_ACCESS_KEY=${{ secrets.AWS_S3_ACCESS_KEY }} \
-              -e AWS_S3_SECRET_KEY=${{ secrets.AWS_S3_SECRET_KEY }} \
-              -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
-              -e AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e FCM_PROJECT_ID=${{ secrets.FCM_PROJECT_ID }} \
-              -e FCM_SERVICE_ACCOUNT_FILE_PATH=/app/firebase-key.json \
-              --restart unless-stopped \
-              "$IMAGE_URI"
+            # 사용하지 않는 이미지 정리
+            docker image prune -f
