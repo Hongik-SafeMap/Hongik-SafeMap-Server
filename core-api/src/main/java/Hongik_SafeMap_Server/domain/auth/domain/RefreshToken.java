@@ -1,23 +1,16 @@
 package Hongik_SafeMap_Server.domain.auth.domain;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
-@Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RedisHash(value = "refresh_token", timeToLive = 1296000) // 15 days
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String refreshToken;
 
     public RefreshToken(String email, String refreshToken) {
@@ -25,7 +18,7 @@ public class RefreshToken {
         this.refreshToken = refreshToken;
     }
 
-    public void updateToken(String newRefreshToken){
+    public void updateToken(String newRefreshToken) {
         this.refreshToken = newRefreshToken;
     }
 }
