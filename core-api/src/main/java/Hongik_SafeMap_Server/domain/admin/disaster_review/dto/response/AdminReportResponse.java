@@ -28,7 +28,10 @@ public record AdminReportResponse(
         int notHelpfulCount,
 
         @Schema(description = "신고 수", example = "2")
-        int accusationCount
+        int accusationCount,
+
+        @Schema(description = "AI 분석 결과")
+        AdminAiAnalysisResponse aiAnalysis
 ) {
     public static AdminReportResponse of(DisasterReport disasterReport) {
         return new AdminReportResponse(
@@ -39,7 +42,8 @@ public record AdminReportResponse(
                 disasterReport.getReviewComment(),
                 0,
                 0,
-                0
+                0,
+                toAiAnalysisResponse(disasterReport)
         );
     }
 
@@ -57,7 +61,26 @@ public record AdminReportResponse(
                 disasterReport.getReviewComment(),
                 helpfulCount,
                 notHelpfulCount,
-                accusationCount
+                accusationCount,
+                toAiAnalysisResponse(disasterReport)
+        );
+    }
+
+    private static AdminAiAnalysisResponse toAiAnalysisResponse(DisasterReport disasterReport) {
+        if (disasterReport.getTrustScore() == null
+                && disasterReport.getAiGeneratedProbability() == null
+                && disasterReport.getInformativeProbability() == null) {
+            return null;
+        }
+
+        return new AdminAiAnalysisResponse(
+                disasterReport.getAiGeneratedProbability(),
+                disasterReport.getRealProbability(),
+                disasterReport.getAiPrediction(),
+                disasterReport.getInformativeProbability(),
+                disasterReport.getNotInformativeProbability(),
+                disasterReport.getInformativePrediction(),
+                disasterReport.getTrustScore()
         );
     }
 }
