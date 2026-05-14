@@ -57,16 +57,17 @@ public class AdminDisasterArchiveController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "재난 기록 전체 조회", description = "활성/비활성 포함 전체 재난 기록(그룹) 목록을 조회합니다. riskLevels, 기간(from, to)로 필터링 가능.")
+    @Operation(summary = "재난 기록 전체 조회", description = "활성/비활성 포함 전체 재난 기록(그룹) 목록을 조회합니다. disasterTypeIds, riskLevels, 기간(from, to)로 필터링 가능.")
     @GetMapping("/disaster-records")
     public ResponseEntity<DisasterRecordListResponse> getDisasterRecords(
+            @RequestParam(name = "disasterTypeIds", required = false) List<Long> disasterTypeIds,
             @RequestParam(name = "riskLevels", required = false) List<RiskLevel> riskLevels,
             @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(adminDisasterArchiveService.getDisasterRecords(riskLevels, from, to, page, size));
+        return ResponseEntity.ok(adminDisasterArchiveService.getDisasterRecords(disasterTypeIds, riskLevels, from, to, page, size));
     }
 
     @Operation(summary = "재난 기록 위치 조회", description = "그룹 정보와 속한 각 제보의 위도·경도를 조회합니다.")

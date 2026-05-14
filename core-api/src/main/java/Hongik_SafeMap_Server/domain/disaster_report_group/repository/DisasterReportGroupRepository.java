@@ -78,19 +78,22 @@ public interface DisasterReportGroupRepository extends JpaRepository<DisasterRep
             @Param("disasterTypeIds") List<Long> disasterTypeIds,
             @Param("riskLevels") List<RiskLevel> riskLevels);
 
-    // 재난 기록 아카이브 - 페이지네이션 + riskLevel/날짜 필터
+    // 재난 기록 아카이브 - 페이지네이션 + disasterTypeIds/riskLevel/날짜 필터
     @Query(value = "SELECT drg FROM DisasterReportGroup drg JOIN FETCH drg.disasterType " +
             "WHERE drg.reportCount > 0 " +
+            "AND (:disasterTypeIds IS NULL OR drg.disasterType.id IN :disasterTypeIds) " +
             "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
             "AND (:from IS NULL OR drg.earliestReportTime >= :from) " +
             "AND (:to IS NULL OR drg.earliestReportTime <= :to) " +
             "ORDER BY drg.earliestReportTime DESC",
             countQuery = "SELECT COUNT(drg) FROM DisasterReportGroup drg " +
             "WHERE drg.reportCount > 0 " +
+            "AND (:disasterTypeIds IS NULL OR drg.disasterType.id IN :disasterTypeIds) " +
             "AND (:riskLevels IS NULL OR drg.latestRiskLevel IN :riskLevels) " +
             "AND (:from IS NULL OR drg.earliestReportTime >= :from) " +
             "AND (:to IS NULL OR drg.earliestReportTime <= :to)")
     Page<DisasterReportGroup> findAllGroupsForArchive(
+            @Param("disasterTypeIds") List<Long> disasterTypeIds,
             @Param("riskLevels") List<RiskLevel> riskLevels,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
