@@ -95,6 +95,7 @@ public class AdminDisasterArchiveService {
     }
 
     public DisasterRecordListResponse getDisasterRecords(
+            List<Long> disasterTypeIds,
             List<RiskLevel> riskLevels,
             LocalDate fromDate,
             LocalDate toDate,
@@ -103,11 +104,12 @@ public class AdminDisasterArchiveService {
     ) {
         LocalDateTime from = fromDate != null ? fromDate.atStartOfDay() : null;
         LocalDateTime to = toDate != null ? toDate.atTime(LocalTime.MAX) : null;
+        List<Long> typeFilter = (disasterTypeIds != null && disasterTypeIds.isEmpty()) ? null : disasterTypeIds;
         List<RiskLevel> riskLevelFilter = (riskLevels != null && riskLevels.isEmpty()) ? null : riskLevels;
 
         Pageable pageable = PageRequest.of(page, size);
         Page<DisasterReportGroup> result = disasterReportGroupRepository.findAllGroupsForArchive(
-                riskLevelFilter, from, to, pageable);
+                typeFilter, riskLevelFilter, from, to, pageable);
 
         List<Long> groupIds = result.getContent().stream().map(DisasterReportGroup::getId).toList();
 
