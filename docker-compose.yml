@@ -46,6 +46,10 @@ services:
       - FCM_SERVICE_ACCOUNT_FILE_PATH=/app/firebase-key.json
       - AI_SERVER_URL=${AI_SERVER_URL:-http://localhost:8000}
       - REDIS_HOST=redis
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
     volumes:
       - /home/ubuntu/firebase-key.json:/app/firebase-key.json
     depends_on:
