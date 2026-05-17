@@ -19,6 +19,11 @@ public class NotificationService {
     private final FcmService fcmService;
 
     public void sendDisasterReportNotification(DisasterType disasterType, String locationName) {
+        if (!disasterType.isNotificationEnabled()) {
+            log.info("재난 유형 {} 알림이 관리자에 의해 비활성화되어 있습니다", disasterType.getName());
+            return;
+        }
+
         // 해당 재난 유형에 대해 알림을 활성화한 사용자들 조회
         var enabledPreferences = notificationPreferenceRepository
                 .findByDisasterTypeAndIsEnabledTrue(disasterType);

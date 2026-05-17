@@ -23,10 +23,14 @@ public class DisasterType {
     @Column(nullable = false, length = 500)
     private String iconUrl;
 
+    @Column(nullable = false)
+    private boolean notificationEnabled = true;
+
     @Builder
     private DisasterType(String name, String iconUrl) {
         this.name = name;
         this.iconUrl = iconUrl;
+        this.notificationEnabled = true;
     }
 
     public void updateName(String name) {
@@ -35,5 +39,9 @@ public class DisasterType {
 
     public void updateIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+    public void updateNotificationEnabled(boolean enabled) {
+        this.notificationEnabled = enabled;
     }
 }
