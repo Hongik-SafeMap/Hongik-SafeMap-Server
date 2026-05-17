@@ -67,12 +67,6 @@ public record AdminReportResponse(
     }
 
     private static AdminAiAnalysisResponse toAiAnalysisResponse(DisasterReport disasterReport) {
-        if (disasterReport.getTrustScore() == null
-                && disasterReport.getAiGeneratedProbability() == null
-                && disasterReport.getInformativeProbability() == null) {
-            return null;
-        }
-
         return new AdminAiAnalysisResponse(
                 disasterReport.getAiGeneratedProbability(),
                 disasterReport.getRealProbability(),
@@ -80,7 +74,8 @@ public record AdminReportResponse(
                 disasterReport.getInformativeProbability(),
                 disasterReport.getNotInformativeProbability(),
                 disasterReport.getInformativePrediction(),
-                disasterReport.getTrustScore()
+                disasterReport.getTrustScore(),
+                disasterReport.getStatus().name()
         );
     }
 }
