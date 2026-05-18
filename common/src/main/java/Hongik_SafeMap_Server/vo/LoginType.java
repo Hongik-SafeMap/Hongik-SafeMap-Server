@@ -12,7 +12,7 @@ import static Hongik_SafeMap_Server.exception.ErrorMessage.INVALID_LOGIN_TYPE;
 public enum LoginType {
     GENERAL("일반"),
     KAKAO("카카오"),
-    GOOGLE("구글");
+    NAVER("네이버");
 
     @JsonValue
     private final String description;
