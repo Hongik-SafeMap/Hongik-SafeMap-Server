@@ -72,7 +72,7 @@ public class SnsService {
             String email = (String) kakaoAccount.get("email");
 
             if (email == null || email.isBlank()) {
-                throw new MemberException(SNS_EMAIL_NOT_PROVIDED);
+                email = socialId + "@kakao.safemap";
             }
 
             Map<String, Object> profile =
@@ -134,7 +134,7 @@ public class SnsService {
             }
 
             if (email == null || email.isBlank()) {
-                throw new MemberException(SNS_EMAIL_NOT_PROVIDED);
+                email = socialId + "@naver.safemap";
             }
 
             log.info("네이버 SNS 인증 성공: email={}, socialId={}", email, socialId);
