@@ -28,8 +28,8 @@ public class SnsService {
             return getKakaoUserInfo(token);
         }
 
-        if (loginType == LoginType.GOOGLE) {
-            return getGoogleUserInfo(token);
+        if (loginType == LoginType.NAVER) {
+            return getNaverUserInfo(token);
         }
 
         throw new MemberException(UNSUPPORTED_SNS_LOGIN_TYPE);
@@ -97,7 +97,8 @@ public class SnsService {
         }
     }
 
-    private SnsAuthResponse getGoogleUserInfo(String accessToken) {
+    @SuppressWarnings("unchecked")
+    private SnsAuthResponse getNaverUserInfo(String accessToken) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
@@ -105,21 +106,28 @@ public class SnsService {
             HttpEntity<Void> request = new HttpEntity<>(headers);
 
             ResponseEntity<Map> responseEntity = restTemplate.exchange(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    "https://openapi.naver.com/v1/nid/me",
                     HttpMethod.GET,
                     request,
                     Map.class
             );
 
-            Map<String, Object> response = responseEntity.getBody();
+            Map<String, Object> body = responseEntity.getBody();
 
-            if (response == null) {
+            if (body == null) {
                 throw new MemberException(SNS_RESPONSE_EMPTY);
             }
 
-            String socialId = (String) response.get("sub");
+            Map<String, Object> response = (Map<String, Object>) body.get("response");
+
+            if (response == null){
+                throw new MemberException(SNS_RESPONSE_EMPTY);
+            }
+
+            String socialId = (String) response.get("id");
             String email = (String) response.get("email");
             String name = (String) response.get("name");
+            String phone = (String) response.get("mobile");
 
             if (socialId == null || socialId.isBlank()) {
                 throw new MemberException(SNS_SOCIAL_ID_NOT_PROVIDED);
@@ -129,14 +137,14 @@ public class SnsService {
                 throw new MemberException(SNS_EMAIL_NOT_PROVIDED);
             }
 
-            log.info("구글 SNS 인증 성공: email={}, socialId={}", email, socialId);
+            log.info("네이버 SNS 인증 성공: email={}, socialId={}", email, socialId);
 
-            return new SnsAuthResponse(email, socialId, name, null);
+            return new SnsAuthResponse(email, socialId, name, phone);
 
         } catch (MemberException e) {
             throw e;
         } catch (RestClientException e) {
-            log.error("구글 사용자 정보 조회 실패", e);
+            log.error("네이버 사용자 정보 조회 실패", e);
             throw new MemberException(SNS_USER_INFO_REQUEST_FAILED);
         }
     }
