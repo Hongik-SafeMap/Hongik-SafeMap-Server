@@ -220,6 +220,16 @@ public class DisasterReportService {
         accusationRepository.save(accusation);
     }
 
+    private DisasterReportStatus resolveFinalStatus(DisasterReportStatus current, AiAnalyzeResponse aiResult) {
+        if (current == DisasterReportStatus.BLINDED) {
+            return DisasterReportStatus.BLINDED;
+        }
+        if (aiResult.trustScore() != null && aiResult.trustScore() <= 75) {
+            return DisasterReportStatus.SUSPICIOUS;
+        }
+        return DisasterReportStatus.valueOf(aiResult.status());
+    }
+
     private void analyzeReportImage(DisasterReport savedReport) {
         if (savedReport.getFileUrls() == null || savedReport.getFileUrls().isEmpty()) {
             return;
@@ -230,6 +240,7 @@ public class DisasterReportService {
 
             AiAnalyzeResponse aiResult = aiAnalyzeClient.analyze(savedReport.getId(), imageUrl);
 
+            DisasterReportStatus finalStatus = resolveFinalStatus(savedReport.getStatus(), aiResult);
             savedReport.updateAiAnalysisResult(
                     aiResult.aiGeneratedProbability(),
                     aiResult.realProbability(),
@@ -238,7 +249,7 @@ public class DisasterReportService {
                     aiResult.notInformativeProbability(),
                     aiResult.informativePrediction(),
                     aiResult.trustScore(),
-                    DisasterReportStatus.valueOf(aiResult.status())
+                    finalStatus
             );
         } catch (Exception e) {
             log.warn("AI 분석 실패 reportId={}, reason={}", savedReport.getId(), e.getMessage());
