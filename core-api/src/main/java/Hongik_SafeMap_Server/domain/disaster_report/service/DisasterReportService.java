@@ -221,8 +221,8 @@ public class DisasterReportService {
     }
 
     private DisasterReportStatus resolveFinalStatus(DisasterReportStatus current, AiAnalyzeResponse aiResult) {
-        if (current == DisasterReportStatus.BLINDED) {
-            return DisasterReportStatus.BLINDED;
+        if (current == DisasterReportStatus.BLINDED || current == DisasterReportStatus.APPROVED) {
+            return current;
         }
         if (aiResult.trustScore() != null && aiResult.trustScore() <= 75) {
             return DisasterReportStatus.SUSPICIOUS;
