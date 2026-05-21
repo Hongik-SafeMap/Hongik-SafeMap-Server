@@ -12,8 +12,8 @@ public record AdminDashboardResponse(
         long totalReports,
         long falseReports,
         long totalUsers,
-        long suspiciousReports,
         long blindedReports,
+        long suspiciousReports,
         long credibleUsers,
         List<RecentReport> recentReports
 ) {
