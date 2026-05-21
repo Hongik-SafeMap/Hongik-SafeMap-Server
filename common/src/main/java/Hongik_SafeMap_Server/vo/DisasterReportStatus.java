@@ -10,7 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum DisasterReportStatus implements EnumUtil.DescriptionProvider {
     PENDING("검토대기"),
-    VERIFIED("검증됨"),
     SUSPICIOUS("AI 신뢰도 의심"),
     APPROVED("승인"),
     BLINDED("블라인드");
