@@ -74,6 +74,7 @@ jobs:
             echo "AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> /home/ubuntu/.env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> /home/ubuntu/.env
             echo "FCM_PROJECT_ID=${{ secrets.FCM_PROJECT_ID }}" >> /home/ubuntu/.env
+            echo "AI_SERVER_URL=${{ secrets.AI_SERVER_URL }}" >> /home/ubuntu/.env
             chmod 600 /home/ubuntu/.env
 
             # ECR 로그인
